@@ -438,6 +438,8 @@ HALDI_HEAD = ('<svg class="head" viewBox="0 0 810 380" aria-hidden="true"><defs>
               + _img("img-06", 170, 219, -30, -64) + _img("img-06", 170, 219, 670, -64, True) + _img("img-06", 130, 168, 330, -92)
               + _img("img-07", 120, 120, 150, -36) + _img("img-07", 120, 120, 540, -40, True)
               + '</svg>')
+HYDRANGEAS = "".join(f'<img class="hyd {c}" src="images/{_P["img-05"]}" alt="" aria-hidden="true">' for c in ("ha", "hb", "hc"))
+LEAVES = "".join(f'<img class="leaf {c}" src="images/{_P["img-07"]}" alt="" aria-hidden="true">' for c in ("la", "lb", "lc", "ld"))
 VINES = "".join(f'<img class="vine {c}" src="images/{_P["img-06"]}" alt="" aria-hidden="true">' for c in ("va", "vb", "vc", "vd", "ve", "vf"))
 def _lantern(side, pos, top, w, grad, cls):
     return (f'<svg class="lantern {cls}" viewBox="0 0 60 100" aria-hidden="true" style="{side}:{pos}%;top:{top}%;width:{w}cqw">'
@@ -456,7 +458,8 @@ def art(kind):
     head = HALDI_HEAD if kind == "haldi" else ART_HEAD
     foot = "" if kind == "dusk" else ART_FOOT
     extra = {"dusk": SCENE + LANTERNS + '<canvas class="glow" data-kind="fire" aria-hidden="true"></canvas>',
-             "night": '<canvas class="glow" data-kind="fly" aria-hidden="true"></canvas>', "haldi": VINES}.get(kind, "")
+             "night": '<canvas class="glow" data-kind="fly" aria-hidden="true"></canvas>', "haldi": VINES,
+             "day": VINES + HYDRANGEAS + LEAVES}.get(kind, "")
     return sky + head + foot + extra
 def ev(name, time):
     return f'<li><span class="n">{name}</span><span class="t">{time}</span></li>'
@@ -561,7 +564,7 @@ EXTRA_SECTIONS = f"""
     <p class="lead" id="rsvp-done-msg"></p>
   </div>
 </div></div></section>
-<section class="web theme-dusk" id="blessings" aria-labelledby="bless-h"><canvas class="petals" data-n="9" aria-hidden="true"></canvas><div class="col">{art("dusk")}<div class="frame">
+<section class="web theme-day" id="blessings" aria-labelledby="bless-h"><canvas class="petals" data-n="9" aria-hidden="true"></canvas><div class="col">{art("day")}<div class="frame">
   <div class="hosts-box">
     <p class="label">Lovingly invited by</p>
     <p class="hosts">Umakant Gupta<span>&amp;</span>Santosh Gupta</p>
@@ -581,7 +584,7 @@ EXTRA_SECTIONS = f"""
 """
 
 _i_rsvp = EXTRA_SECTIONS.index('<section class="web theme-night" id="rsvp"')
-_i_bless = EXTRA_SECTIONS.index('<section class="web theme-dusk" id="blessings" ')
+_i_bless = EXTRA_SECTIONS.index('<section class="web theme-day" id="blessings" ')
 _VENUES, _RSVP, _BLESSINGS = EXTRA_SECTIONS[:_i_rsvp], EXTRA_SECTIONS[_i_rsvp:_i_bless], EXTRA_SECTIONS[_i_bless:]
 
 # ---------- assemble ----------
@@ -675,6 +678,7 @@ html {{ scroll-snap-type: y proximity; scroll-behavior: smooth; }}
 .seal img {{ width: 46%; height: auto; display: block; margin: auto; filter: brightness(0) invert(1); opacity: .9; }}
 .seal:focus-visible, .intro-skip:focus-visible {{ outline: 2px solid #784646; outline-offset: 4px; }}
 @keyframes pulse {{ 0%, 100% {{ transform: translate(-50%, -50%) scale(1); }} 50% {{ transform: translate(-50%, -50%) scale(1.06); }} }}
+.intro-to {{ margin: 0; max-width: min(84vw, 420px); text-align: center; font-family: "Crimson Text", Georgia, serif; font-style: italic; color: #b85c1d; font-size: clamp(22px, 6.4vw, 30px); line-height: 1.2; letter-spacing: .03em; overflow-wrap: anywhere; }}
 .intro-hint {{ margin: 0; font-family: "Crimson Text", Georgia, serif; font-style: italic; color: #784646; font-size: 18px; letter-spacing: .04em; }}
 .intro-skip {{ position: absolute; right: max(16px, env(safe-area-inset-right, 0px)); bottom: calc(16px + env(safe-area-inset-bottom, 0px));
   background: none; border: 0; color: #784646; font: italic 16px "Crimson Text", Georgia, serif; text-decoration: underline; cursor: pointer; padding: 8px; }}
@@ -798,14 +802,14 @@ html.locked {{ overflow: hidden; }}
 .theme-night {{ --ink: #fdf5ef; --accent: #f7d77a; --accent2: #f7d77a; --gold: #d9b25a; --paper: #0f1d40; --line: rgba(247,215,122,.7); --line2: rgba(247,215,122,.4);
   --hover: rgba(247,215,122,.16); --field: rgba(255,255,255,.1); --field2: rgba(255,255,255,.1); --field-ink: #fdf5ef; --ph: rgba(253,245,239,.55);
   --shadow: 0 0 1.4cqw rgba(6,15,38,.9), 0 0 .5cqw rgba(6,15,38,.8); }}
-.theme-dusk {{ --ink: #fdf1e6; --accent: #ffd38a; --accent2: #ffd38a; --gold: #e0a85a; --paper: #4c1525; --line: rgba(255,211,138,.7); --line2: rgba(255,211,138,.4);
-  --hover: rgba(255,211,138,.16); --field: rgba(255,255,255,.1); --field2: rgba(255,255,255,.1); --field-ink: #fdf1e6; --ph: rgba(253,241,230,.55);
-  --shadow: 0 0 1.4cqw rgba(50,8,16,.9), 0 0 .5cqw rgba(50,8,16,.85); }}
+.theme-dusk {{ --ink: #fff3ea; --accent: #ffd98a; --accent2: #ffd98a; --gold: #f0b95a; --paper: #32145e; --line: rgba(255,217,138,.75); --line2: rgba(255,217,138,.45);
+  --hover: rgba(255,217,138,.18); --field: rgba(255,255,255,.12); --field2: rgba(255,255,255,.1); --field-ink: #fff3ea; --ph: rgba(255,243,234,.6);
+  --shadow: 0 0 1.4cqw rgba(50,10,70,.9), 0 0 .5cqw rgba(50,10,70,.85); }}
 .theme-haldi {{ --ink: #5e3410; --accent: #b0300c; --accent2: #9a2a0a; --gold: #b8860b; --paper: #fff6d6; --line: rgba(94,52,16,.55); --line2: rgba(94,52,16,.35);
   --hover: rgba(94,52,16,.12); --field: rgba(255,251,230,.65); --field2: rgba(255,251,230,.5); --field-ink: #3b200a; --ph: rgba(94,52,16,.55);
   --shadow: 0 0 1.4cqw rgba(255,246,205,.95), 0 0 .5cqw rgba(255,246,205,.9); }}
 .theme-night .sky {{ background: linear-gradient(180deg, #0a1431 0%, #12234a 40%, #1d2f5c 72%, #2a3d70 100%); }}
-.theme-dusk .sky {{ background: linear-gradient(180deg, #c4572b 0%, #a83c2d 26%, #7e2631 56%, #4c1525 82%, #2d0b16 100%); }}
+.theme-dusk .sky {{ background: linear-gradient(180deg, #e13db0 0%, #b5329a 25%, #8a2686 50%, #5e1c73 75%, #32145e 100%); }}
 .web .glow {{ position: absolute; inset: 0; width: 100%; height: 100%; pointer-events: none; z-index: 1; }}
 .web .scene {{ position: absolute; left: 0; bottom: 0; width: 100%; height: auto; display: block; pointer-events: none; z-index: 1; }}
 .web .flame {{ transform-box: fill-box; transform-origin: 50% 100%; animation: flicker 1.7s ease-in-out infinite; }}
@@ -824,6 +828,11 @@ html.locked {{ overflow: hidden; }}
 .web .vine.va {{ left: -9cqw; top: 22%; transform: rotate(70deg); }} .web .vine.vb {{ right: -9cqw; top: 34%; transform: scaleX(-1) rotate(70deg); }}
 .web .vine.vc {{ left: -10cqw; top: 50%; transform: rotate(110deg); }} .web .vine.vd {{ right: -10cqw; top: 62%; transform: scaleX(-1) rotate(110deg); }}
 .web .vine.ve {{ left: -9cqw; top: 76%; transform: rotate(80deg); }} .web .vine.vf {{ right: -9cqw; top: 86%; transform: scaleX(-1) rotate(80deg); }}
+.web .hyd {{ position: absolute; width: 28cqw; height: auto; pointer-events: none; z-index: 1; }}
+.web .hyd.ha {{ left: -12cqw; top: 40%; transform: rotate(20deg); }} .web .hyd.hb {{ right: -13cqw; top: 54%; transform: scaleX(-1) rotate(-15deg); }} .web .hyd.hc {{ left: -11cqw; top: 67%; transform: rotate(-10deg); }}
+.web .leaf {{ position: absolute; width: 20cqw; height: auto; pointer-events: none; z-index: 1; }}
+.web .leaf.la {{ right: -6cqw; top: 14%; transform: scaleX(-1) rotate(30deg); }} .web .leaf.lb {{ left: -6cqw; top: 31%; transform: rotate(-25deg); }}
+.web .leaf.lc {{ right: -7cqw; top: 46%; transform: scaleX(-1) rotate(10deg); }} .web .leaf.ld {{ left: -7cqw; top: 58%; transform: rotate(35deg); }}
 [hidden] {{ display: none !important; }}
 </style>
 </head>
@@ -837,6 +846,7 @@ html.locked {{ overflow: hidden; }}
     <button class="seal" id="seal" type="button" aria-label="Open the invitation"><img src="images/{model[2]["images"][1]["file"]}" alt=""></button>
   </div>
   <canvas class="burst" id="burst" aria-hidden="true"></canvas>
+  <p class="intro-to" id="intro-to" hidden></p>
   <p class="intro-hint">Tap the seal to open</p>
   <button class="intro-skip" id="intro-skip" type="button">Skip</button>
 </div>
@@ -905,6 +915,7 @@ html.locked {{ overflow: hidden; }}
     if (reduce || !document.body.animate) {{ finish(); return; }}
     var ease = 'cubic-bezier(.45,0,.2,1)';
     anim($('.intro-hint'), [{{ opacity: 1 }}, {{ opacity: 0 }}], {{ duration: 300 }});
+    if (!$('.intro-to').hidden) anim($('.intro-to'), [{{ opacity: 1 }}, {{ opacity: 0 }}], {{ duration: 300 }});
     anim($('.intro-skip'), [{{ opacity: 1 }}, {{ opacity: 0 }}], {{ duration: 300 }});
     seal.style.animation = 'none';
     burst();
@@ -1199,11 +1210,25 @@ html.locked {{ overflow: hidden; }}
     }}).observe(cv);
   }});
 }})();
+/* ---------- personal invitations: ?to=Name shows "Dear Name" on the envelope and pre-fills the RSVP name ---------- */
+(function () {{
+  var raw = '';
+  try {{ var q = new URLSearchParams(location.search); raw = q.get('to') || q.get('name') || ''; }} catch (e) {{}}
+  raw = raw.replace(/[\\u0000-\\u001f\\u007f<>]/g, '').replace(/\\s+/g, ' ').trim().slice(0, 60);
+  if (!raw) return;
+  var el = document.getElementById('intro-to');
+  if (el) {{ el.textContent = 'Dear ' + raw; el.hidden = false; }}
+  var f = document.getElementById('rsvp-name');
+  if (f && !f.value) f.value = raw;
+}})();
 </script>
 </body>
 </html>
 """
 out = f"{SITE}/index.html" if MODE == "site" else f"{SITE}/test.html"
+LINKS_HTML = '<!doctype html>\n<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">\n<title>Invitation links - Soumya &amp; Madhur</title><meta name="robots" content="noindex">\n<style>\nbody{font:16px/1.5 Georgia,serif;color:#784646;background:#fdf5ef;margin:0;padding:24px 16px 60px}\nmain{max-width:760px;margin:0 auto}h1{font-weight:400;color:#b85c1d;margin:0 0 4px}p.s{margin:0 0 20px;font-style:italic}\nlabel{display:block;font-weight:700;margin:18px 0 6px}input,textarea{width:100%;box-sizing:border-box;font:inherit;padding:10px 12px;border:1.4px solid #c9a99a;border-radius:10px;background:#fff;color:#4f2c2c}\ntextarea{min-height:130px}button{font:700 15px Georgia,serif;letter-spacing:.06em;padding:8px 16px;border-radius:999px;border:1.5px solid #784646;background:transparent;color:#784646;cursor:pointer}\nbutton:hover{background:rgba(120,70,70,.12)}.row{display:grid;grid-template-columns:1fr auto auto;gap:8px;align-items:center;margin:10px 0;padding:10px 12px;background:#fff;border:1px solid #ecd9cc;border-radius:12px}\n.row b{grid-column:1/-1}.row input{grid-column:1;font-size:14px}.bar{display:flex;gap:10px;margin:16px 0;flex-wrap:wrap}small{color:#9a7468}\n</style></head><body><main>\n<h1>Personal invitation links</h1><p class="s">Type each guest or family on its own line. Each link opens the invitation with &ldquo;Dear &hellip;&rdquo; on the envelope and their name already in the RSVP.</p>\n<label for="base">Website address</label><input id="base" value="https://soumyamadhurweddinginvitation.vercel.app/">\n<label for="names">Names (one per line)</label><textarea id="names" placeholder="Sharma Family&#10;Aunty Rekha&#10;Rahul &amp; Priya"></textarea>\n<label for="msg">WhatsApp message <small>({name} and {link} are filled in)</small></label>\n<textarea id="msg">Dear {name}, you are warmly invited to the wedding of Soumya &amp; Madhur. Please open your invitation here: {link}</textarea>\n<div class="bar"><button id="copyall" type="button">Copy all (name + link)</button></div><div id="out"></div>\n<script>\nvar $=function(i){return document.getElementById(i)};\ntry{var sv=localStorage.getItem(\'base\');if(sv)$(\'base\').value=sv}catch(e){}\nfunction link(n){var b=$(\'base\').value.trim();if(b&&b.slice(-1)!==\'/\'&&b.indexOf(\'?\')<0)b+=\'/\';return b+\'?to=\'+encodeURIComponent(n)}\nfunction render(){var out=$(\'out\');out.textContent=\'\';try{localStorage.setItem(\'base\',$(\'base\').value)}catch(e){}\n $(\'names\').value.split(/\\n/).map(function(x){return x.trim()}).filter(Boolean).forEach(function(n){\n  var u=link(n),r=document.createElement(\'div\');r.className=\'row\';\n  var t=document.createElement(\'b\');t.textContent=n;var i=document.createElement(\'input\');i.value=u;i.readOnly=true;\n  var c=document.createElement(\'button\');c.textContent=\'Copy\';c.onclick=function(){navigator.clipboard.writeText(u);c.textContent=\'Copied\'};\n  var w=document.createElement(\'button\');w.textContent=\'WhatsApp\';w.onclick=function(){\n   window.open(\'https://wa.me/?text=\'+encodeURIComponent($(\'msg\').value.split(\'{name}\').join(n).split(\'{link}\').join(u)),\'_blank\',\'noopener\')};\n  r.append(t,i,c,w);out.append(r)})}\n$(\'names\').oninput=$(\'base\').oninput=render;\n$(\'copyall\').onclick=function(){var l=$(\'names\').value.split(/\\n/).map(function(x){return x.trim()}).filter(Boolean).map(function(n){return n+\'\\t\'+link(n)}).join(\'\\n\');navigator.clipboard.writeText(l);$(\'copyall\').textContent=\'Copied\'};\nrender();\n</script></main></body></html>\n'
 open(out, "w", encoding="utf-8", newline="\n").write(page)
+if MODE == "site":
+    open(f"{SITE}/links.html", "w", encoding="utf-8", newline="\n").write(LINKS_HTML)
 json.dump(checklist, open(f"{S}/checklist.json", "w", encoding="utf-8"), ensure_ascii=False, indent=1)
 print("wrote", out, len(page) // 1024, "KB; glyphs", len(used_glyphs))

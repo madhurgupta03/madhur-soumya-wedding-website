@@ -110,6 +110,16 @@ with sync_playwright() as p:
     check(declined == want_declined, "declined reply routes to wishes and includes its message" + ("" if declined == want_declined else f"\n       sent {declined}"))
     pg.close()
 
+    print("3b. Personal invitation link (?to=Name)")
+    pg = b.new_page(viewport={"width": 390, "height": 844})
+    pg.goto(url("index.html") + "?to=Asha%20%26%20Family%3Cb%3Ex%3C%2Fb%3E"); pg.wait_for_timeout(900)
+    check(pg.inner_text("#intro-to").strip() == "Dear Asha & Familybx/b", "envelope greets the guest by name (markup stripped)")
+    check(pg.locator("#intro-to b").count() == 0, "no HTML is injected from the link")
+    check(pg.input_value("#rsvp-name") == "Asha & Familybx/b", "RSVP name is pre-filled")
+    pg.goto(url("index.html")); pg.wait_for_timeout(700)
+    check(not pg.is_visible("#intro-to"), "no greeting without a name in the link")
+    pg.close()
+
     print("4. Overview picture")
     pg = b.new_page(viewport={"width": 390, "height": 844}, device_scale_factor=1.5)
     pg.goto(url("index.html")); pg.wait_for_timeout(700); pg.click("#intro-skip"); pg.wait_for_timeout(900)
