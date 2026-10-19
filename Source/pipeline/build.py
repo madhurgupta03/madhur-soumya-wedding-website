@@ -551,7 +551,7 @@ EXTRA_SECTIONS = f"""
     <p class="lead" id="rsvp-done-msg"></p>
   </div>
 </div></div></section>
-<section class="web theme-dusk" id="blessings" aria-labelledby="bless-h"><canvas class="petals" data-n="9" aria-hidden="true"></canvas><div class="col">{art("dusk")}<div class="frame">
+<section class="web theme-day" id="blessings" aria-labelledby="bless-h"><canvas class="petals" data-n="9" aria-hidden="true"></canvas><div class="col">{art("day")}<div class="frame">
   <div class="hosts-box">
     <p class="label">Lovingly invited by</p>
     <p class="hosts">Umakant Gupta<span>&amp;</span>Santosh Gupta</p>
@@ -571,7 +571,7 @@ EXTRA_SECTIONS = f"""
 """
 
 _i_rsvp = EXTRA_SECTIONS.index('<section class="web theme-night" id="rsvp"')
-_i_bless = EXTRA_SECTIONS.index('<section class="web theme-dusk" id="blessings" ')
+_i_bless = EXTRA_SECTIONS.index('<section class="web theme-day" id="blessings" ')
 _VENUES, _RSVP, _BLESSINGS = EXTRA_SECTIONS[:_i_rsvp], EXTRA_SECTIONS[_i_rsvp:_i_bless], EXTRA_SECTIONS[_i_bless:]
 
 # ---------- assemble ----------
