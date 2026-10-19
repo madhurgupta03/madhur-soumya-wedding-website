@@ -2,6 +2,10 @@
 
 **To look at the site:** open `Website` and double-click **Open website.bat**. It opens http://localhost:8000 and starts at the envelope.
 
+**Dev server with hot reload:** `python3 serve.py` (or `./open.sh` to also open the browser).
+
+**AI assistants:** Claude reads `CLAUDE.md`; Codex and other agents read `AGENTS.md`, which points to `CLAUDE.md`. For ChatGPT (no file convention), attach `CLAUDE.md` and `SETUP.md` to the chat or project.
+
 **To publish it:** upload the `Website` folder to Vercel (see "Deploying" in `CLAUDE.md`).
 
 **To change something:** ask Claude in a session linked to this folder, e.g. *"Read CLAUDE.md in my Wedding_Stationary folder, then change …"*. It has everything it needs here:
