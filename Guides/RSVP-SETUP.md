@@ -19,5 +19,6 @@ Every reply from the website appears in that form under **Responses**.
 - To see replies as a spreadsheet: in the form, open **Responses**, then **Link to Sheets**.
 
 ## Good to know
-- Guests who choose "Regretfully unable" skip straight to the end in your Google Form, the same as on the website. Their message is sent too, but Google may not save it because the message question is on the form's second page.
-- Replies only send from the real website (Vercel). The Claude preview page blocks outside connections.
+- Guests who choose "Regretfully unable" skip straight to the end in your Google Form, the same as on the website. Their message is sent too, but Google doesn't save it, because the message question is on the form's second page (confirmed with a test). To fix this, drag "💌 A message for Soumya & Madhur" above the "🥳 Hurray!" section break in the Google Form.
+- Replies send from the real website (Vercel) and from the local preview at http://localhost:8000. The Claude preview page blocks outside connections, so sending doesn't work there.
+- The mapping lives in `Source/pipeline/build.py` (search for `var GOOGLE_FORM`). `python Source/make.py check` confirms it without sending anything.

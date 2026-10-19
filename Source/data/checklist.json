@@ -1,0 +1,42 @@
+[
+ [
+  "2",
+  "Parent names",
+  "Replaced with “Daughter of Mrs. Rashmi Gupta & Mr. Umakant Gupta” and “Son of Mrs. Bhavna Gupta & Mr. Santosh Gupta”; same size (28 pt), colour, weight, line breaks and centring"
+ ],
+ [
+  "2",
+  "Script names spacing",
+  "“Soumya Gupta” and “Madhur Gupta” tightened so each line is 5% narrower; centre unchanged"
+ ],
+ [
+  "2",
+  "Hindi line spacing",
+  "Added tracking of 0.86 pt per glyph removed from “॥ श्री गणेशाय नमः ॥”; centre unchanged"
+ ],
+ [
+  "4",
+  "Title",
+  "Now “ENGAGEMENT” / small “&” (half size) / “SANGEET” on three lines; “CEREMONY” removed; same title font, colour and centre"
+ ],
+ [
+  "5",
+  "Title",
+  "Now “HALDI” / small “&” (half size) / “MEHENDI” on three lines; same title font, colour and centre"
+ ],
+ [
+  "3–7",
+  "Venue address",
+  "Bold removed (Crimson semibold italic → regular italic) and size 34.5 pt → 31 pt on all five event pages; colour, line breaks and centring kept"
+ ],
+ [
+  "3–7",
+  "Title-to-date gap",
+  "Every event page now has the same 50.1 pt gap from the bottom of the title to the top of the date (before: p3 59.2, p4 49.7, p5 46.0, p6 50.5, p7 31.4 pt)"
+ ],
+ [
+  "1",
+  "Names on cover",
+  "“Soumya & Madhur” added below the monogram in the same lettering as the names on page 2 (script names, 63 pt, #784646; italic “&”, #b85c1d), centred under the monogram, 14 pt below it (the same gap as above the names on page 2)"
+ ]
+]

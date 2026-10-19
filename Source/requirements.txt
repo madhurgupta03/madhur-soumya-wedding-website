@@ -1,0 +1,7 @@
+# Python packages for the build pipeline (tested versions; newer usually fine)
+pymupdf>=1.24        # reads the PDF: images, text positions, letter outlines   (tested 2.0)
+pillow>=10           # image files and comparisons                             (tested 12.3)
+fonttools>=4.40      # font metrics                                            (tested 4.65)
+brotli>=1.0          # lets fonttools read .woff2 fonts                        (tested 1.2)
+svgpathtools>=1.6    # measures letter outlines for exact alignment            (tested 1.8)
+playwright>=1.40     # headless Chromium for checks, previews and the link picture (tested 1.56)

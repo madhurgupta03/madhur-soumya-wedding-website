@@ -33,7 +33,7 @@ Everything not listed below is copied from the original PDF unchanged.
 | Feature | Details |
 |---------|---------|
 | Always starts from the envelope | Every visit and every reload opens at the closed envelope, never part-way down the page |
-| Envelope opening | Guests first see a closed envelope with a rust wax seal. One tap plays a single smooth sequence (about 4 seconds): the seal pops with gold sparkles, the flap swings open, the card rises to show the SM logo, then the logo lifts off and glides onto the cover's own logo (it lands exactly on it, at every screen size) while the envelope fades away to reveal the cover. A "Skip" link is always available |
+| Envelope opening | Guests first see a closed envelope with a rust wax seal. One tap plays a smooth sequence (about 5 seconds): the seal pops with gold sparkles, the flap swings open, the card slides all the way out of the envelope, the empty envelope fades away, the card settles with its SM logo over the spot where the cover's logo sits, and then the card and the cover crossfade (the card fades out as the cover fades in). A "Skip" link is always available |
 | Gentle reveals | Text on each page and section rises softly into view the first time it is scrolled to. The artwork itself never moves |
 | Falling flowers | Pink rose petals, small marigolds and a few green leaves drift and tumble down, the way leaves fall, on every page and section (lighter on the venue, RSVP and blessings sections). They never block taps, and pause when off-screen to save battery |
 | Sparkle | A shower of gold sparkles bursts from the wax seal when the envelope opens, and a few soft gold stars twinkle on and off across every page and section |
@@ -54,6 +54,10 @@ Everything not listed below is copied from the original PDF unchanged.
 - **Text:** unchanged text is drawn with the PDF's own letter shapes at the exact PDF positions. New or restyled text (parent names, venue) uses Crimson Text, the free version of the same Crimson font, included in `fonts/`.
 - **Pages:** each page is one 9:16 section. On phones it fills the width and you scroll page by page. On wider screens it is centred, with the page's paper colour (#fdf5ef) at the sides.
 - **Checked:** each page was rendered in Chrome and compared with the PDF. Apart from the listed changes, the pages match except for normal image-smoothing differences.
+
+## Source code
+
+Everything is rebuilt from the PDF by `python Source/make.py all`. See `CLAUDE.md` for the workflow.
 
 ## Files
 
