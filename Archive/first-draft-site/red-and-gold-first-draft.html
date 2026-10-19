@@ -1,0 +1,291 @@
+<title>Soumya & Madhur</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Rozha+One&family=Tiro+Devanagari+Hindi:ital@0;1&display=swap">
+<style>
+/* Layout: a printed kumkum-red wedding card with a marigold toran hung across the top; one narrow column, schedule grouped by day and venue. Single deliberate look in both themes. */
+:root {
+  --ground: #3f0711;      /* table the card lies on */
+  --card: #6c0f1f;        /* kumkum card stock */
+  --card-edge: #8a1a2c;
+  --gold: #dcb766;        /* foil */
+  --gold-dim: #a8874a;
+  --ivory: #f6e9cf;       /* body text */
+  --ivory-dim: #d9c6a6;
+  --genda: #f39a1f;       /* marigold */
+  --genda-light: #f8c33c;
+  --leaf: #3d7a3f;
+  --display: "Rozha One", "Tiro Devanagari Hindi", Georgia, serif;
+  --body: "Tiro Devanagari Hindi", Georgia, "Times New Roman", serif;
+  color-scheme: dark;
+}
+body {
+  background: var(--ground);
+  color: var(--ivory);
+  font-family: var(--body);
+  font-size: 18px;
+  line-height: 1.6;
+  padding-left: max(16px, env(safe-area-inset-left, 0px));
+  padding-right: max(16px, env(safe-area-inset-right, 0px));
+  padding-block: 0 48px;
+}
+* { box-sizing: border-box; }
+
+.card {
+  max-width: 620px;
+  margin: 0 auto;
+  background:
+    radial-gradient(120% 60% at 50% 0%, rgba(255,210,140,.10), transparent 60%),
+    var(--card);
+  border-left: 1px solid var(--card-edge);
+  border-right: 1px solid var(--card-edge);
+  border-bottom: 1px solid var(--card-edge);
+  position: relative;
+  overflow: hidden;
+}
+
+/* ---------- Toran ---------- */
+.toran { position: relative; height: 150px; }
+.toran::before {           /* the cord the strings hang from */
+  content: ""; position: absolute; left: 0; right: 0; top: 10px; height: 4px;
+  background: repeating-linear-gradient(90deg, var(--gold) 0 6px, var(--gold-dim) 6px 12px);
+}
+.strands { position: absolute; inset: 12px 0 0; display: flex; justify-content: space-between; padding: 0 6px; }
+.strand { display: flex; flex-direction: column; align-items: center; transform-origin: top center; }
+.strand i {
+  display: block; width: 18px; height: 18px; margin-top: -3px; border-radius: 50%;
+  background: radial-gradient(circle at 40% 35%, var(--genda-light) 0 25%, var(--genda) 55%, #c76a0c 100%);
+  box-shadow: 0 1px 0 rgba(0,0,0,.25);
+}
+.strand i.y { background: radial-gradient(circle at 40% 35%, #fff2a6 0 20%, var(--genda-light) 55%, #d69a12 100%); }
+.strand b {                 /* mango leaf at the end */
+  display: block; width: 12px; height: 22px; margin-top: -2px;
+  background: var(--leaf); border-radius: 0 100% 0 100%; transform: rotate(45deg);
+}
+@media (prefers-reduced-motion: no-preference) {
+  .strand { animation: sway 5s ease-in-out infinite alternate; }
+}
+@keyframes sway { from { transform: rotate(-1.6deg); } to { transform: rotate(1.6deg); } }
+
+/* ---------- Inner ---------- */
+.inner { padding: 8px 28px 40px; display: grid; gap: 40px; }
+@media (max-width: 440px) { .inner { padding-inline: 18px; } }
+
+.invocation { text-align: center; display: grid; gap: 6px; }
+.shloka { font-family: var(--body); color: var(--gold); font-size: 1.15rem; letter-spacing: .02em; }
+.lead { color: var(--ivory-dim); font-style: italic; max-width: 30ch; margin: 0 auto; text-wrap: balance; }
+
+.names { text-align: center; display: grid; gap: 28px; }
+.person { display: grid; gap: 2px; }
+.person h1, .person h2 {
+  font-family: var(--display); font-weight: 400; color: var(--gold);
+  font-size: clamp(3rem, 13vw, 4.6rem); line-height: 1; margin: 0;
+  text-shadow: 0 1px 0 rgba(0,0,0,.35);
+}
+.person .rel { font-size: .8rem; letter-spacing: .18em; text-transform: uppercase; color: var(--ivory-dim); margin-top: 10px; }
+.person .parents { font-size: 1.05rem; }
+.amp { font-family: var(--display); color: var(--genda-light); font-size: 2rem; line-height: 1; }
+
+.date-band {
+  border-top: 1px solid var(--gold-dim); border-bottom: 1px solid var(--gold-dim);
+  padding-block: 14px; text-align: center; display: grid; gap: 2px;
+}
+.date-band .k { font-size: .78rem; letter-spacing: .2em; text-transform: uppercase; color: var(--ivory-dim); }
+.date-band .v { font-family: var(--display); color: var(--gold); font-size: 1.6rem; line-height: 1.2; }
+
+/* ---------- Schedule ---------- */
+.section-h {
+  font-family: var(--display); font-weight: 400; color: var(--gold);
+  font-size: 1.9rem; line-height: 1.1; margin: 0 0 18px; text-align: center;
+}
+.days { display: grid; gap: 22px; }
+.day {
+  border: 1px solid var(--gold-dim); border-radius: 2px;
+  background: rgba(0,0,0,.14);
+  padding: 20px 20px 22px; display: grid; gap: 16px;
+}
+.day-head { display: grid; gap: 4px; }
+.day-label { font-size: .78rem; letter-spacing: .2em; text-transform: uppercase; color: var(--genda-light); }
+.day-date { font-family: var(--display); color: var(--ivory); font-size: 1.45rem; line-height: 1.2; }
+.venue { display: flex; flex-wrap: wrap; align-items: baseline; justify-content: space-between; gap: 8px 16px; }
+.venue p { margin: 0; min-width: 0; }
+.venue strong { color: var(--gold); font-weight: 400; font-size: 1.15rem; }
+.venue span { display: block; color: var(--ivory-dim); font-size: .95rem; }
+.dir {
+  display: inline-block; flex: none; font-size: .85rem; letter-spacing: .08em; text-transform: uppercase;
+  color: var(--ground); background: var(--gold); text-decoration: none;
+  padding: 7px 14px; border-radius: 2px;
+}
+.dir:hover { background: var(--genda-light); }
+.dir:focus-visible, a:focus-visible { outline: 2px solid var(--genda-light); outline-offset: 3px; }
+.events { list-style: none; margin: 0; padding: 0; border-top: 1px dashed var(--gold-dim); }
+.events li {
+  display: grid; grid-template-columns: 8.5rem 1fr; gap: 12px; align-items: baseline;
+  padding: 10px 0; border-bottom: 1px dashed var(--gold-dim);
+}
+.events li:last-child { border-bottom: 0; padding-bottom: 0; }
+.events .t { color: var(--ivory-dim); font-size: .95rem; font-variant-numeric: tabular-nums; }
+.events .t.tbc { font-style: italic; color: var(--gold-dim); }
+.events .n { font-size: 1.15rem; }
+@media (max-width: 440px) {
+  .events li { grid-template-columns: 1fr; gap: 0; }
+}
+
+/* ---------- Invited by ---------- */
+.invited { text-align: center; display: grid; gap: 8px; }
+.invited p { margin: 0; }
+.invited .k { font-size: .78rem; letter-spacing: .2em; text-transform: uppercase; color: var(--ivory-dim); }
+.invited .who { font-family: var(--display); color: var(--gold); font-size: 1.4rem; }
+.invited .note { font-style: italic; color: var(--ivory-dim); max-width: 34ch; margin: 0 auto; text-wrap: balance; }
+
+/* ---------- Blessings ---------- */
+.sides { display: grid; grid-template-columns: 1fr 1fr; gap: 28px; }
+@media (max-width: 560px) { .sides { grid-template-columns: 1fr; } }
+.side { min-width: 0; display: grid; gap: 14px; align-content: start; }
+.side h3 {
+  margin: 0; font-family: var(--display); font-weight: 400; color: var(--genda-light);
+  font-size: 1.25rem; border-bottom: 1px solid var(--gold-dim); padding-bottom: 6px;
+}
+.side dl { margin: 0; display: grid; gap: 12px; }
+.side dt { font-size: .74rem; letter-spacing: .18em; text-transform: uppercase; color: var(--gold); }
+.side dd { margin: 2px 0 0; font-size: .98rem; line-height: 1.5; }
+.side dd span { display: block; }
+
+/* ---------- Foot ---------- */
+.foot { text-align: center; display: grid; gap: 4px; padding-top: 8px; border-top: 1px solid var(--gold-dim); }
+.foot .pair { font-family: var(--display); color: var(--gold); font-size: 2rem; line-height: 1.2; }
+.foot .tag { color: var(--genda-light); letter-spacing: .04em; }
+.foot .d { color: var(--ivory-dim); font-size: .95rem; }
+</style>
+
+<main class="card">
+  <div class="toran" aria-hidden="true"><div class="strands" id="strands"></div></div>
+
+  <div class="inner">
+    <header class="invocation">
+      <div class="shloka">॥ श्री गणेशाय नमः ॥</div>
+      <p class="lead">With the blessings of Lord Ganesha and all our elders, we warmly invite you to the wedding of</p>
+    </header>
+
+    <section class="names" aria-label="The couple">
+      <div class="person">
+        <h1>Soumya</h1>
+        <div class="rel">Daughter of</div>
+        <div class="parents">Smt. Rashmi Gupta &amp; Shri Umakant Gupta</div>
+      </div>
+      <div class="amp" aria-hidden="true">&amp;</div>
+      <div class="person">
+        <h2>Madhur</h2>
+        <div class="rel">Son of</div>
+        <div class="parents">Smt. Bhavna Gupta &amp; Shri Santosh Gupta</div>
+      </div>
+    </section>
+
+    <div class="date-band">
+      <span class="k">शुभ विवाह</span>
+      <span class="v">Wednesday, 25 November 2026</span>
+    </div>
+
+    <section aria-labelledby="sched-h">
+      <h2 class="section-h" id="sched-h">The Celebrations</h2>
+      <div class="days">
+
+        <article class="day">
+          <div class="day-head">
+            <span class="day-label">Day one</span>
+            <span class="day-date">Tuesday, 24 November 2026</span>
+          </div>
+          <div class="venue">
+            <p><strong>Havana Restro</strong><span>In front of the bus stand, Kanpur Road, Cantt, Jhansi</span></p>
+            <a class="dir" href="https://maps.app.goo.gl/NSd9deR3CCMiEXvz9" target="_blank" rel="noopener">Directions</a>
+          </div>
+          <ul class="events">
+            <li><span class="t">3:00 PM onwards</span><span class="n">Tilak</span></li>
+            <li><span class="t tbc">Time to be added</span><span class="n">Engagement &amp; Sangeet</span></li>
+          </ul>
+        </article>
+
+        <article class="day">
+          <div class="day-head">
+            <span class="day-label">Day two</span>
+            <span class="day-date">Wednesday, 25 November 2026</span>
+          </div>
+          <div class="venue">
+            <p><strong>The Royal Resort Orchha</strong><span>Tigela, Orchha</span></p>
+            <a class="dir" href="https://www.google.com/maps/search/?api=1&amp;query=The+Royal+Resort+Orchha+Tigela+Orchha" target="_blank" rel="noopener">Directions</a>
+          </div>
+          <ul class="events">
+            <li><span class="t tbc">Time to be added</span><span class="n">Haldi &amp; Mehendi</span></li>
+            <li><span class="t tbc">Time to be added</span><span class="n">Baraat</span></li>
+            <li><span class="t tbc">Time to be added</span><span class="n">Jaimala</span></li>
+          </ul>
+        </article>
+
+      </div>
+    </section>
+
+    <section class="invited">
+      <p class="k">Lovingly invited by</p>
+      <p class="who">Umakant Gupta &amp; Santosh Gupta</p>
+      <p class="note">and the Gupta families, who look forward to your presence and blessings.</p>
+    </section>
+
+    <section aria-labelledby="bless-h">
+      <h2 class="section-h" id="bless-h">With Blessings Of</h2>
+      <div class="sides">
+        <div class="side">
+          <h3>Bride's side</h3>
+          <dl>
+            <div><dt>Grandparents</dt><dd><span>Late Smt. Mannu Devi Gupta &amp; Shri Nathuram Gupta</span><span>Smt. Shashi Gupta &amp; Shri Amarnath Gupta</span></dd></div>
+            <div><dt>Parents</dt><dd><span>Smt. Rashmi Gupta &amp; Shri Umakant Gupta</span></dd></div>
+            <div><dt>Tauji &amp; Tayji</dt><dd><span>Late Smt. Vimla Devi Gupta &amp; Dr. P. D. Gupta</span><span>Smt. Usha Gupta &amp; Shri Ramakant Gupta</span></dd></div>
+            <div><dt>Bua &amp; Fufa Ji</dt><dd><span>Smt. Susheela Gupta &amp; Shri Ramprakash Gupta</span><span>Smt. Malti Gupta &amp; Late Shri Santosh Kumar Gupta</span></dd></div>
+            <div><dt>Mausi &amp; Mausa</dt><dd><span>Smt. Ruchi Gupta &amp; Shri Sanjay Gupta</span><span>Smt. Rati Gupta &amp; Shri Amit Gupta</span></dd></div>
+            <div><dt>Brothers &amp; Sisters</dt><dd>Ramdevi, Annu, Vedprakash, Satya Prakash, Harishchandra, Gyandevi, Gyan Chand, Gyan Bharti, Anurag Gupta, Ashish Gupta, Saurav, Achin, Simran, Arnav, Sameeksha, Netra, Anmol, Yashita</dd></div>
+          </dl>
+        </div>
+        <div class="side">
+          <h3>Groom's side</h3>
+          <dl>
+            <div><dt>Nana Ji &amp; Nani Ji</dt><dd><span>Late Shri Seetaram Gupta &amp; Smt. Rukmani Gupta</span></dd></div>
+            <div><dt>Fufa Ji &amp; Bua Ji</dt><dd><span>Shri Narayan Das Gupta &amp; Smt. Uma Gupta</span><span>Late Shri Udit Narayan Gupta &amp; Smt. Kamlesh Gupta</span><span>Shri Rakesh Gupta &amp; Smt. Jayanti Gupta</span></dd></div>
+            <div><dt>Didi &amp; Jiju</dt><dd><span>Geeta &amp; Dinesh Gupta</span><span>Shivani &amp; Ashish Gupta</span></dd></div>
+            <div><dt>Mausi &amp; Mausa Ji</dt><dd><span>Vandana &amp; Ashok Nayak</span><span>Archana &amp; Ajay Gupta</span><span>Shivani &amp; Yogesh Gupta</span></dd></div>
+            <div><dt>Mama &amp; Mami</dt><dd><span>Amit Gupta &amp; Deepti Gupta</span><span>Ankit Gupta &amp; Noopur Gupta</span></dd></div>
+          </dl>
+        </div>
+      </div>
+    </section>
+
+    <footer class="foot">
+      <span class="pair">Soumya &amp; Madhur</span>
+      <span class="d">24 &amp; 25 November 2026 · Jhansi &amp; Orchha</span>
+      <span class="tag">#SoumyaWedsMadhur</span>
+    </footer>
+  </div>
+</main>
+
+<script>
+(function () {
+  var host = document.getElementById('strands');
+  function build() {
+    var w = host.clientWidth || 600;
+    var n = Math.max(9, Math.floor(w / 30));
+    var html = '';
+    for (var k = 0; k < n; k++) {
+      // longer strands at the edges and centre, like a hand-tied toran
+      var pos = k / (n - 1);
+      var len = 3 + Math.round(3 * Math.abs(Math.cos(pos * Math.PI * 2)));
+      var s = '';
+      for (var j = 0; j < len; j++) s += '<i class="' + ((j + k) % 2 ? 'y' : '') + '"></i>';
+      s += '<b></b>';
+      html += '<div class="strand" style="animation-delay:' + (-(k * 0.37) % 5).toFixed(2) + 's">' + s + '</div>';
+    }
+    host.innerHTML = html;
+  }
+  build();
+  var t;
+  window.addEventListener('resize', function () { clearTimeout(t); t = setTimeout(build, 150); });
+})();
+</script>

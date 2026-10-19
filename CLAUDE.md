@@ -1,6 +1,6 @@
 # CLAUDE.md — Soumya & Madhur wedding e-invite website
 
-Instructions for Claude (or any developer) picking up this project. Read this file first, then `SETUP.md`.
+Instructions for Claude (or any developer) picking up this project. Read this file first, then `SETUP.md`, then `Guides/PROJECT-HISTORY.md` (Soumya's original brief word for word and every later request, in order).
 
 ## What this is
 
@@ -43,9 +43,15 @@ Wedding_Stationary/
 │       ├── check.py     ← step 5: automatic checks (always run after a change)
 │       └── record.py    ← optional: MP4 of the envelope opening (needs ffmpeg)
 ├── Guides/
+│   ├── PROJECT-HISTORY.md ← the original brief (verbatim), every later request in order, outside links
 │   ├── CHECKLIST.md     ← every change made vs the PDF, every decision, every website feature
 │   └── RSVP-SETUP.md    ← how the RSVP is wired to Google Forms, and how to keep it working
-└── Previews/            ← screenshots and video for reviewing (Full-invite-overview.png, Envelope-opening.mp4, ...)
+├── Previews/            ← screenshots and video for reviewing (Full-invite-overview.png, Envelope-opening.mp4, ...)
+└── Archive/             ← reference only, not used by the build:
+    ├── earlier-build-versions/  ← build.py before later changes (v1 before the sections redesign, v2–v4 earlier envelope openings)
+    ├── first-draft-site/        ← the first red-and-gold draft (replaced)
+    ├── review-tools/            ← scripts used to verify the review comments (older paths; adapt before use)
+    └── reference/               ← all 8 pages of the original and the reviewed PDF on one sheet each
 ```
 
 ## Workflow
@@ -132,6 +138,10 @@ The `Website` folder is a static site with no build step on the server.
 - **vercel.com:** open the existing project, drag in the `Website` folder (or connect a Git repo with `Website` as the root).
 - **CLI:** `cd Website` then `vercel --prod`. `.vercelignore` keeps `test.html` and the `.bat` file out.
 - After deploying, open the live link on a phone, go through the envelope and all pages, and check the WhatsApp preview by pasting the link into a chat.
+
+## Going back to an earlier version
+
+Earlier versions of `build.py` are in `Archive/earlier-build-versions/`. They use the old scratch-folder paths, so don't run them as they are: copy the part you need (for example an earlier envelope animation) into the current `Source/pipeline/build.py`, then build and check. If the folder is under Git (it is), `git log` and `git diff` also show past states.
 
 ## Known limitations / open items
 

@@ -9,7 +9,9 @@
 - `CLAUDE.md`: how the project works, the rules, every decision, the RSVP wiring.
 - `SETUP.md`: software to install, step by step (Python, a few packages, a headless browser).
 - `Source/`: the approved PDF, the review PDF, and the code that builds the site from them.
+- `Guides/PROJECT-HISTORY.md`: your original brief word for word and every later request.
 - `Guides/CHECKLIST.md`: every change made to the PDF design and every website feature.
+- `Archive/`: earlier versions and drafts (for reference).
 - `Guides/RSVP-SETUP.md`: how replies reach the Google Form, and how to keep that working.
 - `Previews/`: pictures and a video of the current site.
 
