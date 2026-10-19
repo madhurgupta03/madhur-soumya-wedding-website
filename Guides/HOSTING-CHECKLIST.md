@@ -12,10 +12,10 @@ Tick each box as the step is completed. The hosting research, provider compariso
 - [x] Use the Vercel project name `madhur-soumya-wedding-website`.
 - [x] Set **Root Directory** to `Website`.
 - [x] Set **Framework Preset** to `Other`.
-- [ ] Turn on **Build Command** override and leave the command empty to skip builds.
+- [x] Leave **Build Command** empty/off; Vercel serves the static files directly.
 - [x] Leave **Install Command** empty.
 - [x] Keep the **Output Directory** empty with its override off. With `Website` as the root and no `public/` folder, Vercel serves that directory's static files.
-- [ ] Leave environment variables unset; this site has no server runtime or deployment secrets.
+- [x] Leave environment variables unset; this site has no server runtime or deployment secrets.
 
 ## 2. Deploy the first trial
 
@@ -27,32 +27,25 @@ Tick each box as the step is completed. The hosting research, provider compariso
 
 ## 3. Verify the deployed site
 
-- [ ] Open the deployment URL and confirm the envelope opens and all invitation pages display.
-- [ ] Check that images and fonts load, including later pages reached by scrolling.
-- [ ] Check the venue directions, countdown, blessings, and RSVP form layout.
-- [ ] Open the site on an iPhone/iOS browser and an Android browser.
-- [ ] Open the site on a Windows or macOS desktop browser.
-- [ ] Confirm the public URL uses HTTPS without a certificate warning.
-- [ ] Confirm the Google Form is reachable and still accepts responses. Do not submit a test RSVP; it would become a real response.
-- [ ] Check the social preview image. The current `og:image` in `Source/pipeline/build.py` points to `https://soumyamadhurweddinginvitation.vercel.app/og-cover.jpg`.
-- [ ] If the chosen project URL differs and the preview should use the new host, update `og:image` in `Source/pipeline/build.py`, then run `python3 Source/make.py build` and `python3 Source/make.py check` before redeploying. Never hand-edit generated `Website/index.html`.
+- [x] Open the deployment URL and confirm the envelope opens and all invitation pages display.
+- [x] Check that images and fonts load, including later pages reached by scrolling.
+- [x] Confirm the venue directions buttons open the expected locations (owner-confirmed).
+- [x] Open the site on an iPhone/iOS browser and an Android browser.
+- [x] Open the site on a Windows or macOS desktop browser.
+- [x] Confirm the public URL uses HTTPS without a certificate warning.
+- **Owner decision (19 October 2026):** Vercel is working, and the owner does not plan to perform any further manual deployment checks. Remaining visual/manual checks are intentionally waived, not confirmed successful. Functional fixes and deferred Google Forms work remain in [OPEN-ITEMS.md](OPEN-ITEMS.md).
+- **Waived, not verified:** countdown reaching and staying at zero; blessings and RSVP layout review; social preview image. The owner accepts sharing the link with an attached image/video instead of relying on WhatsApp's automatic preview.
+- **Google Forms deferred:** Endpoint reachability and response acceptance have not been verified. See [RSVP open items](OPEN-ITEMS.md#rsvp); do not submit a real RSVP as a test.
 
-## 4. Optional custom domain
+## 4. Ongoing Vercel hosting
 
-- [ ] Decide whether the Vercel-provided URL is enough or whether to buy a custom domain.
-- [ ] If buying one, check the exact name, first-year price, tax, minimum term, and renewal price at checkout; domain registration is normally annual.
-- [ ] Add the domain in Vercel **Settings → Domains** and apply Vercel's DNS instructions at the registrar.
-- [ ] Wait for DNS verification and HTTPS to become active.
-- [ ] Open the custom domain on mobile and desktop and confirm it serves the same deployment.
-- [ ] Update `og:image` to the final public domain if needed, rebuild, check, and redeploy.
-- [ ] Save the registrar and renewal date here: ______________________________
+- **Custom domain:** Not needed. The owner is happy with `madhur-soumya-wedding-website.vercel.app`.
+- **Plan:** Vercel Hobby is free for personal, non-commercial use and has no fixed two-month expiry or billing cycle. Usage limits apply; if a limit is exceeded, Vercel may pause the Hobby deployment or affected feature until usage resets. See [Vercel Hobby plan](https://vercel.com/docs/plans/hobby).
+- **No action due:** Reconsider only if Vercel changes its terms or the project reaches a usage limit.
 
-## 5. At the end of the two-month trial
+## 5. Two-month trial wrap-up — complete
 
-- [ ] Decide whether to leave the Vercel site online or remove its deployment/project.
-- [ ] If a domain was purchased, decide whether to keep it for another year.
-- [ ] If dropping the domain, turn off auto-renew before the registrar's deadline.
-- [ ] Keep any RSVP responses in the Google Form; removing the site does not delete those responses.
+- [x] Confirmed: no cancellation or renewal action is due after two months on Vercel Hobby. Keep the site on its Vercel-provided address; ongoing hosting remains subject to the plan's personal-use terms and usage limits.
 
 ## 6. If Vercel does not work
 
@@ -61,29 +54,8 @@ Tick each box as the step is completed. The hosting research, provider compariso
 - [ ] For Cloudflare direct upload, deploy the contents of `Website/`; exclude development-only files such as `Open website.bat` if they are present.
 - [ ] Repeat the verification steps above on the Cloudflare Pages URL.
 
-## 7. Set up automatic CI/CD for Vercel
+## 7. Automatic deployments from GitHub
 
-**Intended flow:** pushes to GitHub `main` should create a Vercel production deployment. A local commit by itself does not reach GitHub or deploy; it must be pushed.
+**Status:** Vercel is connected to `madhurgupta03/madhur-soumya-wedding-website`; pushes/merges to `main` have been confirmed to create Ready production deployments. No pull request previews are requested. No separate Python build/check automation or rollback note is required by the owner.
 
-### Connect and configure Vercel
-
-- [ ] In the Vercel project, confirm **Settings → Git** is connected to `madhurgupta03/madhur-soumya-wedding-website`.
-- [ ] Set the Vercel **Production Branch** to `main`.
-- [ ] Confirm automatic deployments are enabled for pushes to `main`; those deployments update the production URL above.
-- [ ] Keep the project **Root Directory** as `Website`, **Framework Preset** as `Other`, and the Build, Install, and Output Directory overrides empty/off. This project is currently deployed as static files from `Website/` with no Vercel build step.
-
-### Add CI validation in GitHub
-
-- [ ] Add a GitHub Actions workflow for pull requests and pushes to `main` that installs the Python requirements needed by `Source/make.py`.
-- [ ] Run `python3 Source/make.py build` in CI when source changes need to regenerate the site, then run `python3 Source/make.py check` and require it to pass before merging.
-- [ ] Ensure the generated `Website/` output is included and up to date in the commit that reaches `main`. Vercel's current settings serve `Website/` directly and do not run the source build, so source-only changes will not appear on the live site.
-- [ ] Require the CI check to pass in GitHub branch protection/rules for `main` before merge, if branch protection is available for this repository.
-- [ ] Open a test pull request and confirm the CI check passes. Do not submit a test RSVP; it would create a real response.
-
-### Verify production deploys and recovery
-
-- [ ] Push a reviewed change to `main` and confirm Vercel starts a Production deployment automatically.
-- [ ] Confirm Vercel reports the deployment as **Ready**, then open the production URL and verify the changed page and key assets.
-- [ ] Confirm a failed CI check blocks the PR from merging and a failed Vercel deployment is visible in the project/GitHub status.
-- [ ] Record the last known good Vercel deployment. If a production deployment breaks the site, use Vercel's deployment controls to promote/rollback to that known good deployment, then fix the source and repeat CI before pushing again.
-- [ ] Mark this CI/CD section complete only after the Git connection, branch settings, CI workflow, and a successful production push have all been verified. CI/CD is not yet recorded as configured.
+Vercel deploys the committed static files in `Website/` directly. If a source change needs regeneration, run the project build and check locally and include the updated `Website/` output in the commit; Vercel does not run the Python generator.

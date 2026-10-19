@@ -75,21 +75,39 @@ with sync_playwright() as p:
 
     print("3. RSVP form (request intercepted, nothing is sent)")
     sent = []
+    check(pg.locator(".rsvp-contact-grid a[href^='tel:']").count() == 4, "four tap-to-call contact numbers appear above the RSVP")
+    check(pg.locator("#rsvp-contact-h span").count() == 2, "contact heading is split over two lines")
+    check("(optional)" in pg.locator("label[for='rsvp-travel']").inner_text() and "🚆" not in pg.locator("label[for='rsvp-travel']").inner_text(), "travel field is marked optional without an emoji")
     pg.route("**/formResponse", lambda r, q: (sent.append(q.post_data), r.fulfill(status=200, body="ok")))
     pg.click("#intro-skip"); pg.wait_for_timeout(900)
     pg.evaluate("document.getElementById('rsvp').scrollIntoView()"); pg.wait_for_timeout(400)
     pg.click("#rsvp-send"); pg.wait_for_timeout(200)
-    check(pg.is_visible("#rsvp-err") and not sent, "empty form is stopped with a message")
+    check(pg.is_visible("#rsvp-name-error") and not pg.is_visible("#rsvp-err") and not sent, "name error appears beside its field")
     pg.fill("#rsvp-name", "Check Test"); pg.fill("#rsvp-phone", "98765 43210"); pg.check("#rsvp-yes")
-    pg.select_option("#rsvp-guests", "3"); pg.click("label[for=ev-tilak]"); pg.fill("#rsvp-msg", "hello")
+    pg.click("#rsvp-send"); pg.wait_for_timeout(200)
+    check(pg.is_visible("#rsvp-phone-error"), "mobile number with spaces is rejected beside its field")
+    pg.fill("#rsvp-phone", "9876543210")
+    check(pg.locator("#rsvp-guests option").count() == 10, "guest selector offers exactly 1–10")
+    pg.select_option("#rsvp-guests", "3"); pg.fill("#rsvp-travel", "Arrival by train"); pg.fill("#rsvp-msg", "hello")
     pg.click("#rsvp-send"); pg.wait_for_timeout(700)
     got = dict()
     for k, v in parse_qsl(sent[0] if sent else ""): got.setdefault(k, []).append(v)
-    want = {"entry.127160018": ["Check Test"], "entry.1746679459": ["98765 43210"], "entry.55150948": ["🎉 Joyfully attending"],
-            "entry.798723131": ["3"], "entry.1689328520": ["hello"], "pageHistory": ["0,1"],
-            "entry.142255648": ["💃 Engagement & Sangeet (24 Nov)", "🌼 Haldi & Mehendi (25 Nov)", "🥁 Baraat (25 Nov)", "💐 Jaimala (25 Nov)"]}
+    want = {"entry.127160018": ["Check Test"], "entry.1746679459": ["9876543210"], "entry.55150948": ["🎉 Joyfully attending"],
+            "entry.798723131": ["3"], "entry.136625829": ["Arrival by train"], "entry.1689328520": ["hello"], "pageHistory": ["0,1,2"],
+            "entry.142255648": ["🌸 Tilak (24 Nov, 4:30 PM)", "💃 Engagement & Sangeet (24 Nov, 7:00 PM)", "🌼 Haldi & Mehendi (25 Nov, 11:30 AM)", "🥁 Baraat (25 Nov, 7:00 PM)", "💐 Jaimala (25 Nov, 9:00 PM)"]}
     check(got == want, "attending reply maps to the Google Form exactly" + ("" if got == want else f"\n       sent {got}"))
     check(pg.is_visible("#rsvp-done"), "thank-you message shows")
+
+    pg.reload(); pg.wait_for_timeout(1200); pg.click("#intro-skip"); pg.wait_for_timeout(900)
+    pg.evaluate("document.getElementById('rsvp').scrollIntoView()"); pg.wait_for_timeout(400)
+    pg.fill("#rsvp-name", "Decline Test"); pg.fill("#rsvp-phone", "9876543210"); pg.check("#rsvp-no"); pg.fill("#rsvp-msg", "Wishing you all the best")
+    check(pg.locator("#rsvp-more").evaluate("e => e.hidden"), "decliners skip the attendee details")
+    pg.click("#rsvp-send"); pg.wait_for_timeout(700)
+    declined = dict()
+    for k, v in parse_qsl(sent[-1] if len(sent) > 1 else ""): declined.setdefault(k, []).append(v)
+    want_declined = {"entry.127160018": ["Decline Test"], "entry.1746679459": ["9876543210"],
+                     "entry.55150948": ["💌 Regretfully unable"], "entry.1689328520": ["Wishing you all the best"], "pageHistory": ["0,2"]}
+    check(declined == want_declined, "declined reply routes to wishes and includes its message" + ("" if declined == want_declined else f"\n       sent {declined}"))
     pg.close()
 
     print("3b. Personal invitation link (?to=Name)")
