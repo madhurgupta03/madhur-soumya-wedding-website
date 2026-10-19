@@ -8,11 +8,11 @@ Use this list for work that is still pending. Check an item only after the chang
 
 - [x] Match mobile-number validation to the form's digits-only prompt; local checks reject spaces and symbols.
 - [x] Show field validation beside its field. The owner confirmed the error placement works.
-- [x] Verify attendee and guest-count submission. The owner confirmed the deployed RSVP works.
+- [x] Attending choice and guest-count submission work; the owner confirmed this.
 - [x] Compare the website mapping with the current Google Form fields and options; local checks cover the mapped payloads.
 - [x] Reset RSVP answers on every visit or reload. Keep the intentional defaults (Joyfully attending, 1 guest, all events selected), leave other answers blank, and preserve personalized invite-name prefill.
 - [x] Confirm the deployed Google Form accepts RSVP replies; the owner confirmed successful submissions. The website still cannot read Google's response because it uses `no-cors`.
-- [x] Save declined guests' wishes through the form's third section; the owner confirmed it works after deployment.
+- [x] Declined guests' wishes are saved through the form's third section; the owner confirmed this works.
 
 ## Site navigation
 
