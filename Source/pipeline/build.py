@@ -438,6 +438,8 @@ HALDI_HEAD = ('<svg class="head" viewBox="0 0 810 380" aria-hidden="true"><defs>
               + _img("img-06", 170, 219, -30, -64) + _img("img-06", 170, 219, 670, -64, True) + _img("img-06", 130, 168, 330, -92)
               + _img("img-07", 120, 120, 150, -36) + _img("img-07", 120, 120, 540, -40, True)
               + '</svg>')
+HYDRANGEAS = "".join(f'<img class="hyd {c}" src="images/{_P["img-05"]}" alt="" aria-hidden="true">' for c in ("ha", "hb", "hc"))
+LEAVES = "".join(f'<img class="leaf {c}" src="images/{_P["img-07"]}" alt="" aria-hidden="true">' for c in ("la", "lb", "lc", "ld"))
 VINES = "".join(f'<img class="vine {c}" src="images/{_P["img-06"]}" alt="" aria-hidden="true">' for c in ("va", "vb", "vc", "vd", "ve", "vf"))
 def _lantern(side, pos, top, w, grad, cls):
     return (f'<svg class="lantern {cls}" viewBox="0 0 60 100" aria-hidden="true" style="{side}:{pos}%;top:{top}%;width:{w}cqw">'
@@ -456,7 +458,8 @@ def art(kind):
     head = HALDI_HEAD if kind == "haldi" else ART_HEAD
     foot = "" if kind == "dusk" else ART_FOOT
     extra = {"dusk": SCENE + LANTERNS + '<canvas class="glow" data-kind="fire" aria-hidden="true"></canvas>',
-             "night": '<canvas class="glow" data-kind="fly" aria-hidden="true"></canvas>', "haldi": VINES}.get(kind, "")
+             "night": '<canvas class="glow" data-kind="fly" aria-hidden="true"></canvas>', "haldi": VINES,
+             "day": VINES + HYDRANGEAS + LEAVES}.get(kind, "")
     return sky + head + foot + extra
 def ev(name, time):
     return f'<li><span class="n">{name}</span><span class="t">{time}</span></li>'
@@ -779,14 +782,14 @@ html.locked {{ overflow: hidden; }}
 .theme-night {{ --ink: #fdf5ef; --accent: #f7d77a; --accent2: #f7d77a; --gold: #d9b25a; --paper: #0f1d40; --line: rgba(247,215,122,.7); --line2: rgba(247,215,122,.4);
   --hover: rgba(247,215,122,.16); --field: rgba(255,255,255,.1); --field2: rgba(255,255,255,.1); --field-ink: #fdf5ef; --ph: rgba(253,245,239,.55);
   --shadow: 0 0 1.4cqw rgba(6,15,38,.9), 0 0 .5cqw rgba(6,15,38,.8); }}
-.theme-dusk {{ --ink: #fdf1e6; --accent: #ffd38a; --accent2: #ffd38a; --gold: #e0a85a; --paper: #4c1525; --line: rgba(255,211,138,.7); --line2: rgba(255,211,138,.4);
-  --hover: rgba(255,211,138,.16); --field: rgba(255,255,255,.1); --field2: rgba(255,255,255,.1); --field-ink: #fdf1e6; --ph: rgba(253,241,230,.55);
-  --shadow: 0 0 1.4cqw rgba(50,8,16,.9), 0 0 .5cqw rgba(50,8,16,.85); }}
+.theme-dusk {{ --ink: #fff3ea; --accent: #ffd98a; --accent2: #ffd98a; --gold: #f0b95a; --paper: #32145e; --line: rgba(255,217,138,.75); --line2: rgba(255,217,138,.45);
+  --hover: rgba(255,217,138,.18); --field: rgba(255,255,255,.12); --field2: rgba(255,255,255,.1); --field-ink: #fff3ea; --ph: rgba(255,243,234,.6);
+  --shadow: 0 0 1.4cqw rgba(50,10,70,.9), 0 0 .5cqw rgba(50,10,70,.85); }}
 .theme-haldi {{ --ink: #5e3410; --accent: #b0300c; --accent2: #9a2a0a; --gold: #b8860b; --paper: #fff6d6; --line: rgba(94,52,16,.55); --line2: rgba(94,52,16,.35);
   --hover: rgba(94,52,16,.12); --field: rgba(255,251,230,.65); --field2: rgba(255,251,230,.5); --field-ink: #3b200a; --ph: rgba(94,52,16,.55);
   --shadow: 0 0 1.4cqw rgba(255,246,205,.95), 0 0 .5cqw rgba(255,246,205,.9); }}
 .theme-night .sky {{ background: linear-gradient(180deg, #0a1431 0%, #12234a 40%, #1d2f5c 72%, #2a3d70 100%); }}
-.theme-dusk .sky {{ background: linear-gradient(180deg, #c4572b 0%, #a83c2d 26%, #7e2631 56%, #4c1525 82%, #2d0b16 100%); }}
+.theme-dusk .sky {{ background: linear-gradient(180deg, #e13db0 0%, #b5329a 25%, #8a2686 50%, #5e1c73 75%, #32145e 100%); }}
 .web .glow {{ position: absolute; inset: 0; width: 100%; height: 100%; pointer-events: none; z-index: 1; }}
 .web .scene {{ position: absolute; left: 0; bottom: 0; width: 100%; height: auto; display: block; pointer-events: none; z-index: 1; }}
 .web .flame {{ transform-box: fill-box; transform-origin: 50% 100%; animation: flicker 1.7s ease-in-out infinite; }}
@@ -805,6 +808,11 @@ html.locked {{ overflow: hidden; }}
 .web .vine.va {{ left: -9cqw; top: 22%; transform: rotate(70deg); }} .web .vine.vb {{ right: -9cqw; top: 34%; transform: scaleX(-1) rotate(70deg); }}
 .web .vine.vc {{ left: -10cqw; top: 50%; transform: rotate(110deg); }} .web .vine.vd {{ right: -10cqw; top: 62%; transform: scaleX(-1) rotate(110deg); }}
 .web .vine.ve {{ left: -9cqw; top: 76%; transform: rotate(80deg); }} .web .vine.vf {{ right: -9cqw; top: 86%; transform: scaleX(-1) rotate(80deg); }}
+.web .hyd {{ position: absolute; width: 28cqw; height: auto; pointer-events: none; z-index: 1; }}
+.web .hyd.ha {{ left: -12cqw; top: 40%; transform: rotate(20deg); }} .web .hyd.hb {{ right: -13cqw; top: 54%; transform: scaleX(-1) rotate(-15deg); }} .web .hyd.hc {{ left: -11cqw; top: 67%; transform: rotate(-10deg); }}
+.web .leaf {{ position: absolute; width: 20cqw; height: auto; pointer-events: none; z-index: 1; }}
+.web .leaf.la {{ right: -6cqw; top: 14%; transform: scaleX(-1) rotate(30deg); }} .web .leaf.lb {{ left: -6cqw; top: 31%; transform: rotate(-25deg); }}
+.web .leaf.lc {{ right: -7cqw; top: 46%; transform: scaleX(-1) rotate(10deg); }} .web .leaf.ld {{ left: -7cqw; top: 58%; transform: rotate(35deg); }}
 [hidden] {{ display: none !important; }}
 </style>
 </head>
