@@ -6,10 +6,11 @@
 
 **AI assistants:** When ChatGPT or Codex is connected to this repository (for example, through Codex or a ChatGPT project with repository access), project context is automatic: the assistant reads `AGENTS.md`, which points to `CLAUDE.md`. Claude reads `CLAUDE.md` directly. A standalone ChatGPT chat cannot read files from your computer; open this repository in a connected workspace to give it automatic access.
 
-**Hosting status:** The site is deployed on Vercel Hobby from the `main` branch of `madhurgupta03/madhur-soumya-wedding-website`. The project root is `Website`, with the `Other` preset and no build, install, or output-directory overrides or environment variables. The site is static; RSVP submissions go to Google Forms.
+**Hosting status:** The site is deployed on Vercel Hobby from the `main` branch of `madhurgupta03/madhur-soumya-wedding-website`. The project root is `Website`, with the `Other` preset and no build, install, or output-directory overrides or environment variables. Vercel Hobby has no two-month expiry or billing cycle for personal, non-commercial use; usage limits apply. The owner is happy with the Vercel-provided project URL and does not require separate Python build/check automation or a recovery note. The site is static; RSVP submissions go to Google Forms.
 
 - **Live site:** [madhur-soumya-wedding-website.vercel.app](https://madhur-soumya-wedding-website.vercel.app/)
-- **Still to verify:** open and check the site on desktop and mobile browsers, confirm its pages/assets and RSVP form, and review the social preview. Do not send a test RSVP because it would create a real response.
+- **Google Forms RSVP:** [Open the RSVP form](https://tinyurl.com/madhur-soumya-wedding-rsvp)
+- **Deployment status:** Vercel is working, and pushes to `main` automatically create Ready production deployments. The owner has decided not to perform any further manual deployment checks; unchecked visual checks are waived, not verified. Outstanding functional work, including deferred Google Forms issues, is tracked in [Guides/OPEN-ITEMS.md](Guides/OPEN-ITEMS.md).
 - **Hosting research and launch plan:** [Guides/HOSTING-OPTIONS-AND-PLAN.md](Guides/HOSTING-OPTIONS-AND-PLAN.md)
 - **Tickable deployment checklist:** [Guides/HOSTING-CHECKLIST.md](Guides/HOSTING-CHECKLIST.md)
 
