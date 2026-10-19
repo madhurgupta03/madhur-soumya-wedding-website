@@ -32,7 +32,8 @@ Everything not listed below is copied from the original PDF unchanged.
 
 | Feature | Details |
 |---------|---------|
-| Envelope opening | Guests first see a closed envelope with a rust wax seal (the card's own ornament). Tapping it opens the flap and the monogram card rises out, then the cover appears. A "Skip" link is always available |
+| Always starts from the envelope | Every visit and every reload opens at the closed envelope, never part-way down the page |
+| Envelope opening | Guests first see a closed envelope with a rust wax seal. One tap plays a single smooth sequence (about 4 seconds): the seal pops with gold sparkles, the flap swings open, the card rises to show the SM logo, then the logo lifts off and glides onto the cover's own logo (it lands exactly on it, at every screen size) while the envelope fades away to reveal the cover. A "Skip" link is always available |
 | Gentle reveals | Text on each page and section rises softly into view the first time it is scrolled to. The artwork itself never moves |
 | Falling flowers | Pink rose petals, small marigolds and a few green leaves drift and tumble down, the way leaves fall, on every page and section (lighter on the venue, RSVP and blessings sections). They never block taps, and pause when off-screen to save battery |
 | Sparkle | A shower of gold sparkles bursts from the wax seal when the envelope opens, and a few soft gold stars twinkle on and off across every page and section |
@@ -42,9 +43,9 @@ Everything not listed below is copied from the original PDF unchanged.
 | Directions on the cards | A "Get directions" button under the venue on all five event pages: Tilak and Engagement & Sangeet (Havana Restro), Haldi & Mehendi, Baraat and Jaimala (Royal Resort). On Jaimala the button sits slightly right of centre, in the clear sky beside the peacock, so it doesn't cover its neck |
 | Where we celebrate | New section after the event cards: Day 1 at Havana Restro (Tilak 4:30 PM, Engagement & Sangeet 7:00 PM) and Day 2 at The Royal Resort Orchha (Haldi & Mehendi 11:30 AM, Baraat 7:00 PM, Jaimala 9:00 PM), each with directions |
 | RSVP form | After the venues section: name, mobile, attending (yes/no), number of guests and which events (shown only if attending), and an optional message. Replies go straight into your Google Form once it is connected (see RSVP-SETUP.md) |
-| With Blessings Of | "Lovingly invited by Umakant Gupta & Santosh Gupta" and the full family list for both sides, taken from the old website |
+| With Blessings Of | Two pages: the bride's side, with the "Lovingly invited by Umakant Gupta & Santosh Gupta" box on top, then the groom's side on its own page. Names taken from the old website |
 | WhatsApp / link preview | `og-cover.jpg` (cover monogram and names) shows when the link is shared. It points to soumyamadhurweddinginvitation.vercel.app, so deploy to that address or update the `og:image` line |
-| Style | New sections use the card's paper colour, Crimson fonts, brown #784646 and rust #b85c1d, and the card's own ornament as a divider |
+| Style | Each website section is a framed card: cream paper with a double gold border and the card's ornament in each corner, on a coloured background from the artwork (night blue for the venues and the groom's side, rose for RSVP, marigold for the bride's side). Day, side and family headings sit in coloured bands, events and relations in tinted rows and tags. Text is the same reading size as the card pages (about 16–23 px on a phone) |
 
 ## How it was built
 
