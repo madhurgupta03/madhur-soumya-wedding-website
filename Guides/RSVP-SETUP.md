@@ -20,6 +20,7 @@ Guest replies can be viewed in that form under **Responses**.
 - To see replies as a spreadsheet: in the form, open **Responses**, then **Link to Sheets**.
 
 ## Good to know
+- The RSVP resets to its intentional defaults on each visit or reload: "Joyfully attending," one guest and all events selected. Previously entered answers are not restored; the arrival/departure and message fields start blank. Personalized invitation links still pre-fill the guest's name.
 - Guests who choose "Regretfully unable" skip the attendee details in section 2 and go to the wishes section 3. Their message is sent through that section; arrival/departure details are only sent for attendees.
 - The browser submits with `no-cors`, so it cannot read Google's response. The thank-you screen means the browser request did not fail at the network level; it cannot confirm that Google saved the reply. `python Source/make.py check` intercepts the request locally and verifies its fields without sending a real reply.
 - Replies send from the real website (Vercel) and from the local preview at http://localhost:8000. The Claude preview page blocks outside connections, so sending doesn't work there.

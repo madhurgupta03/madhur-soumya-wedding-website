@@ -78,6 +78,7 @@ with sync_playwright() as p:
     check(pg.locator(".rsvp-contact-grid a[href^='tel:']").count() == 4, "four tap-to-call contact numbers appear above the RSVP")
     check(pg.locator("#rsvp-contact-h span").count() == 2, "contact heading is split over two lines")
     check("(optional)" in pg.locator("label[for='rsvp-travel']").inner_text() and "🚆" not in pg.locator("label[for='rsvp-travel']").inner_text(), "travel field is marked optional without an emoji")
+    check(pg.locator("#rsvp-phone").get_attribute("inputmode") == "numeric", "mobile phone field requests a numeric keyboard")
     pg.route("**/formResponse", lambda r, q: (sent.append(q.post_data), r.fulfill(status=200, body="ok")))
     pg.click("#intro-skip"); pg.wait_for_timeout(900)
     pg.evaluate("document.getElementById('rsvp').scrollIntoView()"); pg.wait_for_timeout(400)
@@ -98,7 +99,14 @@ with sync_playwright() as p:
     check(got == want, "attending reply maps to the Google Form exactly" + ("" if got == want else f"\n       sent {got}"))
     check(pg.is_visible("#rsvp-done"), "thank-you message shows")
 
-    pg.reload(); pg.wait_for_timeout(1200); pg.click("#intro-skip"); pg.wait_for_timeout(900)
+    pg.reload(); pg.wait_for_timeout(1200)
+    reset_state = pg.evaluate("""() => ({name: document.querySelector('#rsvp-name').value, phone: document.querySelector('#rsvp-phone').value,
+        attending: document.querySelector('#rsvp-yes').checked, guests: document.querySelector('#rsvp-guests').value,
+        events: [...document.querySelectorAll('#rsvp-events input')].filter(e => e.checked).length,
+        travel: document.querySelector('#rsvp-travel').value, message: document.querySelector('#rsvp-msg').value})""")
+    check(reset_state == {"name": "", "phone": "", "attending": True, "guests": "1", "events": 5, "travel": "", "message": ""},
+          "reload resets RSVP answers to the intentional defaults")
+    pg.click("#intro-skip"); pg.wait_for_timeout(900)
     pg.evaluate("document.getElementById('rsvp').scrollIntoView()"); pg.wait_for_timeout(400)
     pg.fill("#rsvp-name", "Decline Test"); pg.fill("#rsvp-phone", "9876543210"); pg.check("#rsvp-no"); pg.fill("#rsvp-msg", "Wishing you all the best")
     check(pg.locator("#rsvp-more").evaluate("e => e.hidden"), "decliners skip the attendee details")

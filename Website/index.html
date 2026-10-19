@@ -299,16 +299,16 @@ html.locked { overflow: hidden; }
     </ul>
   </aside>
   <div class="divider" aria-hidden="true"><span></span><img src="images/img-10-251x251.png" alt=""><span></span></div>
-  <form id="rsvp-form" novalidate>
+  <form id="rsvp-form" autocomplete="off" novalidate>
     <div class="f"><label for="rsvp-name">Your name</label>
-      <input id="rsvp-name" name="name" type="text" autocomplete="name" placeholder="Full name" aria-describedby="rsvp-name-error" required>
+      <input id="rsvp-name" name="name" type="text" autocomplete="off" placeholder="Full name" aria-describedby="rsvp-name-error" required>
       <p class="err field-err" id="rsvp-name-error" role="alert" hidden></p></div>
     <div class="f"><label for="rsvp-phone">Mobile number</label>
-      <input id="rsvp-phone" name="phone" type="tel" autocomplete="tel" inputmode="tel" placeholder="10-digit mobile" aria-describedby="rsvp-phone-error" required>
+      <input id="rsvp-phone" name="phone" type="tel" autocomplete="off" inputmode="numeric" placeholder="10-digit mobile" aria-describedby="rsvp-phone-error" required>
       <p class="err field-err" id="rsvp-phone-error" role="alert" hidden></p></div>
     <fieldset class="f" id="rsvp-attending" aria-describedby="rsvp-attending-error"><legend>Will you join us?</legend>
       <div class="choices">
-        <label class="pill"><input id="rsvp-yes" type="radio" name="attending" value="Joyfully attending" required><span>Joyfully attending</span></label>
+        <label class="pill"><input id="rsvp-yes" type="radio" name="attending" value="Joyfully attending" checked required><span>Joyfully attending</span></label>
         <label class="pill"><input id="rsvp-no" type="radio" name="attending" value="Regretfully unable"><span>Regretfully unable</span></label>
       </div><p class="err field-err" id="rsvp-attending-error" role="alert" hidden></p></fieldset>
     <div id="rsvp-more">
@@ -699,11 +699,16 @@ html.locked { overflow: hidden; }
   var raw = '';
   try { var q = new URLSearchParams(location.search); raw = q.get('to') || q.get('name') || ''; } catch (e) {}
   raw = raw.replace(/[\u0000-\u001f\u007f<>]/g, '').replace(/\s+/g, ' ').trim().slice(0, 60);
-  if (!raw) return;
   var el = document.getElementById('intro-to');
-  if (el) { el.textContent = 'Dear ' + raw; el.hidden = false; }
+  if (raw && el) { el.textContent = 'Dear ' + raw; el.hidden = false; }
   var f = document.getElementById('rsvp-name');
-  if (f && !f.value) f.value = raw;
+  function restoreInviteName() { if (f && raw) f.value = raw; }
+  restoreInviteName();
+  var form = document.getElementById('rsvp-form');
+  if (form) window.addEventListener('pageshow', function () {
+    form.reset();
+    restoreInviteName();
+  });
 })();
 </script>
 </body>
