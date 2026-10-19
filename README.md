@@ -6,7 +6,14 @@
 
 **AI assistants:** When ChatGPT or Codex is connected to this repository (for example, through Codex or a ChatGPT project with repository access), project context is automatic: the assistant reads `AGENTS.md`, which points to `CLAUDE.md`. Claude reads `CLAUDE.md` directly. A standalone ChatGPT chat cannot read files from your computer; open this repository in a connected workspace to give it automatic access.
 
-**To publish it:** upload the `Website` folder to Vercel (see "Deploying" in `CLAUDE.md`).
+**Hosting status:** The site is deployed on Vercel Hobby from the `main` branch of `madhurgupta03/madhur-soumya-wedding-website`. The project root is `Website`, with the `Other` preset and no build, install, or output-directory overrides or environment variables. The site is static; RSVP submissions go to Google Forms.
+
+- **Live site:** [madhur-soumya-wedding-website.vercel.app](https://madhur-soumya-wedding-website.vercel.app/)
+- **Still to verify:** open and check the site on desktop and mobile browsers, confirm its pages/assets and RSVP form, and review the social preview. Do not send a test RSVP because it would create a real response.
+- **Hosting research and launch plan:** [Guides/HOSTING-OPTIONS-AND-PLAN.md](Guides/HOSTING-OPTIONS-AND-PLAN.md)
+- **Tickable deployment checklist:** [Guides/HOSTING-CHECKLIST.md](Guides/HOSTING-CHECKLIST.md)
+
+The existing project setup is documented under "Deploying" in `CLAUDE.md`.
 
 **To change something:** ask your assistant in a session linked to this folder to make the change. It should follow `AGENTS.md` and `CLAUDE.md` automatically. The project context is here:
 
