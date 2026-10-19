@@ -65,6 +65,7 @@ html { scroll-snap-type: y proximity; scroll-behavior: smooth; }
 .seal img { width: 46%; height: auto; display: block; margin: auto; filter: brightness(0) invert(1); opacity: .9; }
 .seal:focus-visible, .intro-skip:focus-visible { outline: 2px solid #784646; outline-offset: 4px; }
 @keyframes pulse { 0%, 100% { transform: translate(-50%, -50%) scale(1); } 50% { transform: translate(-50%, -50%) scale(1.06); } }
+.intro-to { margin: 0; max-width: min(84vw, 420px); text-align: center; font-family: "Crimson Text", Georgia, serif; font-style: italic; color: #b85c1d; font-size: clamp(22px, 6.4vw, 30px); line-height: 1.2; letter-spacing: .03em; overflow-wrap: anywhere; }
 .intro-hint { margin: 0; font-family: "Crimson Text", Georgia, serif; font-style: italic; color: #784646; font-size: 18px; letter-spacing: .04em; }
 .intro-skip { position: absolute; right: max(16px, env(safe-area-inset-right, 0px)); bottom: calc(16px + env(safe-area-inset-bottom, 0px));
   background: none; border: 0; color: #784646; font: italic 16px "Crimson Text", Georgia, serif; text-decoration: underline; cursor: pointer; padding: 8px; }
@@ -226,6 +227,7 @@ html.locked { overflow: hidden; }
     <button class="seal" id="seal" type="button" aria-label="Open the invitation"><img src="images/img-10-251x251.png" alt=""></button>
   </div>
   <canvas class="burst" id="burst" aria-hidden="true"></canvas>
+  <p class="intro-to" id="intro-to" hidden></p>
   <p class="intro-hint">Tap the seal to open</p>
   <button class="intro-skip" id="intro-skip" type="button">Skip</button>
 </div>
@@ -378,6 +380,7 @@ html.locked { overflow: hidden; }
     if (reduce || !document.body.animate) { finish(); return; }
     var ease = 'cubic-bezier(.45,0,.2,1)';
     anim($('.intro-hint'), [{ opacity: 1 }, { opacity: 0 }], { duration: 300 });
+    if (!$('.intro-to').hidden) anim($('.intro-to'), [{ opacity: 1 }, { opacity: 0 }], { duration: 300 });
     anim($('.intro-skip'), [{ opacity: 1 }, { opacity: 0 }], { duration: 300 });
     seal.style.animation = 'none';
     burst();
@@ -666,6 +669,17 @@ html.locked { overflow: hidden; }
       if (v && !run) { run = true; requestAnimationFrame(frame); } else if (!v) run = false;
     }).observe(cv);
   });
+})();
+/* ---------- personal invitations: ?to=Name shows "Dear Name" on the envelope and pre-fills the RSVP name ---------- */
+(function () {
+  var raw = '';
+  try { var q = new URLSearchParams(location.search); raw = q.get('to') || q.get('name') || ''; } catch (e) {}
+  raw = raw.replace(/[\u0000-\u001f\u007f<>]/g, '').replace(/\s+/g, ' ').trim().slice(0, 60);
+  if (!raw) return;
+  var el = document.getElementById('intro-to');
+  if (el) { el.textContent = 'Dear ' + raw; el.hidden = false; }
+  var f = document.getElementById('rsvp-name');
+  if (f && !f.value) f.value = raw;
 })();
 </script>
 </body>

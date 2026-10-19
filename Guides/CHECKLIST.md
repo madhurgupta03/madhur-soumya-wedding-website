@@ -66,3 +66,10 @@ Everything is rebuilt from the PDF by `python Source/make.py all`. See `CLAUDE.m
 - `fonts/` — Crimson Text (SIL Open Font License)
 
 To publish: upload this folder to Vercel (or any static host) as is.
+
+## Personal invitations (website-only)
+
+| Feature | What it does |
+|---|---|
+| `?to=Name` in the link | Envelope shows "Dear Name" above "Tap the seal to open"; the RSVP name field is pre-filled (editable). Names are plain text, max 60 characters. No change to the approved card pages |
+| `Website/links.html` | Link maker: one name per line gives a link, Copy, and a WhatsApp button with an editable message; "Copy all" gives name + link for pasting into a sheet. Kept out of the deploy via `.vercelignore` |

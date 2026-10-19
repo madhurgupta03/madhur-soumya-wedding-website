@@ -665,6 +665,7 @@ html {{ scroll-snap-type: y proximity; scroll-behavior: smooth; }}
 .seal img {{ width: 46%; height: auto; display: block; margin: auto; filter: brightness(0) invert(1); opacity: .9; }}
 .seal:focus-visible, .intro-skip:focus-visible {{ outline: 2px solid #784646; outline-offset: 4px; }}
 @keyframes pulse {{ 0%, 100% {{ transform: translate(-50%, -50%) scale(1); }} 50% {{ transform: translate(-50%, -50%) scale(1.06); }} }}
+.intro-to {{ margin: 0; max-width: min(84vw, 420px); text-align: center; font-family: "Crimson Text", Georgia, serif; font-style: italic; color: #b85c1d; font-size: clamp(22px, 6.4vw, 30px); line-height: 1.2; letter-spacing: .03em; overflow-wrap: anywhere; }}
 .intro-hint {{ margin: 0; font-family: "Crimson Text", Georgia, serif; font-style: italic; color: #784646; font-size: 18px; letter-spacing: .04em; }}
 .intro-skip {{ position: absolute; right: max(16px, env(safe-area-inset-right, 0px)); bottom: calc(16px + env(safe-area-inset-bottom, 0px));
   background: none; border: 0; color: #784646; font: italic 16px "Crimson Text", Georgia, serif; text-decoration: underline; cursor: pointer; padding: 8px; }}
@@ -826,6 +827,7 @@ html.locked {{ overflow: hidden; }}
     <button class="seal" id="seal" type="button" aria-label="Open the invitation"><img src="images/{model[2]["images"][1]["file"]}" alt=""></button>
   </div>
   <canvas class="burst" id="burst" aria-hidden="true"></canvas>
+  <p class="intro-to" id="intro-to" hidden></p>
   <p class="intro-hint">Tap the seal to open</p>
   <button class="intro-skip" id="intro-skip" type="button">Skip</button>
 </div>
@@ -894,6 +896,7 @@ html.locked {{ overflow: hidden; }}
     if (reduce || !document.body.animate) {{ finish(); return; }}
     var ease = 'cubic-bezier(.45,0,.2,1)';
     anim($('.intro-hint'), [{{ opacity: 1 }}, {{ opacity: 0 }}], {{ duration: 300 }});
+    if (!$('.intro-to').hidden) anim($('.intro-to'), [{{ opacity: 1 }}, {{ opacity: 0 }}], {{ duration: 300 }});
     anim($('.intro-skip'), [{{ opacity: 1 }}, {{ opacity: 0 }}], {{ duration: 300 }});
     seal.style.animation = 'none';
     burst();
@@ -1183,11 +1186,25 @@ html.locked {{ overflow: hidden; }}
     }}).observe(cv);
   }});
 }})();
+/* ---------- personal invitations: ?to=Name shows "Dear Name" on the envelope and pre-fills the RSVP name ---------- */
+(function () {{
+  var raw = '';
+  try {{ var q = new URLSearchParams(location.search); raw = q.get('to') || q.get('name') || ''; }} catch (e) {{}}
+  raw = raw.replace(/[\\u0000-\\u001f\\u007f<>]/g, '').replace(/\\s+/g, ' ').trim().slice(0, 60);
+  if (!raw) return;
+  var el = document.getElementById('intro-to');
+  if (el) {{ el.textContent = 'Dear ' + raw; el.hidden = false; }}
+  var f = document.getElementById('rsvp-name');
+  if (f && !f.value) f.value = raw;
+}})();
 </script>
 </body>
 </html>
 """
 out = f"{SITE}/index.html" if MODE == "site" else f"{SITE}/test.html"
+LINKS_HTML = '<!doctype html>\n<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">\n<title>Invitation links - Soumya &amp; Madhur</title><meta name="robots" content="noindex">\n<style>\nbody{font:16px/1.5 Georgia,serif;color:#784646;background:#fdf5ef;margin:0;padding:24px 16px 60px}\nmain{max-width:760px;margin:0 auto}h1{font-weight:400;color:#b85c1d;margin:0 0 4px}p.s{margin:0 0 20px;font-style:italic}\nlabel{display:block;font-weight:700;margin:18px 0 6px}input,textarea{width:100%;box-sizing:border-box;font:inherit;padding:10px 12px;border:1.4px solid #c9a99a;border-radius:10px;background:#fff;color:#4f2c2c}\ntextarea{min-height:130px}button{font:700 15px Georgia,serif;letter-spacing:.06em;padding:8px 16px;border-radius:999px;border:1.5px solid #784646;background:transparent;color:#784646;cursor:pointer}\nbutton:hover{background:rgba(120,70,70,.12)}.row{display:grid;grid-template-columns:1fr auto auto;gap:8px;align-items:center;margin:10px 0;padding:10px 12px;background:#fff;border:1px solid #ecd9cc;border-radius:12px}\n.row b{grid-column:1/-1}.row input{grid-column:1;font-size:14px}.bar{display:flex;gap:10px;margin:16px 0;flex-wrap:wrap}small{color:#9a7468}\n</style></head><body><main>\n<h1>Personal invitation links</h1><p class="s">Type each guest or family on its own line. Each link opens the invitation with &ldquo;Dear &hellip;&rdquo; on the envelope and their name already in the RSVP.</p>\n<label for="base">Website address</label><input id="base" value="https://soumyamadhurweddinginvitation.vercel.app/">\n<label for="names">Names (one per line)</label><textarea id="names" placeholder="Sharma Family&#10;Aunty Rekha&#10;Rahul &amp; Priya"></textarea>\n<label for="msg">WhatsApp message <small>({name} and {link} are filled in)</small></label>\n<textarea id="msg">Dear {name}, you are warmly invited to the wedding of Soumya &amp; Madhur. Please open your invitation here: {link}</textarea>\n<div class="bar"><button id="copyall" type="button">Copy all (name + link)</button></div><div id="out"></div>\n<script>\nvar $=function(i){return document.getElementById(i)};\ntry{var sv=localStorage.getItem(\'base\');if(sv)$(\'base\').value=sv}catch(e){}\nfunction link(n){var b=$(\'base\').value.trim();if(b&&b.slice(-1)!==\'/\'&&b.indexOf(\'?\')<0)b+=\'/\';return b+\'?to=\'+encodeURIComponent(n)}\nfunction render(){var out=$(\'out\');out.textContent=\'\';try{localStorage.setItem(\'base\',$(\'base\').value)}catch(e){}\n $(\'names\').value.split(/\\n/).map(function(x){return x.trim()}).filter(Boolean).forEach(function(n){\n  var u=link(n),r=document.createElement(\'div\');r.className=\'row\';\n  var t=document.createElement(\'b\');t.textContent=n;var i=document.createElement(\'input\');i.value=u;i.readOnly=true;\n  var c=document.createElement(\'button\');c.textContent=\'Copy\';c.onclick=function(){navigator.clipboard.writeText(u);c.textContent=\'Copied\'};\n  var w=document.createElement(\'button\');w.textContent=\'WhatsApp\';w.onclick=function(){\n   window.open(\'https://wa.me/?text=\'+encodeURIComponent($(\'msg\').value.split(\'{name}\').join(n).split(\'{link}\').join(u)),\'_blank\',\'noopener\')};\n  r.append(t,i,c,w);out.append(r)})}\n$(\'names\').oninput=$(\'base\').oninput=render;\n$(\'copyall\').onclick=function(){var l=$(\'names\').value.split(/\\n/).map(function(x){return x.trim()}).filter(Boolean).map(function(n){return n+\'\\t\'+link(n)}).join(\'\\n\');navigator.clipboard.writeText(l);$(\'copyall\').textContent=\'Copied\'};\nrender();\n</script></main></body></html>\n'
 open(out, "w", encoding="utf-8", newline="\n").write(page)
+if MODE == "site":
+    open(f"{SITE}/links.html", "w", encoding="utf-8", newline="\n").write(LINKS_HTML)
 json.dump(checklist, open(f"{S}/checklist.json", "w", encoding="utf-8"), ensure_ascii=False, indent=1)
 print("wrote", out, len(page) // 1024, "KB; glyphs", len(used_glyphs))

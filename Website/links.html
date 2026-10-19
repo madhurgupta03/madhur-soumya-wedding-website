@@ -1,0 +1,33 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Invitation links - Soumya &amp; Madhur</title><meta name="robots" content="noindex">
+<style>
+body{font:16px/1.5 Georgia,serif;color:#784646;background:#fdf5ef;margin:0;padding:24px 16px 60px}
+main{max-width:760px;margin:0 auto}h1{font-weight:400;color:#b85c1d;margin:0 0 4px}p.s{margin:0 0 20px;font-style:italic}
+label{display:block;font-weight:700;margin:18px 0 6px}input,textarea{width:100%;box-sizing:border-box;font:inherit;padding:10px 12px;border:1.4px solid #c9a99a;border-radius:10px;background:#fff;color:#4f2c2c}
+textarea{min-height:130px}button{font:700 15px Georgia,serif;letter-spacing:.06em;padding:8px 16px;border-radius:999px;border:1.5px solid #784646;background:transparent;color:#784646;cursor:pointer}
+button:hover{background:rgba(120,70,70,.12)}.row{display:grid;grid-template-columns:1fr auto auto;gap:8px;align-items:center;margin:10px 0;padding:10px 12px;background:#fff;border:1px solid #ecd9cc;border-radius:12px}
+.row b{grid-column:1/-1}.row input{grid-column:1;font-size:14px}.bar{display:flex;gap:10px;margin:16px 0;flex-wrap:wrap}small{color:#9a7468}
+</style></head><body><main>
+<h1>Personal invitation links</h1><p class="s">Type each guest or family on its own line. Each link opens the invitation with &ldquo;Dear &hellip;&rdquo; on the envelope and their name already in the RSVP.</p>
+<label for="base">Website address</label><input id="base" value="https://soumyamadhurweddinginvitation.vercel.app/">
+<label for="names">Names (one per line)</label><textarea id="names" placeholder="Sharma Family&#10;Aunty Rekha&#10;Rahul &amp; Priya"></textarea>
+<label for="msg">WhatsApp message <small>({name} and {link} are filled in)</small></label>
+<textarea id="msg">Dear {name}, you are warmly invited to the wedding of Soumya &amp; Madhur. Please open your invitation here: {link}</textarea>
+<div class="bar"><button id="copyall" type="button">Copy all (name + link)</button></div><div id="out"></div>
+<script>
+var $=function(i){return document.getElementById(i)};
+try{var sv=localStorage.getItem('base');if(sv)$('base').value=sv}catch(e){}
+function link(n){var b=$('base').value.trim();if(b&&b.slice(-1)!=='/'&&b.indexOf('?')<0)b+='/';return b+'?to='+encodeURIComponent(n)}
+function render(){var out=$('out');out.textContent='';try{localStorage.setItem('base',$('base').value)}catch(e){}
+ $('names').value.split(/\n/).map(function(x){return x.trim()}).filter(Boolean).forEach(function(n){
+  var u=link(n),r=document.createElement('div');r.className='row';
+  var t=document.createElement('b');t.textContent=n;var i=document.createElement('input');i.value=u;i.readOnly=true;
+  var c=document.createElement('button');c.textContent='Copy';c.onclick=function(){navigator.clipboard.writeText(u);c.textContent='Copied'};
+  var w=document.createElement('button');w.textContent='WhatsApp';w.onclick=function(){
+   window.open('https://wa.me/?text='+encodeURIComponent($('msg').value.split('{name}').join(n).split('{link}').join(u)),'_blank','noopener')};
+  r.append(t,i,c,w);out.append(r)})}
+$('names').oninput=$('base').oninput=render;
+$('copyall').onclick=function(){var l=$('names').value.split(/\n/).map(function(x){return x.trim()}).filter(Boolean).map(function(n){return n+'\t'+link(n)}).join('\n');navigator.clipboard.writeText(l);$('copyall').textContent='Copied'};
+render();
+</script></main></body></html>
