@@ -79,7 +79,7 @@ python Source/make.py video    # optional: Previews/Envelope-opening.mp4
   - **Unchanged text** is drawn with the PDF's own letter outlines (`<use href="#pN_font_…">`) at the exact PDF positions, so it matches the PDF even for Canva-only fonts.
   - **New or restyled text** (parent names, venue lines) is live `<text>` in **Crimson Text**, the free version of the PDF's Crimson.
 - **Website sections** between the cards (`venues`, `rsvp`, `blessings`, `blessings-groom`) are normal HTML inside the `EXTRA_SECTIONS` string.
-- **Page order:** cover, invitation, Tilak, Engagement & Sangeet, Haldi & Mehendi, Baraat, Jaimala → Where we celebrate → RSVP → Bride's side → Groom's side → closing page.
+- **Page order:** cover, invitation, Tilak, Engagement & Sangeet, Haldi & Mehendi, Baraat, Jaimala → Where we celebrate → Bride's side → Groom's side → closing page → RSVP (the last section of the invite).
 
 Where things live in `build.py` (search for these markers):
 

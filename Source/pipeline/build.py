@@ -1,14 +1,19 @@
 """Build the e-invite website from the extracted PDF model.
 Unchanged text is drawn with the PDF's own glyph outlines at their exact positions.
 Only the items in the CHANGES list are altered."""
-import json, re, os, sys, html
+import json, re, os, sys, html, math
 from svgpathtools import parse_path
 
-S = os.path.dirname(os.path.abspath(__file__))
-SITE = f"{S}/site"
-MODE = sys.argv[1] if len(sys.argv) > 1 else "site"   # "site" or "test" (all images eager)
-model = json.load(open(f"{SITE}/model.json"))
-OPAC = json.load(open(f"{S}/opacity.json"))
+sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+import paths, shutil
+S = paths.DATA                     # model.json, opacity.json, svgsrc/ live here
+SITE = paths.WEBSITE               # output: Website/index.html (+ images/, fonts/)
+MODE = sys.argv[1] if len(sys.argv) > 1 else "site"   # "site" -> index.html, "test" -> test.html (all images load at once)
+model = json.load(open(f"{S}/model.json", encoding="utf-8"))
+OPAC = json.load(open(f"{S}/opacity.json", encoding="utf-8"))
+os.makedirs(f"{SITE}/fonts", exist_ok=True)
+for _f in os.listdir(paths.FONTS):
+    shutil.copy2(os.path.join(paths.FONTS, _f), os.path.join(SITE, "fonts", _f))
 
 # ---------------- decisions agreed with the user ----------------
 PARENTS = {
@@ -28,7 +33,7 @@ glyph_defs = {}             # id -> d (font units, y up)
 glyph_bbox = {}             # id -> (xmin, xmax, ymin, ymax) font units
 
 def load_svg(n):
-    s = open(f"{S}/svgsrc/p{n}.svg").read()
+    s = open(f"{S}/svgsrc/p{n}.svg", encoding="utf-8").read()
     for m in re.finditer(r'<path id="(font_[0-9_]+)" d="([^"]*)"', s):
         gid, d = m.group(1), m.group(2)
         key = f"p{n}_{gid}"
@@ -90,7 +95,7 @@ def use_svg(u):
 
 # Crimson Text metrics for live text (cap height ratio from the font file)
 from fontTools.ttLib import TTFont
-_ct = TTFont(f"{S}/npm/node_modules/@fontsource/crimson-text/files/crimson-text-latin-400-italic.woff2")
+_ct = TTFont(os.path.join(paths.FONTS, "crimson-text-latin-400-italic.woff2"))
 CAP = _ct["OS/2"].sCapHeight / _ct["head"].unitsPerEm if getattr(_ct["OS/2"], "sCapHeight", 0) else 0.59
 
 def live_text(lines, cx, y0, pitch, size, fill, weight, style, track_em):
@@ -342,7 +347,117 @@ checklist.append(("1", "Names on cover", f"“Soumya & Madhur” added below the
 # ---------- website sections between the cards (card fonts, colours, divider) ----------
 ORN = "images/" + model[2]["images"][1]["file"]
 DIV = f'<div class="divider" aria-hidden="true"><span></span><img src="{ORN}" alt=""><span></span></div>'
-CORNERS = "".join(f'<img class="corner {c}" src="{ORN}" alt="" aria-hidden="true">' for c in ("tl", "tr", "bl", "br"))
+# The sections reuse the card artwork, untouched, exactly as pages 2 and 8 place it:
+#   sky = the page-2/8 sky (tiled, every other tile mirrored so the joins are seamless),
+#   head = the garland and the two top leaf sprigs, foot = the flower clusters along the bottom of page 8.
+SKY = model[1]["images"][0]["file"]
+def _lay(im, op=1):
+    a, b, c, d, e, f = im["m"]
+    opa = "" if op == 1 else f' opacity="{op}"'
+    return (f'<image href="images/{im["file"]}"{opa} width="1" height="1" preserveAspectRatio="none" '
+            f'transform="matrix({a},{b},{c},{d},{e},{f})"/>')
+_p8 = list(zip(model[7]["images"], OPAC["8"]))
+_garland = next(k for k, (im, _) in enumerate(_p8) if im["file"].startswith("img-08"))
+ART_HEAD = ('<svg class="head" viewBox="0 0 810 340" aria-hidden="true">'
+            + "".join(_lay(im, op) for im, op in [_p8[_garland]] + [t for t in _p8[_garland + 1:] if t[0]["m"][5] < 200])
+            + '</svg>')
+ART_FOOT = ('<svg class="foot" viewBox="0 780 810 660" aria-hidden="true">'
+            + "".join(_lay(im, op) for im, op in _p8 if im["m"][5] >= 990)
+            + '</svg>')
+def _marigold(cx, cy, r=15):
+    out = "".join(f'<circle cx="{cx + r * .72 * math.cos(k * math.pi / 4):.1f}" cy="{cy + r * .72 * math.sin(k * math.pi / 4):.1f}" r="{r * .42:.1f}" fill="#f7b32f"/>' for k in range(8))
+    return out + f'<circle cx="{cx}" cy="{cy}" r="{r * .66:.1f}" fill="#ee8f12"/><circle cx="{cx}" cy="{cy}" r="{r * .24:.1f}" fill="#b85a06"/>'
+_strands = [(30, 7), (92, 9), (156, 6), (222, 8), (288, 9), (352, 6), (418, 8), (484, 9), (548, 6), (614, 8), (680, 9), (748, 7), (796, 5)]
+MARIGOLDS = ('<svg class="head" viewBox="0 0 810 380" aria-hidden="true"><line x1="0" y1="14" x2="810" y2="14" stroke="#7a4a12" stroke-width="3"/>'
+             + "".join(f'<line x1="{x}" y1="14" x2="{x}" y2="{14 + n * 34}" stroke="#7a4a12" stroke-width="2"/>'
+                       + "".join(_marigold(x, 34 + i * 34) for i in range(n)) for x, n in _strands)
+             + '</svg>')
+# ---- bride's side: the Jaimala candle scene (pillar candles, a floor of tea-lights, red roses) ----
+_FLAME = "M0 -46 C11 -28 10 -9 0 -4 C-10 -9 -11 -28 0 -46Z"
+def _pillar(x, top, w=24, flame="f1"):
+    return (f'<ellipse cx="{x}" cy="196" rx="{w * .8}" ry="5" fill="#2a0a12" opacity=".5"/>'
+            f'<circle class="halo" cx="{x}" cy="{top - 24}" r="52" fill="url(#cg)"/>'
+            f'<rect x="{x - w / 2}" y="{top}" width="{w}" height="{196 - top}" rx="3" fill="url(#cb)"/>'
+            f'<ellipse cx="{x}" cy="{top + 1}" rx="{w / 2}" ry="3.6" fill="#fff8e6"/>'
+            f'<line x1="{x}" y1="{top}" x2="{x}" y2="{top - 8}" stroke="#4a3320" stroke-width="2.2"/>'
+            f'<g transform="translate({x} {top - 6}) scale(.8)"><path class="flame {flame}" d="{_FLAME}" fill="url(#cf)"/></g>')
+def _tealight(x, y, flame="f1"):
+    return (f'<ellipse cx="{x}" cy="{y + 12}" rx="5" ry="15" fill="#ffd27a" opacity=".22"/>'
+            f'<circle class="halo" cx="{x}" cy="{y - 8}" r="26" fill="url(#cg)"/>'
+            f'<path d="M{x - 9} {y} q0 8 9 8 q9 0 9 -8z" fill="#e6cba0"/><ellipse cx="{x}" cy="{y}" rx="9" ry="3.2" fill="#f6e6c6"/>'
+            f'<g transform="translate({x} {y - 1}) scale(.42)"><path class="flame {flame}" d="{_FLAME}" fill="url(#cf)"/></g>')
+def _rose(cx, cy, r):
+    return (f'<ellipse cx="{cx - r * .9}" cy="{cy - r * .2}" rx="{r * .6}" ry="{r * .26}" fill="#2f5a2a" transform="rotate(-25 {cx - r * .9} {cy - r * .2})"/>'
+            f'<ellipse cx="{cx + r * .9}" cy="{cy - r * .3}" rx="{r * .6}" ry="{r * .26}" fill="#3a6a31" transform="rotate(25 {cx + r * .9} {cy - r * .3})"/>'
+            f'<circle cx="{cx}" cy="{cy}" r="{r}" fill="#9b1028"/><circle cx="{cx}" cy="{cy}" r="{r * .8}" fill="#bd1a38"/>'
+            f'<circle cx="{cx}" cy="{cy}" r="{r * .58}" fill="#d12a47"/><circle cx="{cx}" cy="{cy}" r="{r * .36}" fill="#a3122b"/>'
+            f'<path d="M{cx - r * .55} {cy - r * .1} Q{cx} {cy - r * .75} {cx + r * .55} {cy - r * .05} M{cx - r * .3} {cy + r * .35} Q{cx + r * .1} {cy + r * .05} {cx + r * .35} {cy + r * .3}" '
+            f'fill="none" stroke="#6d0a1d" stroke-width="2" stroke-linecap="round"/>'
+            f'<path d="M{cx - r * .5} {cy - r * .45} Q{cx - r * .1} {cy - r * .8} {cx + r * .3} {cy - r * .55}" fill="none" stroke="#e8586f" stroke-width="2" opacity=".7" stroke-linecap="round"/>')
+_L = [(70, 100, 24, "f1"), (112, 62, 26, "f2"), (152, 104, 24, "f3"), (192, 84, 22, "f1")]
+_R = [(618, 88, 24, "f2"), (660, 104, 24, "f3"), (702, 60, 26, "f1"), (746, 98, 24, "f2")]
+_TEA = [(95, 236), (150, 266), (212, 226), (262, 290), (306, 246), (350, 304), (402, 232), (444, 278), (486, 312), (524, 242), (568, 292), (612, 228),
+        (656, 270), (706, 240), (752, 290), (28, 272), (788, 240), (376, 266)]
+SCENE = ('<svg class="scene" viewBox="0 0 810 330" aria-hidden="true"><defs>'
+         '<radialGradient id="cg"><stop offset="0" stop-color="#ffd27a" stop-opacity=".95"/><stop offset="1" stop-color="#ffb347" stop-opacity="0"/></radialGradient>'
+         '<linearGradient id="cb" x1="0" x2="1"><stop offset="0" stop-color="#f1d9b0"/><stop offset=".45" stop-color="#fff4dc"/><stop offset="1" stop-color="#e8c994"/></linearGradient>'
+         '<linearGradient id="cf" x1="0" y1="1" x2="0" y2="0"><stop offset="0" stop-color="#ff9d1c"/><stop offset=".55" stop-color="#ffd35a"/><stop offset="1" stop-color="#fff3b0"/></linearGradient>'
+         '<linearGradient id="fl" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#5a1522" stop-opacity="0"/><stop offset=".22" stop-color="#4a1220" stop-opacity=".92"/><stop offset="1" stop-color="#22070e"/></linearGradient>'
+         '<linearGradient id="lg1" x1="0" y1="1" x2="0" y2="0"><stop offset="0" stop-color="#ffb23d"/><stop offset="1" stop-color="#ff7a2a"/></linearGradient>'
+         '<linearGradient id="lg2" x1="0" y1="1" x2="0" y2="0"><stop offset="0" stop-color="#ffd56a"/><stop offset="1" stop-color="#f59a2e"/></linearGradient>'
+         '<linearGradient id="lg3" x1="0" y1="1" x2="0" y2="0"><stop offset="0" stop-color="#ff9f6a"/><stop offset="1" stop-color="#e8506e"/></linearGradient>'
+         '</defs><rect x="0" y="110" width="810" height="220" fill="url(#fl)"/>'
+         + "".join(_pillar(*t) for t in _L + _R)
+         + "".join(_tealight(x, y, ("f1", "f2", "f3")[i % 3]) for i, (x, y) in enumerate(_TEA))
+         + "".join(_rose(x, y, r) for x, y, r in [(30, 316, 40), (92, 326, 36), (156, 332, 34), (62, 276, 30), (118, 296, 28),
+                                                   (780, 316, 40), (718, 326, 36), (654, 332, 34), (748, 276, 30), (692, 296, 28)])
+         + '</svg>')
+
+# ---- groom's side: the Haldi & Mehendi page's yellow curtains, bell-and-flower strings and bougainvillea ----
+def _bead(x, y, k):
+    return (f'<circle cx="{x}" cy="{y}" r="7" fill="#e8508a"/><circle cx="{x}" cy="{y}" r="3" fill="#f7b6cc"/>' if k % 2 == 0
+            else f'<circle cx="{x}" cy="{y}" r="7.5" fill="#f59a1b"/><circle cx="{x}" cy="{y}" r="3" fill="#c76a06"/>')
+def _bell(x, y):
+    return (f'<path d="M{x - 15} {y} C{x - 15} {y - 22} {x - 8} {y - 30} {x} {y - 30} C{x + 8} {y - 30} {x + 15} {y - 22} {x + 15} {y} L{x + 20} {y + 9} H{x - 20}Z" fill="url(#bg)"/>'
+            f'<path d="M{x - 9} {y - 24} Q{x - 11} {y - 8} {x - 12} {y + 6} M{x + 9} {y - 24} Q{x + 11} {y - 8} {x + 12} {y + 6}" fill="none" stroke="#7a4d10" stroke-width="1.4" opacity=".6"/>'
+            f'<circle cx="{x}" cy="{y - 32}" r="3.4" fill="#b9801f"/><circle cx="{x}" cy="{y + 12}" r="3.6" fill="#7a4d10"/>'
+            + "".join(f'<circle cx="{x}" cy="{y + 22 + i * 12}" r="{7 - i}" fill="#f59a1b"/><circle cx="{x}" cy="{y + 22 + i * 12}" r="{2.6 - i * .5}" fill="#c76a06"/>' for i in range(3)))
+_P = {f: x for f, x in ((m["file"][:6], m["file"]) for m in model[7]["images"])}
+def _img(key, a, d, e, f, flip=False):
+    m = f'matrix({-a if flip else a},0,0,{d},{e + a if flip else e},{f})'
+    return f'<image href="images/{_P[key]}" width="1" height="1" preserveAspectRatio="none" transform="{m}"/>'
+HALDI_HEAD = ('<svg class="head" viewBox="0 0 810 380" aria-hidden="true"><defs>'
+              '<linearGradient id="cu" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#fbe48c"/><stop offset="1" stop-color="#f1b73a"/></linearGradient>'
+              '<linearGradient id="bg" x1="0" x2="1"><stop offset="0" stop-color="#a8721a"/><stop offset=".4" stop-color="#f0c15a"/><stop offset="1" stop-color="#8a5a14"/></linearGradient></defs>'
+              '<g id="curl"><path d="M0 0 H178 C172 92 150 168 118 232 C96 282 56 322 0 344Z" fill="url(#cu)"/>'
+              '<path d="M44 0 C46 100 36 200 0 300 M92 0 C96 100 84 190 40 290 M138 0 C142 96 126 180 84 262" fill="none" stroke="#c98a12" stroke-width="2" opacity=".35"/></g>'
+              '<use href="#curl" transform="translate(810 0) scale(-1 1)"/>'
+              + "".join(f'<line x1="{x}" y1="0" x2="{x}" y2="{y}" stroke="#7a4d10" stroke-width="1.6"/>'
+                        + "".join(_bead(x, 22 + i * 26, i) for i in range((y - 40) // 26)) + _bell(x, y)
+                        for x, y in [(212, 150), (262, 232), (312, 180), (362, 246), (412, 160), (462, 238), (512, 190), (562, 244), (612, 150)])
+              + _img("img-06", 170, 219, -30, -64) + _img("img-06", 170, 219, 670, -64, True) + _img("img-06", 130, 168, 330, -92)
+              + _img("img-07", 120, 120, 150, -36) + _img("img-07", 120, 120, 540, -40, True)
+              + '</svg>')
+VINES = "".join(f'<img class="vine {c}" src="images/{_P["img-06"]}" alt="" aria-hidden="true">' for c in ("va", "vb", "vc", "vd", "ve", "vf"))
+def _lantern(side, pos, top, w, grad, cls):
+    return (f'<svg class="lantern {cls}" viewBox="0 0 60 100" aria-hidden="true" style="{side}:{pos}%;top:{top}%;width:{w}cqw">'
+            f'<circle cx="30" cy="42" r="40" fill="url(#cg)" opacity=".75"/>'
+            f'<path d="M30 6 L30 14" stroke="#8a3b12" stroke-width="2"/>'
+            f'<path d="M12 22 Q30 12 48 22 L53 66 Q30 78 7 66 Z" fill="url(#{grad})" stroke="#9a4415" stroke-width="1.4"/>'
+            f'<path d="M30 16 Q19 42 22 72 M30 16 Q41 42 38 72 M30 16 L30 74" fill="none" stroke="#9a4415" stroke-width="1" opacity=".55"/>'
+            f'<ellipse cx="30" cy="46" rx="11" ry="17" fill="#fff6c2" opacity=".85"/>'
+            f'<rect x="14" y="18" width="32" height="6" rx="3" fill="#8a3b12"/><rect x="11" y="64" width="38" height="7" rx="3" fill="#8a3b12"/>'
+            f'<path d="M30 71 L30 86" stroke="#8a3b12" stroke-width="1.6"/><circle cx="30" cy="89" r="3.4" fill="#f2c14e"/>'
+            f'<path d="M24 72 L22 84 M36 72 L38 84" stroke="#8a3b12" stroke-width="1.2"/></svg>')
+LANTERNS = "".join(_lantern(*a) for a in [("left", 3, 12, 12, "lg1", "l1"), ("right", 4, 25, 10, "lg2", "l2"), ("left", 6, 41, 11, "lg3", "l3"),
+                                          ("right", 3, 56, 12, "lg1", "l4"), ("left", 4, 71, 10, "lg2", "l5")])
+def art(kind):
+    sky = '<div class="sky" aria-hidden="true">' + ('<i></i><i></i><i></i><i></i>' if kind in ("day", "haldi") else '') + '</div>'
+    head = HALDI_HEAD if kind == "haldi" else ART_HEAD
+    foot = "" if kind == "dusk" else ART_FOOT
+    extra = {"dusk": SCENE + LANTERNS + '<canvas class="glow" data-kind="fire" aria-hidden="true"></canvas>',
+             "night": '<canvas class="glow" data-kind="fly" aria-hidden="true"></canvas>', "haldi": VINES}.get(kind, "")
+    return sky + head + foot + extra
 def ev(name, time):
     return f'<li><span class="n">{name}</span><span class="t">{time}</span></li>'
 bride = [("Grandparents", ["Late Smt. Mannu Devi Gupta & Shri Nathuram Gupta", "Smt. Shashi Gupta & Shri Amarnath Gupta"]),
@@ -367,7 +482,7 @@ def evcheck(i, val, label, date):
     return (f'<label class="chip" for="ev-{i}"><input id="ev-{i}" type="checkbox" name="events" value="{val}" checked>'
             f'<span class="box" aria-hidden="true"></span><span class="lbl">{label}</span><span class="dt">{date}</span></label>')
 EXTRA_SECTIONS = f"""
-<section class="web theme-night" id="venues" aria-labelledby="venues-h"><canvas class="petals" data-n="7" aria-hidden="true"></canvas><div class="col"><div class="frame">{CORNERS}
+<section class="web theme-day" id="venues" aria-labelledby="venues-h"><canvas class="petals" data-n="7" aria-hidden="true"></canvas><div class="col">{art("day")}<div class="frame">
   <p class="label">Where we celebrate</p>
   <h2 id="venues-h">Two Days, Two Venues</h2>
   <div class="count" id="countdown" aria-live="off">
@@ -385,6 +500,7 @@ EXTRA_SECTIONS = f"""
       <a class="btn" href="{MAPS['havana']}" target="_blank" rel="noopener">Get Directions</a>
     </div>
   </article>
+  {DIV}
   <article class="tile">
     <p class="band">Day 2 &middot; Wednesday, 25 November</p>
     <div class="tile-body">
@@ -395,7 +511,7 @@ EXTRA_SECTIONS = f"""
     </div>
   </article>
 </div></div></section>
-<section class="web theme-rose" id="rsvp" aria-labelledby="rsvp-h"><canvas class="petals" data-n="6" aria-hidden="true"></canvas><div class="col"><div class="frame">{CORNERS}
+<section class="web theme-night" id="rsvp" aria-labelledby="rsvp-h"><canvas class="petals" data-n="6" aria-hidden="true"></canvas><div class="col">{art("night")}<div class="frame">
   <p class="label">Kindly reply</p>
   <h2 id="rsvp-h">RSVP</h2>
   <p class="lead">We would love to know if you can join us.</p>
@@ -432,7 +548,7 @@ EXTRA_SECTIONS = f"""
     <p class="lead" id="rsvp-done-msg"></p>
   </div>
 </div></div></section>
-<section class="web theme-marigold" id="blessings" aria-labelledby="bless-h"><canvas class="petals" data-n="9" aria-hidden="true"></canvas><div class="col"><div class="frame">{CORNERS}
+<section class="web theme-dusk" id="blessings" aria-labelledby="bless-h"><canvas class="petals" data-n="9" aria-hidden="true"></canvas><div class="col">{art("dusk")}<div class="frame">
   <div class="hosts-box">
     <p class="label">Lovingly invited by</p>
     <p class="hosts">Umakant Gupta<span>&amp;</span>Santosh Gupta</p>
@@ -443,13 +559,17 @@ EXTRA_SECTIONS = f"""
   <p class="label">The Bride’s Family</p>
   <div class="sides">{side("Bride’s Side", bride, "bride")}</div>
 </div></div></section>
-<section class="web theme-night" id="blessings-groom" aria-labelledby="bless-g-h"><canvas class="petals" data-n="8" aria-hidden="true"></canvas><div class="col"><div class="frame">{CORNERS}
+<section class="web theme-haldi" id="blessings-groom" aria-labelledby="bless-g-h"><canvas class="petals" data-n="8" aria-hidden="true"></canvas><div class="col">{art("haldi")}<div class="frame">
   <p class="label">With blessings of</p>
   <h2 id="bless-g-h">The Groom’s Family</h2>
   {DIV}
   <div class="sides">{side("Groom’s Side", groom, "groom")}</div>
 </div></div></section>
 """
+
+_i_rsvp = EXTRA_SECTIONS.index('<section class="web theme-night" id="rsvp"')
+_i_bless = EXTRA_SECTIONS.index('<section class="web theme-dusk" id="blessings" ')
+_VENUES, _RSVP, _BLESSINGS = EXTRA_SECTIONS[:_i_rsvp], EXTRA_SECTIONS[_i_rsvp:_i_bless], EXTRA_SECTIONS[_i_bless:]
 
 # ---------- assemble ----------
 used_glyphs = set()
@@ -466,10 +586,12 @@ for P in model:
            + '<g class="rv rv3">' + "".join(P["_extra"]) + '</g>'
            + ('<canvas class="petals" aria-hidden="true"></canvas>' if False else '')
            + "</svg>")
-    if P["n"] == 8:
-        sections.append(EXTRA_SECTIONS)
+    if P["n"] == 8:     # venues and the two blessings pages come before the closing page; the RSVP comes last of all
+        sections.append(_VENUES + _BLESSINGS)
     petals = '<canvas class="petals" aria-hidden="true"></canvas>'
     sections.append(f'<section class="page" id="page-{P["n"]}" data-label="{label}">{svg}{petals}</section>')
+    if P["n"] == 8:
+        sections.append(_RSVP)
 
 defs = "".join(f'<path id="{g}" d="{glyph_defs[g]}"/>' for g in sorted(used_glyphs) if glyph_defs.get(g))
 
@@ -510,11 +632,11 @@ html {{ scroll-snap-type: y proximity; scroll-behavior: smooth; }}
 .js .page.seen .rv {{ animation: rise 1s cubic-bezier(.2,.7,.2,1) forwards; }}
 .js .page.seen .rv2 {{ animation-delay: .35s; }}
 .js .page.seen .rv3 {{ animation-delay: .6s; }}
-.js .web .frame > *:not(.corner) {{ opacity: 0; transform: translateY(16px); }}
-.js .web.seen .frame > *:not(.corner) {{ animation: rise .9s cubic-bezier(.2,.7,.2,1) forwards; }}
-.js .web.seen .frame > *:nth-child(6) {{ animation-delay: .1s; }}
-.js .web.seen .frame > *:nth-child(7) {{ animation-delay: .2s; }}
-.js .web.seen .frame > *:nth-child(n+8) {{ animation-delay: .3s; }}
+.js .web .frame > * {{ opacity: 0; transform: translateY(16px); }}
+.js .web.seen .frame > * {{ animation: rise .9s cubic-bezier(.2,.7,.2,1) forwards; }}
+.js .web.seen .frame > *:nth-child(2) {{ animation-delay: .1s; }}
+.js .web.seen .frame > *:nth-child(3) {{ animation-delay: .2s; }}
+.js .web.seen .frame > *:nth-child(n+4) {{ animation-delay: .3s; }}
 @keyframes rise {{ to {{ opacity: 1; transform: none; }} }}
 /* envelope intro */
 .intro {{ position: fixed; inset: 0; z-index: 50; display: none; place-items: center; align-content: center; gap: 22px;
@@ -557,108 +679,132 @@ html.locked {{ overflow: hidden; }}
 .dir:focus-visible rect:first-child {{ stroke-width: 3; }}
 .open text {{ animation: breathe 2.4s ease-in-out infinite; }}
 @keyframes breathe {{ 0%, 100% {{ opacity: .55; }} 50% {{ opacity: 1; }} }}
-/* website sections: framed stationery panels in colours from the artwork; sized like the card pages */
-.web {{ position: relative; display: flex; justify-content: center; scroll-snap-align: start; color: #784646;
-  --band: #b85c1d; --band-ink: #fdf5ef; --gold: #c99a3e; --paper: #fdf5ef; }}
-.web.theme-night {{ background: radial-gradient(120% 70% at 50% 0%, #1d2f5c 0%, #0b1838 55%, #060f26 100%); --band: #1d2f5c; }}
-.web.theme-rose {{ background: linear-gradient(180deg, #f7d6cf 0%, #efbcb3 100%); --band: #b85c1d; }}
-.web.theme-marigold {{ background: linear-gradient(180deg, #f9dfa0 0%, #f2c46a 100%); --band: #784646; }}
+/* website sections: the same look as the cards. The card's own sky, garland and flowers sit behind
+   the text; type is Crimson in the card colours (var(--ink) brown, var(--accent) rust); no panels, no coloured backgrounds */
+.web {{ position: relative; display: flex; justify-content: center; scroll-snap-align: start; color: var(--ink); overflow: hidden; }}
 .web .col {{ position: relative; z-index: 1; container-type: inline-size; width: min(100vw, calc(100svh * 9 / 16)); box-sizing: border-box;
-  min-height: min(100svh, calc(100vw * 16 / 9)); display: flex;
-  padding: 6cqw max(4.5cqw, env(safe-area-inset-right, 0px)) 6cqw max(4.5cqw, env(safe-area-inset-left, 0px)); }}
-.web .frame {{ position: relative; flex: 1; box-sizing: border-box; background: var(--paper);
-  border: 2px solid var(--gold); outline: 1px solid var(--gold); outline-offset: -9px;
-  box-shadow: 0 1.5cqw 5cqw rgba(60,20,10,.25);
-  padding: 11cqw 7cqw 10cqw; text-align: center; font-family: "Crimson Text", Georgia, serif;
-  font-size: 4.6cqw; line-height: 1.45; display: flex; flex-direction: column; gap: 3.2cqw; }}
-.web .corner {{ position: absolute; width: 7cqw; height: auto; opacity: .9; }}
-.web .corner.tl {{ top: 3.2cqw; left: 3.2cqw; }} .web .corner.tr {{ top: 3.2cqw; right: 3.2cqw; }}
-.web .corner.bl {{ bottom: 3.2cqw; left: 3.2cqw; }} .web .corner.br {{ bottom: 3.2cqw; right: 3.2cqw; }}
-.web .label {{ margin: 0; font-size: 3.7cqw; letter-spacing: .22em; text-transform: uppercase; color: #b85c1d; font-weight: 600; }}
-.web h2 {{ margin: 0; font-weight: 600; font-size: 8.8cqw; line-height: 1.1; color: #784646; letter-spacing: .02em; text-wrap: balance; }}
-.web h3 {{ margin: 0; font-weight: 600; font-size: 6.6cqw; line-height: 1.15; color: #784646; }}
-.web .lead {{ margin: 0 auto; max-width: 30em; font-style: italic; font-size: 4.6cqw; text-wrap: balance; }}
-.web .divider {{ display: flex; align-items: center; gap: 3cqw; margin: 1.5cqw 0; }}
+  min-height: min(100svh, calc(100vw * 16 / 9)); display: flex; overflow: hidden; }}
+.web .sky {{ position: absolute; inset: 0; z-index: 0; overflow: hidden; }}
+.web .sky i {{ display: block; width: 100%; aspect-ratio: 941 / 1672; background: url("images/{SKY}") 0 0 / 100% 100% no-repeat; }}
+.web .sky i:nth-child(even) {{ transform: scaleY(-1); }}
+.web .head, .web .foot {{ position: absolute; left: 0; width: 100%; height: auto; display: block; pointer-events: none; z-index: 1; }}
+.web .head {{ top: 0; }} .web .foot {{ bottom: 0; }}
+.web .frame {{ position: relative; z-index: 2; flex: 1; box-sizing: border-box; padding: 41cqw 10cqw 50cqw; text-align: center;
+  font-family: "Crimson Text", Georgia, serif; font-size: 4.6cqw; line-height: 1.45; display: flex; flex-direction: column; gap: 4cqw;
+  text-shadow: var(--shadow); }}
+.web form, .web .btn {{ text-shadow: none; }}
+.web .label {{ margin: 0; font-size: 4cqw; letter-spacing: .2em; text-transform: uppercase; color: var(--ink); font-weight: 600; }}
+.web h2 {{ margin: 0; font-weight: 600; font-size: 10.5cqw; line-height: 1.12; color: var(--accent); letter-spacing: .05em; text-transform: uppercase; text-wrap: balance; }}
+.web h3 {{ margin: 0; font-weight: 600; font-size: 6.4cqw; line-height: 1.15; color: var(--accent); letter-spacing: .06em; text-transform: uppercase; }}
+.web .lead {{ margin: 0 auto; max-width: 30em; font-weight: 600; font-size: 4.6cqw; letter-spacing: .02em; text-wrap: balance; }}
+.web .divider {{ display: flex; align-items: center; gap: 3cqw; margin: 1cqw 0; }}
 .web .divider span {{ flex: 1; height: 1px; background: linear-gradient(90deg, transparent, var(--gold), transparent); }}
 .web .divider img {{ width: 6cqw; height: auto; }}
-.web .btn {{ display: inline-block; align-self: center; padding: 3cqw 8cqw; border-radius: 999px; border: 0; cursor: pointer;
-  background: #b85c1d; color: #fdf5ef; text-decoration: none; font: 600 4.2cqw/1 "Crimson Text", Georgia, serif; letter-spacing: .12em;
-  text-transform: uppercase; box-shadow: 0 1cqw 2.4cqw rgba(184,92,29,.3); }}
-.web .btn:hover {{ background: #9e4c15; }}
-.web .btn:focus-visible {{ outline: 3px solid #784646; outline-offset: 3px; }}
-.web .btn.wide {{ align-self: stretch; padding: 4cqw; font-size: 4.6cqw; }}
+/* outlined pill, like the cards' GET DIRECTIONS button */
+.web .btn {{ display: inline-block; align-self: center; padding: 2.6cqw 7cqw; border-radius: 999px; border: 1.6px solid var(--ink); cursor: pointer;
+  background: transparent; color: var(--ink); text-decoration: none; font: 600 4.2cqw/1.2 "Crimson Text", Georgia, serif; letter-spacing: .12em;
+  text-transform: uppercase; }}
+.web .btn:hover {{ background: var(--hover); }}
+.web .btn:focus-visible {{ outline: 3px solid var(--accent); outline-offset: 3px; }}
+.web .btn.wide {{ padding: 3.4cqw 9cqw; font-size: 4.4cqw; }}
 /* countdown */
-.web .count {{ display: grid; grid-template-columns: repeat(4, 1fr); gap: 2.4cqw; margin-top: 1cqw; }}
-.web .count div {{ display: grid; gap: .6cqw; padding: 2.6cqw 0; border-radius: 2.5cqw; background: #1d2f5c; color: #f7d77a;
-  box-shadow: inset 0 0 0 1px rgba(247,215,122,.45); }}
-.web .count b {{ font-weight: 600; font-size: 8.4cqw; line-height: 1; font-variant-numeric: tabular-nums; }}
-.web .count span {{ font-size: 3.2cqw; letter-spacing: .16em; text-transform: uppercase; color: #fdf5ef; }}
-.web .count-note {{ margin: 0; font-style: italic; font-size: 4.2cqw; }}
-/* venue tiles */
-.web .tile {{ border: 1.5px solid var(--gold); border-radius: 3cqw; overflow: hidden; background: #fffaf4; text-align: center; }}
-.web .band {{ margin: 0; padding: 2.6cqw 3cqw; background: var(--band); color: var(--band-ink); font-weight: 600;
-  font-size: 4.2cqw; letter-spacing: .1em; text-transform: uppercase; }}
-.web .tile-body {{ display: flex; flex-direction: column; gap: 2.4cqw; padding: 5cqw 5cqw 6cqw; }}
-.web .addr {{ margin: 0; font-style: italic; font-size: 4.4cqw; }}
-.web .events {{ list-style: none; margin: 1cqw 0; padding: 0; display: grid; gap: 2cqw; text-align: left; }}
-.web .events li {{ display: flex; align-items: center; justify-content: space-between; gap: 3cqw; padding: 2.8cqw 3.6cqw;
-  border-radius: 2cqw; background: #fbeee3; border-left: 1.2cqw solid #b85c1d; }}
-.web .events .n {{ font-weight: 600; font-size: 4.8cqw; min-width: 0; }}
-.web .events .t {{ flex: none; font-size: 4.2cqw; color: #b85c1d; font-weight: 600; font-variant-numeric: tabular-nums; white-space: nowrap; }}
+.web .count {{ display: grid; grid-template-columns: repeat(4, 1fr); margin-top: 1cqw; }}
+.web .count div {{ display: grid; gap: .4cqw; padding: 1cqw 0; }}
+.web .count div + div {{ border-left: 1px solid var(--gold); }}
+.web .count b {{ font-weight: 600; font-size: 10cqw; line-height: 1; color: var(--accent); font-variant-numeric: tabular-nums; }}
+.web .count span {{ font-size: 3.3cqw; letter-spacing: .18em; text-transform: uppercase; font-weight: 600; }}
+.web .count-note {{ margin: 0; font-weight: 600; font-size: 4.6cqw; }}
+/* venues */
+.web .tile {{ display: flex; flex-direction: column; gap: 2.6cqw; text-align: center; }}
+.web .band {{ margin: 0; font-weight: 600; font-size: 4.4cqw; letter-spacing: .06em; color: var(--ink); }}
+.web .tile-body {{ display: flex; flex-direction: column; gap: 2.6cqw; }}
+.web .addr {{ margin: 0; font-weight: 600; font-size: 4.6cqw; letter-spacing: .03em; }}
+.web .events {{ list-style: none; margin: 1cqw 0 2cqw; padding: 0; display: grid; gap: 1.8cqw; }}
+.web .events li {{ display: flex; align-items: baseline; justify-content: center; gap: 2.6cqw; }}
+.web .events .n {{ font-weight: 600; font-size: 4.8cqw; letter-spacing: .03em; }}
+.web .events .t {{ font-size: 4.6cqw; color: var(--accent2); font-weight: 600; font-variant-numeric: tabular-nums; white-space: nowrap; }}
+.web .events .n::after {{ content: "\\2022"; margin-left: 2.6cqw; color: var(--gold); font-style: normal; }}
 /* RSVP form */
 .web form {{ display: flex; flex-direction: column; gap: 5cqw; text-align: left; }}
 .web .f {{ display: grid; gap: 2cqw; border: 0; padding: 0; margin: 0; min-width: 0; }}
-.web .f label, .web legend {{ font-size: 4cqw; font-weight: 600; letter-spacing: .06em; color: #784646; padding: 0; }}
+.web .f label, .web legend {{ font-size: 4.2cqw; font-weight: 600; letter-spacing: .04em; color: var(--ink); padding: 0; }}
 .web .f small {{ font-weight: 400; font-style: italic; letter-spacing: 0; }}
 .web input[type=text], .web input[type=tel], .web textarea, .web select {{
-  font: inherit; font-size: max(16px, 4.6cqw); color: #4f2c2c; background: #fff; box-sizing: border-box; width: 100%;
-  border: 1.5px solid #e2c3b3; border-radius: 2.4cqw; padding: 3cqw 3.6cqw; }}
+  font: inherit; font-size: max(16px, 4.6cqw); color: var(--field-ink); background: var(--field); box-sizing: border-box; width: 100%;
+  border: 1.4px solid var(--line); border-radius: 2.4cqw; padding: 3cqw 3.6cqw; }}
 .web select {{ width: 40%; appearance: none; -webkit-appearance: none; cursor: pointer;
-  background: #fff linear-gradient(45deg, transparent 50%, #b85c1d 50%) right 5.4cqw center / 1.6cqw 1.6cqw no-repeat,
-              linear-gradient(-45deg, transparent 50%, #b85c1d 50%) right 3.8cqw center / 1.6cqw 1.6cqw no-repeat; }}
-.web ::placeholder {{ color: #b9998c; font-style: italic; }}
-.web input:focus, .web textarea:focus, .web select:focus {{ outline: none; border-color: #b85c1d; box-shadow: 0 0 0 3px rgba(184,92,29,.18); }}
+  background: var(--field) linear-gradient(45deg, transparent 50%, var(--accent) 50%) right 5.4cqw center / 1.6cqw 1.6cqw no-repeat,
+              linear-gradient(-45deg, transparent 50%, var(--accent) 50%) right 3.8cqw center / 1.6cqw 1.6cqw no-repeat; }}
+.web ::placeholder {{ color: var(--ph); font-style: italic; }}
+.web input:focus, .web textarea:focus, .web select:focus {{ outline: none; border-color: var(--accent); box-shadow: 0 0 0 3px rgba(184,92,29,.2); }}
 .web textarea {{ resize: vertical; min-height: 24cqw; }}
 .web .choices {{ display: grid; grid-template-columns: 1fr 1fr; gap: 2.6cqw; }}
 .web .pill {{ position: relative; display: block; }}
 .web .pill input {{ position: absolute; opacity: 0; inset: 0; margin: 0; cursor: pointer; }}
 .web .pill span {{ display: grid; place-items: center; min-height: 13cqw; padding: 2cqw; text-align: center; box-sizing: border-box;
-  border: 1.5px solid #e2c3b3; border-radius: 2.4cqw; background: #fff; font-size: 4.3cqw; font-weight: 600; letter-spacing: 0; color: #784646; }}
-.web .pill input:checked + span {{ background: #784646; border-color: #784646; color: #fdf5ef; }}
-.web .pill input:focus-visible + span {{ outline: 3px solid #b85c1d; outline-offset: 2px; }}
+  border: 1.4px solid var(--line); border-radius: 999px; background: transparent; font-size: 4.3cqw; font-weight: 600; letter-spacing: 0; color: var(--ink); }}
+.web .pill input:checked + span {{ background: var(--ink); border-color: var(--ink); color: var(--paper); }}
+.web .pill input:focus-visible + span {{ outline: 3px solid var(--accent); outline-offset: 2px; }}
 .web .checks {{ display: grid; gap: 2.2cqw; }}
-.web .f .chip {{ position: relative; display: flex !important; align-items: center; gap: 3cqw; padding: 3cqw 3.6cqw; cursor: pointer;
-  border: 1.5px solid #e2c3b3; border-radius: 2.4cqw; background: #fff; letter-spacing: 0 !important; }}
+.web .f .chip {{ position: relative; display: flex !important; align-items: center; gap: 3cqw; padding: 2.8cqw 3.6cqw; cursor: pointer;
+  border: 1.2px solid var(--line2); border-radius: 999px; background: transparent; letter-spacing: 0 !important; }}
 .web .chip input {{ position: absolute; opacity: 0; width: 1px; height: 1px; }}
-.web .chip .box {{ flex: none; width: 5.6cqw; height: 5.6cqw; border-radius: 1.2cqw; border: 1.5px solid #b85c1d; display: grid; place-items: center; background: #fff; }}
-.web .chip input:checked ~ .box {{ background: #b85c1d; }}
-.web .chip input:checked ~ .box::after {{ content: ""; width: 1.6cqw; height: 3cqw; border: solid #fff; border-width: 0 .7cqw .7cqw 0; transform: translateY(-.3cqw) rotate(45deg); }}
-.web .chip input:checked ~ .lbl {{ color: #4f2c2c; }}
-.web .chip:has(input:checked) {{ border-color: #b85c1d; background: #fff7f0; }}
-.web .chip input:focus-visible ~ .box {{ outline: 3px solid #784646; outline-offset: 2px; }}
+.web .chip .box {{ flex: none; width: 5.4cqw; height: 5.4cqw; border-radius: 50%; border: 1.4px solid var(--accent); display: grid; place-items: center; background: transparent; }}
+.web .chip input:checked ~ .box {{ background: var(--accent); }}
+.web .chip input:checked ~ .box::after {{ content: ""; width: 1.5cqw; height: 2.8cqw; border: solid var(--paper); border-width: 0 .6cqw .6cqw 0; transform: translateY(-.3cqw) rotate(45deg); }}
+.web .chip:has(input:checked) {{ border-color: var(--accent); background: var(--field2); }}
+.web .chip input:focus-visible ~ .box {{ outline: 3px solid var(--ink); outline-offset: 2px; }}
 .web .chip .lbl {{ flex: 1; min-width: 0; font-size: 4.6cqw; font-weight: 600; }}
-.web .chip .dt {{ font-size: 3.8cqw; font-style: italic; color: #b85c1d; font-weight: 400; }}
-.web .err {{ margin: 0; padding: 3cqw 3.6cqw; border-radius: 2cqw; background: #fde8e4; color: #a3261a; font-size: 4.2cqw; font-style: italic; }}
+.web .chip .dt {{ font-size: 3.8cqw; font-style: italic; color: var(--accent); font-weight: 600; }}
+.web .err {{ margin: 0; padding: 3cqw 3.6cqw; border-radius: 2cqw; background: rgba(253,232,228,.85); color: #a3261a; font-size: 4.2cqw; font-style: italic; }}
 .web .done {{ display: flex; flex-direction: column; gap: 3cqw; padding: 8cqw 0; outline: none; }}
-.web .done h3 {{ font-size: 8.8cqw; color: #b85c1d; }}
+.web .done h3 {{ font-size: 8.8cqw; }}
 #rsvp-more {{ display: flex; flex-direction: column; gap: 5cqw; }}
 /* blessings */
-.web .hosts-box {{ display: flex; flex-direction: column; gap: 2.4cqw; padding: 6cqw 5cqw; border-radius: 3cqw;
-  background: #784646; color: #fdf5ef; border: 1.5px solid var(--gold); outline: 1px solid rgba(247,215,122,.6); outline-offset: -6px; }}
-.web .hosts-box .label {{ color: #f7d77a; }}
-.web .hosts {{ margin: 0; font-weight: 600; font-size: 7cqw; line-height: 1.2; display: flex; flex-direction: column; align-items: center; }}
-.web .hosts span {{ font-style: italic; font-weight: 400; font-size: .7em; color: #f7d77a; }}
-.web .hosts-box .lead {{ color: #fbe9dc; }}
+.web .hosts-box {{ display: flex; flex-direction: column; gap: 2.4cqw; }}
+.web .hosts {{ margin: 0; font-weight: 600; font-size: 8cqw; line-height: 1.2; color: var(--ink); display: flex; flex-direction: column; align-items: center; }}
+.web .hosts span {{ font-size: .6em; color: var(--accent); }}
 .web .sides {{ display: grid; gap: 5cqw; margin-top: 1cqw; }}
-.web .side {{ border: 1.5px solid var(--gold); border-radius: 3cqw; overflow: hidden; background: #fffaf4; }}
-.web .side.bride .band {{ background: #b85c1d; }}
-.web .side.groom .band {{ background: #1d2f5c; }}
-.web .side dl {{ margin: 0; padding: 4cqw 4.5cqw 5cqw; display: grid; gap: 3.6cqw; }}
-.web .rel {{ display: grid; gap: 1cqw; padding-bottom: 3.4cqw; border-bottom: 1px dashed #e2c3b3; }}
+.web .side .band {{ font-size: 4.4cqw; font-weight: 600; letter-spacing: .2em; text-transform: uppercase; color: var(--accent); margin-bottom: 3cqw; }}
+.web .side dl {{ margin: 0; padding: 0; display: grid; gap: 3.6cqw; }}
+.web .rel {{ display: grid; gap: 1cqw; padding-bottom: 3.6cqw; border-bottom: 1px solid transparent;
+  border-image: linear-gradient(90deg, transparent, var(--gold), transparent) 1; }}
 .web .rel:last-child {{ border-bottom: 0; padding-bottom: 0; }}
-.web dt {{ justify-self: center; padding: .8cqw 3.2cqw; border-radius: 999px; background: #fbeee3; color: #b85c1d;
-  font-size: 3.5cqw; font-weight: 600; letter-spacing: .14em; text-transform: uppercase; }}
-.web dd {{ margin: 0; font-size: 4.5cqw; line-height: 1.4; }}
+.web dt {{ color: var(--accent2); font-size: 3.8cqw; font-weight: 600; letter-spacing: .18em; text-transform: uppercase; }}
+.web dd {{ margin: 0; font-size: 4.7cqw; line-height: 1.4; font-weight: 600; letter-spacing: .02em; }}
+/* one palette per section, taken from the cards: day sky (Tilak), starry night (Engagement), sunset (Jaimala), marigold (Haldi) */
+.theme-day {{ --ink: #784646; --accent: #b85c1d; --accent2: #a14d14; --gold: #c99a3e; --paper: #fdf5ef; --line: rgba(120,70,70,.6); --line2: rgba(120,70,70,.4);
+  --hover: rgba(120,70,70,.12); --field: rgba(255,255,255,.55); --field2: rgba(255,255,255,.4); --field-ink: #4f2c2c; --ph: rgba(120,70,70,.6);
+  --shadow: 0 0 1.4cqw rgba(253,245,239,.95), 0 0 .5cqw rgba(253,245,239,.9); }}
+.theme-night {{ --ink: #fdf5ef; --accent: #f7d77a; --accent2: #f7d77a; --gold: #d9b25a; --paper: #0f1d40; --line: rgba(247,215,122,.7); --line2: rgba(247,215,122,.4);
+  --hover: rgba(247,215,122,.16); --field: rgba(255,255,255,.1); --field2: rgba(255,255,255,.1); --field-ink: #fdf5ef; --ph: rgba(253,245,239,.55);
+  --shadow: 0 0 1.4cqw rgba(6,15,38,.9), 0 0 .5cqw rgba(6,15,38,.8); }}
+.theme-dusk {{ --ink: #fdf1e6; --accent: #ffd38a; --accent2: #ffd38a; --gold: #e0a85a; --paper: #4c1525; --line: rgba(255,211,138,.7); --line2: rgba(255,211,138,.4);
+  --hover: rgba(255,211,138,.16); --field: rgba(255,255,255,.1); --field2: rgba(255,255,255,.1); --field-ink: #fdf1e6; --ph: rgba(253,241,230,.55);
+  --shadow: 0 0 1.4cqw rgba(50,8,16,.9), 0 0 .5cqw rgba(50,8,16,.85); }}
+.theme-haldi {{ --ink: #5e3410; --accent: #b0300c; --accent2: #9a2a0a; --gold: #b8860b; --paper: #fff6d6; --line: rgba(94,52,16,.55); --line2: rgba(94,52,16,.35);
+  --hover: rgba(94,52,16,.12); --field: rgba(255,251,230,.65); --field2: rgba(255,251,230,.5); --field-ink: #3b200a; --ph: rgba(94,52,16,.55);
+  --shadow: 0 0 1.4cqw rgba(255,246,205,.95), 0 0 .5cqw rgba(255,246,205,.9); }}
+.theme-night .sky {{ background: linear-gradient(180deg, #0a1431 0%, #12234a 40%, #1d2f5c 72%, #2a3d70 100%); }}
+.theme-dusk .sky {{ background: linear-gradient(180deg, #c4572b 0%, #a83c2d 26%, #7e2631 56%, #4c1525 82%, #2d0b16 100%); }}
+.web .glow {{ position: absolute; inset: 0; width: 100%; height: 100%; pointer-events: none; z-index: 1; }}
+.web .scene {{ position: absolute; left: 0; bottom: 0; width: 100%; height: auto; display: block; pointer-events: none; z-index: 1; }}
+.web .flame {{ transform-box: fill-box; transform-origin: 50% 100%; animation: flicker 1.7s ease-in-out infinite; }}
+.web .flame.f2 {{ animation-duration: 1.3s; animation-delay: -.4s; }} .web .flame.f3 {{ animation-duration: 2.1s; animation-delay: -.9s; }}
+.web .halo {{ animation: halo 2.2s ease-in-out infinite; }}
+@keyframes flicker {{ 0%, 100% {{ transform: scale(1, 1) rotate(-1.5deg); }} 30% {{ transform: scale(.92, 1.08) rotate(2deg); }} 60% {{ transform: scale(1.06, .94) rotate(-2deg); }} }}
+@keyframes halo {{ 0%, 100% {{ opacity: .5; }} 50% {{ opacity: .85; }} }}
+@media (prefers-reduced-motion: reduce) {{ .web .flame, .web .halo {{ animation: none; }} }}
+.web .lantern {{ position: absolute; height: auto; display: block; pointer-events: none; z-index: 1; overflow: visible; opacity: .92;
+  animation: bob 5.5s ease-in-out infinite; transform-origin: 50% 0; filter: drop-shadow(0 0 1.6cqw rgba(255,170,60,.7)); }}
+.web .lantern.l2 {{ animation-duration: 6.6s; animation-delay: -1.8s; }} .web .lantern.l3 {{ animation-duration: 5s; animation-delay: -3s; }}
+.web .lantern.l4 {{ animation-duration: 7s; animation-delay: -.8s; }} .web .lantern.l5 {{ animation-duration: 6s; animation-delay: -2.4s; }}
+@keyframes bob {{ 0%, 100% {{ transform: translateY(0) rotate(-2.5deg); }} 50% {{ transform: translateY(-2.4cqw) rotate(2.5deg); }} }}
+@media (prefers-reduced-motion: reduce) {{ .web .lantern {{ animation: none; }} }}
+.web .vine {{ position: absolute; width: 24cqw; height: auto; pointer-events: none; z-index: 1; }}
+.web .vine.va {{ left: -9cqw; top: 22%; transform: rotate(70deg); }} .web .vine.vb {{ right: -9cqw; top: 34%; transform: scaleX(-1) rotate(70deg); }}
+.web .vine.vc {{ left: -10cqw; top: 50%; transform: rotate(110deg); }} .web .vine.vd {{ right: -10cqw; top: 62%; transform: scaleX(-1) rotate(110deg); }}
+.web .vine.ve {{ left: -9cqw; top: 76%; transform: rotate(80deg); }} .web .vine.vf {{ right: -9cqw; top: 86%; transform: scaleX(-1) rotate(80deg); }}
 [hidden] {{ display: none !important; }}
 </style>
 </head>
@@ -961,11 +1107,79 @@ html.locked {{ overflow: hidden; }}
     }});
   }});
 }})();
+
+/* ---------- fireflies and stars behind the RSVP, firecrackers (fireworks) over the bride's side ---------- */
+(function () {{
+  var cvs = document.querySelectorAll('canvas.glow');
+  if (!cvs.length) return;
+  var reduce = window.matchMedia && matchMedia('(prefers-reduced-motion: reduce)').matches;
+  var COLS = [[255, 170, 0], [226, 32, 110], [255, 96, 20], [196, 24, 64], [255, 200, 30]];
+  cvs.forEach(function (cv) {{
+    var fire = cv.getAttribute('data-kind') === 'fire';
+    var ctx = cv.getContext('2d'), dots = [], stars = [], sparks = [], next = 0, W = 0, H = 0, run = false, dpr = Math.min(window.devicePixelRatio || 1, 2);
+    function size() {{
+      W = cv.clientWidth; H = cv.clientHeight; if (!W || !H) return;
+      cv.width = W * dpr; cv.height = H * dpr; ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+      dots = []; stars = [];
+      if (fire) return;
+      for (var i = 0; i < Math.round(H / 48); i++) dots.push({{ x: Math.random() * W, y: Math.random() * H, r: 1.6 + Math.random() * 1.8,
+        a: Math.random() * 6.28, ph: Math.random() * 6.28, sp: .7 + Math.random() * 1.3 }});
+      for (var j = 0; j < Math.round(H / 12); j++) stars.push({{ x: Math.random() * W, y: Math.random() * H * .75, r: .4 + Math.random() * 1.0,
+        ph: Math.random() * 6.28, sp: .5 + Math.random() * 1.5 }});
+    }}
+    function burst(t) {{
+      var r = cv.getBoundingClientRect(), top = Math.max(0, -r.top), bot = Math.min(H, window.innerHeight - r.top);
+      if (bot - top < 80) return;
+      var x = W * (.15 + Math.random() * .7), y = top + (bot - top) * (.12 + Math.random() * .5), c = COLS[Math.floor(Math.random() * COLS.length)];
+      var n = 34 + Math.floor(Math.random() * 22), sp = 1.4 + Math.random() * 1.6;
+      for (var k = 0; k < n; k++) {{
+        var a = k / n * 6.283 + Math.random() * .2, v = sp * (.55 + Math.random() * .55);
+        sparks.push({{ x: x, y: y, vx: Math.cos(a) * v, vy: Math.sin(a) * v, life: 1, c: c, d: .011 + Math.random() * .012 }});
+      }}
+    }}
+    function frame(ms) {{
+      if (!run) return;
+      var t = ms / 1000; ctx.clearRect(0, 0, W, H);
+      if (fire) {{
+        if (t > next) {{ burst(t); if (Math.random() < .4) burst(t); next = t + 1.3 + Math.random() * 1.8; }}
+        sparks = sparks.filter(function (p) {{ return p.life > 0; }});
+        sparks.forEach(function (p) {{
+          p.x += p.vx; p.y += p.vy; p.vy += .035; p.vx *= .985; p.life -= p.d;
+          var g = Math.max(0, p.life);
+          ctx.fillStyle = 'rgba(' + p.c[0] + ',' + p.c[1] + ',' + p.c[2] + ',' + g + ')';
+          ctx.beginPath(); ctx.arc(p.x, p.y, 1.4 + g * 1.9, 0, 6.28); ctx.fill();
+          ctx.fillStyle = 'rgba(' + p.c[0] + ',' + p.c[1] + ',' + p.c[2] + ',' + (g * .3) + ')';
+          ctx.beginPath(); ctx.arc(p.x, p.y, 6 * g + 2, 0, 6.28); ctx.fill();
+        }});
+        requestAnimationFrame(frame); return;
+      }}
+      stars.forEach(function (s) {{
+        ctx.fillStyle = 'rgba(255,248,225,' + (.35 + .35 * Math.sin(t * s.sp + s.ph)) + ')';
+        ctx.beginPath(); ctx.arc(s.x, s.y, s.r, 0, 6.28); ctx.fill();
+      }});
+      dots.forEach(function (d) {{
+        d.a += (Math.random() - .5) * .12; d.x += Math.cos(d.a) * .28; d.y += Math.sin(d.a) * .22 - .02;
+        if (d.x < -10) d.x = W + 10; if (d.x > W + 10) d.x = -10; if (d.y < -10) d.y = H + 10; if (d.y > H + 10) d.y = -10;
+        var g = Math.max(0, Math.sin(t * d.sp + d.ph)), R = d.r * 7;
+        var gr = ctx.createRadialGradient(d.x, d.y, 0, d.x, d.y, R);
+        gr.addColorStop(0, 'rgba(255,244,160,' + (.95 * g) + ')'); gr.addColorStop(.3, 'rgba(247,215,122,' + (.4 * g) + ')'); gr.addColorStop(1, 'rgba(247,215,122,0)');
+        ctx.fillStyle = gr; ctx.beginPath(); ctx.arc(d.x, d.y, R, 0, 6.28); ctx.fill();
+      }});
+      requestAnimationFrame(frame);
+    }}
+    size(); window.addEventListener('resize', size);
+    if (reduce || !('IntersectionObserver' in window)) {{ if (!fire) {{ run = true; frame(1500); run = false; }} return; }}
+    new IntersectionObserver(function (es) {{
+      var v = es[0].isIntersecting;
+      if (v && !run) {{ run = true; requestAnimationFrame(frame); }} else if (!v) run = false;
+    }}).observe(cv);
+  }});
+}})();
 </script>
 </body>
 </html>
 """
 out = f"{SITE}/index.html" if MODE == "site" else f"{SITE}/test.html"
-open(out, "w").write(page)
-json.dump(checklist, open(f"{S}/checklist.json", "w"), ensure_ascii=False, indent=1)
+open(out, "w", encoding="utf-8", newline="\n").write(page)
+json.dump(checklist, open(f"{S}/checklist.json", "w", encoding="utf-8"), ensure_ascii=False, indent=1)
 print("wrote", out, len(page) // 1024, "KB; glyphs", len(used_glyphs))
