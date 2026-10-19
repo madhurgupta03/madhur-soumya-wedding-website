@@ -1,20 +1,14 @@
-"""Step 3 of the pipeline (python make.py build).  THIS IS THE FILE TO EDIT for any change to the website.
-Build the e-invite website from the extracted PDF model.
+"""Build the e-invite website from the extracted PDF model.
 Unchanged text is drawn with the PDF's own glyph outlines at their exact positions.
 Only the items in the CHANGES list are altered."""
 import json, re, os, sys, html
 from svgpathtools import parse_path
 
-sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
-import paths, shutil
-S = paths.DATA                     # model.json, opacity.json, svgsrc/ live here
-SITE = paths.WEBSITE               # output: Website/index.html (+ images/, fonts/)
-MODE = sys.argv[1] if len(sys.argv) > 1 else "site"   # "site" -> index.html, "test" -> test.html (all images load at once)
-model = json.load(open(f"{S}/model.json", encoding="utf-8"))
-OPAC = json.load(open(f"{S}/opacity.json", encoding="utf-8"))
-os.makedirs(f"{SITE}/fonts", exist_ok=True)
-for _f in os.listdir(paths.FONTS):
-    shutil.copy2(os.path.join(paths.FONTS, _f), os.path.join(SITE, "fonts", _f))
+S = os.path.dirname(os.path.abspath(__file__))
+SITE = f"{S}/site"
+MODE = sys.argv[1] if len(sys.argv) > 1 else "site"   # "site" or "test" (all images eager)
+model = json.load(open(f"{SITE}/model.json"))
+OPAC = json.load(open(f"{S}/opacity.json"))
 
 # ---------------- decisions agreed with the user ----------------
 PARENTS = {
@@ -34,7 +28,7 @@ glyph_defs = {}             # id -> d (font units, y up)
 glyph_bbox = {}             # id -> (xmin, xmax, ymin, ymax) font units
 
 def load_svg(n):
-    s = open(f"{S}/svgsrc/p{n}.svg", encoding="utf-8").read()
+    s = open(f"{S}/svgsrc/p{n}.svg").read()
     for m in re.finditer(r'<path id="(font_[0-9_]+)" d="([^"]*)"', s):
         gid, d = m.group(1), m.group(2)
         key = f"p{n}_{gid}"
@@ -96,7 +90,7 @@ def use_svg(u):
 
 # Crimson Text metrics for live text (cap height ratio from the font file)
 from fontTools.ttLib import TTFont
-_ct = TTFont(os.path.join(paths.FONTS, "crimson-text-latin-400-italic.woff2"))
+_ct = TTFont(f"{S}/npm/node_modules/@fontsource/crimson-text/files/crimson-text-latin-400-italic.woff2")
 CAP = _ct["OS/2"].sCapHeight / _ct["head"].unitsPerEm if getattr(_ct["OS/2"], "sCapHeight", 0) else 0.59
 
 def live_text(lines, cx, y0, pitch, size, fill, weight, style, track_em):
@@ -529,7 +523,6 @@ html {{ scroll-snap-type: y proximity; scroll-behavior: smooth; }}
 .intro.gone {{ opacity: 0; visibility: hidden; transition: opacity .6s ease, visibility .6s; }}
 .env {{ position: relative; width: min(78vw, 400px); aspect-ratio: 7 / 5; perspective: 1600px; }}
 .env > * {{ will-change: transform, opacity; backface-visibility: hidden; }}
-.intro {{ will-change: opacity; }}
 .env-back {{ position: absolute; inset: 0; z-index: 0; background: #ead2bd; border-radius: 6px; box-shadow: 0 18px 40px rgba(120,70,70,.18); }}
 .env-letter {{ position: absolute; left: 6%; right: 6%; top: 6%; height: 88%; background: #fdf5ef; border-radius: 3px; z-index: 1;
   display: grid; place-items: center; align-content: center; gap: 4%; box-shadow: 0 2px 8px rgba(120,70,70,.12); }}
@@ -551,6 +544,7 @@ html {{ scroll-snap-type: y proximity; scroll-behavior: smooth; }}
 .intro-skip {{ position: absolute; right: max(16px, env(safe-area-inset-right, 0px)); bottom: calc(16px + env(safe-area-inset-bottom, 0px));
   background: none; border: 0; color: #784646; font: italic 16px "Crimson Text", Georgia, serif; text-decoration: underline; cursor: pointer; padding: 8px; }}
 .burst {{ position: fixed; inset: 0; width: 100%; height: 100%; pointer-events: none; z-index: 5; }}
+.fly-logo {{ position: fixed; z-index: 60; margin: 0; pointer-events: none; transform-origin: 0 0; will-change: transform, opacity; }}
 html.locked {{ overflow: hidden; }}
 @media (prefers-reduced-motion: reduce) {{
   .js .page .rv, .js .web .frame > * {{ opacity: 1 !important; transform: none !important; animation: none !important; }}
@@ -696,7 +690,7 @@ html.locked {{ overflow: hidden; }}
 }})();
 
 
-/* ---------- envelope intro: seal -> flap opens -> card slides fully out -> envelope fades -> card crossfades into the cover ---------- */
+/* ---------- envelope intro: seal -> flap opens -> card rises -> logo glides onto the cover's logo ---------- */
 (function () {{
   var intro = document.getElementById('intro'), root = document.documentElement;
   if (!intro) return;
@@ -744,45 +738,43 @@ html.locked {{ overflow: hidden; }}
   async function open() {{
     if (busy) return; busy = true;
     if (reduce || !document.body.animate) {{ finish(); return; }}
-    var ease = 'cubic-bezier(.45,0,.2,1)', soft = 'cubic-bezier(.4,0,.2,1)';
+    var ease = 'cubic-bezier(.45,0,.2,1)';
     anim($('.intro-hint'), [{{ opacity: 1 }}, {{ opacity: 0 }}], {{ duration: 300 }});
     anim($('.intro-skip'), [{{ opacity: 1 }}, {{ opacity: 0 }}], {{ duration: 300 }});
     seal.style.animation = 'none';
     burst();
     anim(seal, [{{ transform: 'translate(-50%,-50%) scale(1)', opacity: 1 }}, {{ transform: 'translate(-50%,-50%) scale(.35)', opacity: 0 }}],
          {{ duration: 420, easing: ease }});
-    /* 1. the flap swings open (it passes behind the card halfway, like a real flap) */
+    /* 1. the flap swings open (it moves behind the card halfway, as a real flap would) */
     await anim(flap, [
       {{ transform: 'rotateX(0deg)', zIndex: 3 }},
       {{ transform: 'rotateX(90deg)', zIndex: 3, offset: .5 }},
       {{ transform: 'rotateX(90deg)', zIndex: 0, offset: .5001 }},
       {{ transform: 'rotateX(180deg)', zIndex: 0 }}], {{ duration: 950, delay: 180, easing: 'cubic-bezier(.4,0,.3,1)' }});
-    /* 2. the card slides all the way out of the envelope */
-    var envBox = env.getBoundingClientRect(), card = letter.getBoundingClientRect();
-    var out = -(card.bottom - envBox.top) - 12;            /* card's bottom edge clears the top of the envelope */
-    await anim(letter, [{{ transform: 'translateY(0)' }}, {{ transform: 'translateY(' + out + 'px)' }}],
-               {{ duration: 1300, easing: 'cubic-bezier(.3,.7,.25,1)' }});
-    /* 3. the empty envelope fades away gently while the card settles with its logo over the cover's logo */
-    var pieces = intro.querySelectorAll('.env-back, .env-front, .env-flap');
-    pieces.forEach(function (el) {{
-      var t = getComputedStyle(el).transform; t = (t && t !== 'none') ? t : '';
-      anim(el, [{{ opacity: 1, transform: t || 'translateY(0)' }}, {{ opacity: 0, transform: (t ? t + ' ' : '') + 'translateY(24px)' }}], {{ duration: 900, easing: soft }});
-    }});
-    var target = coverLogo(), lr = logo.getBoundingClientRect(), settle = out;
-    if (target) {{
-      var to = target.getBoundingClientRect();
-      settle = out + ((to.top + to.height / 2) - (lr.top + lr.height / 2));
+    /* 2. the card rises out, showing the logo */
+    await anim(letter, [{{ transform: 'translateY(0)' }}, {{ transform: 'translateY(-44%)' }}], {{ duration: 1100, easing: 'cubic-bezier(.22,.8,.3,1)' }});
+    await wait(350);
+    /* 3. the logo lifts off and glides onto the cover's logo while the envelope fades away */
+    var target = coverLogo(), from = logo.getBoundingClientRect();
+    var to = target ? target.getBoundingClientRect() : null;
+    if (to && to.width) {{
+      var fly = logo.cloneNode(); fly.className = 'fly-logo'; fly.alt = '';
+      fly.style.left = from.left + 'px'; fly.style.top = from.top + 'px'; fly.style.width = from.width + 'px'; fly.style.height = from.height + 'px';
+      document.body.appendChild(fly); logo.style.visibility = 'hidden';
+      var k = to.width / from.width;
+      var envFade = anim(env, [{{ opacity: 1, transform: 'scale(1)' }}, {{ opacity: 0, transform: 'scale(1.04)' }}], {{ duration: 900, easing: 'ease-in-out' }});
+      var bgFade = anim(intro, [{{ opacity: 1 }}, {{ opacity: 0 }}], {{ duration: 1100, delay: 250, easing: 'ease-in-out' }});
+      var glide = anim(fly, [{{ transform: 'translate(0,0) scale(1)' }},
+        {{ transform: 'translate(' + (to.left - from.left) + 'px,' + (to.top - from.top) + 'px) scale(' + k + ')' }}],
+        {{ duration: 1350, easing: 'cubic-bezier(.45,0,.2,1)' }});
+      setTimeout(function () {{ var p1 = document.getElementById('page-1'); if (p1) p1.classList.add('seen'); }}, 900);
+      await Promise.all([envFade, bgFade, glide]);
+      finish();
+      /* the flying logo now sits exactly on the cover's own logo; let it melt into it */
+      anim(fly, [{{ opacity: 1 }}, {{ opacity: 0 }}], {{ duration: 250 }}).then(function () {{ fly.remove(); }});
+    }} else {{
+      finish();
     }}
-    await anim(letter, [{{ transform: 'translateY(' + out + 'px)' }}, {{ transform: 'translateY(' + settle + 'px)' }}],
-               {{ duration: 1000, easing: soft }});
-    await wait(250);
-    /* 4. crossfade: the card and its logo fade out while the cover and its logo fade in */
-    var p1 = document.getElementById('page-1');
-    window.scrollTo(0, 0);
-    root.classList.remove('locked');
-    setTimeout(function () {{ if (p1) p1.classList.add('seen'); }}, 500);
-    await anim(intro, [{{ opacity: 1 }}, {{ opacity: 0 }}], {{ duration: 1400, easing: 'ease-in-out' }});
-    finish();
   }}
   seal.addEventListener('click', open);
   env.addEventListener('click', open);
@@ -943,7 +935,7 @@ html.locked {{ overflow: hidden; }}
     e.preventDefault(); err.hidden = true;
     var name = f.elements['name'].value.trim(), phone = f.phone.value.trim(), att = f.querySelector('input[name=attending]:checked');
     if (!name) return fail('Please enter your name.', f.elements['name']);
-    if (phone.replace(/\\D/g, '').length < 10) return fail('Please enter a mobile number with at least 10 digits.', f.phone);
+    if (phone.replace(/\D/g, '').length < 10) return fail('Please enter a mobile number with at least 10 digits.', f.phone);
     if (!att) return fail('Please choose whether you can join us.', document.getElementById('rsvp-yes'));
     var coming = att.value === 'Joyfully attending';
     var evs = coming ? [].map.call(f.querySelectorAll('input[name=events]:checked'), function (c) {{ return c.value; }}) : [];
@@ -974,6 +966,6 @@ html.locked {{ overflow: hidden; }}
 </html>
 """
 out = f"{SITE}/index.html" if MODE == "site" else f"{SITE}/test.html"
-open(out, "w", encoding="utf-8", newline="\n").write(page)
-json.dump(checklist, open(f"{S}/checklist.json", "w", encoding="utf-8"), ensure_ascii=False, indent=1)
+open(out, "w").write(page)
+json.dump(checklist, open(f"{S}/checklist.json", "w"), ensure_ascii=False, indent=1)
 print("wrote", out, len(page) // 1024, "KB; glyphs", len(used_glyphs))
