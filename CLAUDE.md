@@ -57,15 +57,12 @@ Wedding_Stationary/
 
 ## Workflow
 
-Run everything from the `Wedding_Stationary` folder. On Windows use `python`; on macOS/Linux use `python3`.
+Run everything from the project folder. Use the repo-local `.venv` for all Python work: create it and install dependencies once as described in `SETUP.md`, then reuse it in later sessions. Do not install the requirements globally or recreate `.venv` for each task. Activation is optional; invoke its interpreter directly.
 
 ```
-python Source/make.py all      # full rebuild from the PDF: extract → glyphs → build → og → check
-python Source/make.py build    # after editing Source/pipeline/build.py (makes index.html and test.html)
-python Source/make.py check    # automatic checks; must end with "ALL CHECKS PASSED"
-python Source/make.py serve    # preview at http://localhost:8000 (or double-click Website/Open website.bat)
-python Source/make.py og       # refresh og-cover.jpg after changing the cover
-python Source/make.py video    # optional: Previews/Envelope-opening.mp4
+# macOS/Linux: .venv/bin/python Source/make.py build
+# Windows:     .venv\Scripts\python.exe Source\make.py build
+# Replace "build" with "all", "check", "serve", "og" or "video" as needed.
 ```
 
 **Normal change loop:** edit `Source/pipeline/build.py`, then `make.py build`, then `make.py check`, then look at it with `make.py serve`. If you changed the CHANGES list or features, update `Guides/CHECKLIST.md`. Then deploy.

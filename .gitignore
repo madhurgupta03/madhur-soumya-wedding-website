@@ -1,4 +1,5 @@
 Source/checks/
 Website/test.html
 __pycache__/
+.venv/
 *.pyc

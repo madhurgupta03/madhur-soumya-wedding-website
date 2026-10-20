@@ -14,6 +14,8 @@ OPAC = json.load(open(f"{S}/opacity.json", encoding="utf-8"))
 os.makedirs(f"{SITE}/fonts", exist_ok=True)
 for _f in os.listdir(paths.FONTS):
     shutil.copy2(os.path.join(paths.FONTS, _f), os.path.join(SITE, "fonts", _f))
+os.makedirs(f"{SITE}/audio", exist_ok=True)
+shutil.copy2(os.path.join(paths.SOURCE, "audio", "chaap-tilak.mp3"), os.path.join(SITE, "audio", "chaap-tilak.mp3"))
 
 # ---------------- decisions agreed with the user ----------------
 PARENTS = {
@@ -714,8 +716,13 @@ html {{ scroll-snap-type: y proximity; scroll-behavior: smooth; }}
 @keyframes pulse {{ 0%, 100% {{ transform: translate(-50%, -50%) scale(1); }} 50% {{ transform: translate(-50%, -50%) scale(1.06); }} }}
 .intro-to {{ margin: 0; max-width: min(84vw, 420px); text-align: center; font-family: "Crimson Text", Georgia, serif; font-style: italic; color: #b85c1d; font-size: clamp(22px, 6.4vw, 30px); line-height: 1.2; letter-spacing: .03em; overflow-wrap: anywhere; }}
 .intro-hint {{ margin: 0; font-family: "Crimson Text", Georgia, serif; font-style: italic; color: #784646; font-size: 18px; letter-spacing: .04em; }}
-.intro-skip {{ position: absolute; right: max(16px, env(safe-area-inset-right, 0px)); bottom: calc(16px + env(safe-area-inset-bottom, 0px));
+.intro-skip {{ position: absolute; left: max(16px, env(safe-area-inset-left, 0px)); right: auto; bottom: calc(16px + env(safe-area-inset-bottom, 0px));
   background: none; border: 0; color: #784646; font: italic 16px "Crimson Text", Georgia, serif; text-decoration: underline; cursor: pointer; padding: 8px; }}
+.music-toggle {{ position: fixed; right: max(16px, env(safe-area-inset-right, 0px)); bottom: calc(16px + env(safe-area-inset-bottom, 0px)); z-index: 70;
+  padding: 9px 14px; border: 1px solid rgba(120,70,70,.45); border-radius: 999px; background: rgba(253,245,239,.94);
+  color: #784646; box-shadow: 0 3px 12px rgba(90,40,20,.14); font: 15px "Crimson Text", Georgia, serif; cursor: pointer; }}
+.music-toggle:hover {{ background: #f3e2d2; }}
+.music-toggle:focus-visible {{ outline: 2px solid #b85c1d; outline-offset: 3px; }}
 .burst {{ position: fixed; inset: 0; width: 100%; height: 100%; pointer-events: none; z-index: 5; }}
 .fly-logo {{ position: fixed; z-index: 60; margin: 0; pointer-events: none; transform-origin: 0 0; will-change: transform, opacity; }}
 html.locked {{ overflow: hidden; }}
@@ -898,6 +905,7 @@ html.locked {{ overflow: hidden; }}
   <p class="intro-hint">Tap the seal to open</p>
   <button class="intro-skip" id="intro-skip" type="button">Skip</button>
 </div>
+<button class="music-toggle" id="music-toggle" type="button" aria-label="Mute music" aria-pressed="false">♪ Sound on</button>
 <svg width="0" height="0" style="position:absolute" aria-hidden="true"><defs>{defs}</defs></svg>
 {''.join(sections)}
 <script>
@@ -921,6 +929,25 @@ html.locked {{ overflow: hidden; }}
   var $ = function (s) {{ return intro.querySelector(s); }};
   var seal = $('#seal'), flap = $('.env-flap'), letter = $('.env-letter'), logo = $('.env-letter img'), env = $('#env');
   var busy = false, done = false;
+  var song = new Audio('audio/chaap-tilak.mp3'), songStarted = false;
+  song.volume = 0.65; song.loop = true;
+  var musicToggle = document.getElementById('music-toggle'), muted = false, fadeId = 0;
+  function fadeVolume(target) {{
+    var from = song.volume, started = performance.now(), duration = 400, id = ++fadeId;
+    function step(now) {{
+      if (id !== fadeId) return;
+      var t = Math.min(1, (now - started) / duration);
+      song.volume = from + (target - from) * t;
+      if (t < 1) requestAnimationFrame(step);
+    }}
+    requestAnimationFrame(step);
+  }}
+  musicToggle.addEventListener('click', function () {{
+    muted = !muted; fadeVolume(muted ? 0 : 0.65);
+    musicToggle.textContent = muted ? '♪ Sound off' : '♪ Sound on';
+    musicToggle.setAttribute('aria-label', muted ? 'Unmute music' : 'Mute music');
+    musicToggle.setAttribute('aria-pressed', muted ? 'true' : 'false');
+  }});
   function wait(ms) {{ return new Promise(function (r) {{ setTimeout(r, ms); }}); }}
   function anim(el, frames, opt) {{
     if (!el.animate) {{ return Promise.resolve(); }}
@@ -960,6 +987,7 @@ html.locked {{ overflow: hidden; }}
   }}
   async function open() {{
     if (busy) return; busy = true;
+    if (!songStarted) {{ songStarted = true; song.play().catch(function () {{}}); }}
     if (reduce || !document.body.animate) {{ finish(); return; }}
     var ease = 'cubic-bezier(.45,0,.2,1)';
     anim($('.intro-hint'), [{{ opacity: 1 }}, {{ opacity: 0 }}], {{ duration: 300 }});
