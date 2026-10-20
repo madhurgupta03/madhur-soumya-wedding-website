@@ -480,7 +480,7 @@ def side(title, rows, cls):
     for k, vs in rows:
         out += f'<div class="rel"><dt>{html.escape(k)}</dt>' + "".join(f'<dd>{html.escape(v)}</dd>' for v in vs) + '</div>'
     return out + '</dl></div>'
-GUEST_OPTS = "".join(f'<option value="{i}">{i}</option>' for i in range(1, 21))
+GUEST_OPTS = "".join(f'<option value="{i}">{i}</option>' for i in range(1, 11))
 def evcheck(i, val, label, date):
     return (f'<label class="chip" for="ev-{i}"><input id="ev-{i}" type="checkbox" name="events" value="{val}" checked>'
             f'<span class="box" aria-hidden="true"></span><span class="lbl">{label}</span><span class="dt">{date}</span></label>')
@@ -515,31 +515,44 @@ EXTRA_SECTIONS = f"""
   </article>
 </div></div></section>
 <section class="web theme-night" id="rsvp" aria-labelledby="rsvp-h"><canvas class="petals" data-n="6" aria-hidden="true"></canvas><div class="col">{art("night")}<div class="frame">
-  <p class="label">Kindly reply</p>
+  <p class="label">Kindly RSVP</p>
   <h2 id="rsvp-h">RSVP</h2>
   <p class="lead">We would love to know if you can join us.</p>
+  <aside class="rsvp-contact" aria-labelledby="rsvp-contact-h">
+    <h3 id="rsvp-contact-h"><span>📞 Questions?</span><span>Get in touch!</span></h3>
+    <ul class="rsvp-contact-grid">
+      <li><span>Madhur</span><a href="tel:+919452730775">+91-9452730775</a></li>
+      <li><span>Santosh Gupta</span><a href="tel:+91945004128">+91-9450040128</a></li>
+      <li><span>Soumya</span><a href="tel:+917674981551">+91-7674981551</a></li>
+      <li><span>Umakant Gupta</span><a href="tel:+918500669671">+91-8500669671</a></li>
+    </ul>
+  </aside>
   {DIV}
-  <form id="rsvp-form" novalidate>
+  <form id="rsvp-form" autocomplete="off" novalidate>
     <div class="f"><label for="rsvp-name">Your name</label>
-      <input id="rsvp-name" name="name" type="text" autocomplete="name" placeholder="Full name" required></div>
+      <input id="rsvp-name" name="name" type="text" autocomplete="off" placeholder="Full name" aria-describedby="rsvp-name-error" required>
+      <p class="err field-err" id="rsvp-name-error" role="alert" hidden></p></div>
     <div class="f"><label for="rsvp-phone">Mobile number</label>
-      <input id="rsvp-phone" name="phone" type="tel" autocomplete="tel" inputmode="tel" placeholder="10-digit mobile" required></div>
-    <fieldset class="f"><legend>Will you join us?</legend>
+      <input id="rsvp-phone" name="phone" type="tel" autocomplete="off" inputmode="numeric" placeholder="10-digit mobile" aria-describedby="rsvp-phone-error" required>
+      <p class="err field-err" id="rsvp-phone-error" role="alert" hidden></p></div>
+    <fieldset class="f" id="rsvp-attending" aria-describedby="rsvp-attending-error"><legend>Will you join us?</legend>
       <div class="choices">
-        <label class="pill"><input id="rsvp-yes" type="radio" name="attending" value="Joyfully attending" required><span>Joyfully attending</span></label>
+        <label class="pill"><input id="rsvp-yes" type="radio" name="attending" value="Joyfully attending" checked required><span>Joyfully attending</span></label>
         <label class="pill"><input id="rsvp-no" type="radio" name="attending" value="Regretfully unable"><span>Regretfully unable</span></label>
-      </div></fieldset>
+      </div><p class="err field-err" id="rsvp-attending-error" role="alert" hidden></p></fieldset>
     <div id="rsvp-more">
       <div class="f"><label for="rsvp-guests">Number of guests, including you</label>
         <select id="rsvp-guests" name="guests">{GUEST_OPTS}</select></div>
-      <fieldset class="f"><legend>Which events will you attend?</legend>
+      <fieldset class="f" id="rsvp-events" aria-describedby="rsvp-events-error"><legend>Which events will you attend?</legend>
         <div class="checks">
           {evcheck("tilak", "Tilak", "Tilak", "24 Nov")}
           {evcheck("sangeet", "Engagement &amp; Sangeet", "Engagement &amp; Sangeet", "24 Nov")}
           {evcheck("haldi", "Haldi &amp; Mehendi", "Haldi &amp; Mehendi", "25 Nov")}
           {evcheck("baraat", "Baraat", "Baraat", "25 Nov")}
           {evcheck("jaimala", "Jaimala", "Jaimala", "25 Nov")}
-        </div></fieldset>
+        </div><p class="err field-err" id="rsvp-events-error" role="alert" hidden></p></fieldset>
+      <div class="f"><label for="rsvp-travel">Tell us about your arrival &amp; departure <small>(optional)</small></label>
+        <textarea id="rsvp-travel" name="travel" rows="3" placeholder="Let us know when you plan to arrive and leave. You can also share your train/flight details or any travel arrangements we should know about."></textarea></div>
     </div>
     <div class="f"><label for="rsvp-msg">A message for Soumya &amp; Madhur <small>(optional)</small></label>
       <textarea id="rsvp-msg" name="message" rows="3" placeholder="Your wishes and blessings"></textarea></div>
@@ -730,6 +743,11 @@ html.locked {{ overflow: hidden; }}
 .web .events .n::after {{ content: "\\2022"; margin-left: 2.6cqw; color: var(--gold); font-style: normal; }}
 /* RSVP form */
 .web form {{ display: flex; flex-direction: column; gap: 5cqw; text-align: left; }}
+.web .rsvp-contact {{ padding: 4cqw; border: 1px solid var(--line); border-radius: 2.5cqw; background: var(--field2); }}
+.web .rsvp-contact h3 {{ display: flex; flex-direction: column; gap: .8cqw; margin: 0 0 3cqw; font-size: 4.8cqw; color: var(--ink); }}
+.web .rsvp-contact-grid {{ list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: 1fr 1fr; gap: 3cqw 2cqw; }}
+.web .rsvp-contact-grid li {{ display: flex; flex-direction: column; gap: .8cqw; min-width: 0; font-size: 3.8cqw; }}
+.web .rsvp-contact-grid a {{ color: var(--accent2); font-size: 3.9cqw; font-weight: 600; white-space: nowrap; text-underline-offset: .25em; }}
 .web .f {{ display: grid; gap: 2cqw; border: 0; padding: 0; margin: 0; min-width: 0; }}
 .web .f label, .web legend {{ font-size: 4.2cqw; font-weight: 600; letter-spacing: .04em; color: var(--ink); padding: 0; }}
 .web .f small {{ font-weight: 400; font-style: italic; letter-spacing: 0; }}
@@ -761,6 +779,7 @@ html.locked {{ overflow: hidden; }}
 .web .chip .lbl {{ flex: 1; min-width: 0; font-size: 4.6cqw; font-weight: 600; }}
 .web .chip .dt {{ font-size: 3.8cqw; font-style: italic; color: var(--accent); font-weight: 600; }}
 .web .err {{ margin: 0; padding: 3cqw 3.6cqw; border-radius: 2cqw; background: rgba(253,232,228,.85); color: #a3261a; font-size: 4.2cqw; font-style: italic; }}
+.web .field-err {{ margin: 1.5cqw 0 0; padding: 0 1cqw; background: transparent; font-size: 3.8cqw; }}
 .web .done {{ display: flex; flex-direction: column; gap: 3cqw; padding: 8cqw 0; outline: none; }}
 .web .done h3 {{ font-size: 8.8cqw; }}
 #rsvp-more {{ display: flex; flex-direction: column; gap: 5cqw; }}
@@ -1068,43 +1087,48 @@ html.locked {{ overflow: hidden; }}
   var GOOGLE_FORM = {{
     id: "1FAIpQLSfnBOj2V0I5WwqbaIJzzUCkaqaY4ZEuZ3dqVqI0_m0bwpd1yA",
     name: "127160018", phone: "1746679459", attending: "55150948",
-    guests: "798723131", events: "142255648", message: "1689328520",
+    guests: "798723131", events: "142255648", travel: "136625829", message: "1689328520",
     /* website answer -> the exact option text in the Google Form */
     options: {{
       "Joyfully attending": "🎉 Joyfully attending",
       "Regretfully unable": "💌 Regretfully unable",
-      "Tilak": "🌸 Tilak (24 Nov)",
-      "Engagement & Sangeet": "💃 Engagement & Sangeet (24 Nov)",
-      "Haldi & Mehendi": "🌼 Haldi & Mehendi (25 Nov)",
-      "Baraat": "🥁 Baraat (25 Nov)",
-      "Jaimala": "💐 Jaimala (25 Nov)"
+      "Tilak": "🌸 Tilak (24 Nov, 4:30 PM)",
+      "Engagement & Sangeet": "💃 Engagement & Sangeet (24 Nov, 7:00 PM)",
+      "Haldi & Mehendi": "🌼 Haldi & Mehendi (25 Nov, 11:30 AM)",
+      "Baraat": "🥁 Baraat (25 Nov, 7:00 PM)",
+      "Jaimala": "💐 Jaimala (25 Nov, 9:00 PM)"
     }}
   }};
   var f = document.getElementById('rsvp-form'); if (!f) return;
   var more = document.getElementById('rsvp-more'), err = document.getElementById('rsvp-err');
   var btn = document.getElementById('rsvp-send'), done = document.getElementById('rsvp-done');
   f.addEventListener('change', function (e) {{
-    if (e.target.name === 'attending') more.hidden = e.target.value === 'Regretfully unable';
+    if (e.target.name === 'attending') {{ more.hidden = e.target.value === 'Regretfully unable'; clearField('attending'); err.hidden = true; }}
   }});
-  f.addEventListener('input', function () {{ err.hidden = true; }});
-  function fail(msg, el) {{ err.textContent = msg; err.hidden = false; if (el) el.focus(); }}
+  function clearField(key) {{ var box = document.getElementById('rsvp-' + key + '-error'); if (box) box.hidden = true; var control = document.getElementById('rsvp-' + key); if (control) control.removeAttribute('aria-invalid'); }}
+  f.addEventListener('input', function (e) {{ err.hidden = true; if (e.target.name === 'name') clearField('name'); if (e.target.name === 'phone') clearField('phone'); if (e.target.name === 'events') clearField('events'); }});
+  function fail(msg, key, el) {{
+    if (key) {{ var box = document.getElementById('rsvp-' + key + '-error'), control = document.getElementById('rsvp-' + key); box.textContent = msg; box.hidden = false; if (control) control.setAttribute('aria-invalid', 'true'); err.hidden = true; }}
+    else {{ err.textContent = msg; err.hidden = false; }}
+    if (el) el.focus();
+  }}
   f.addEventListener('submit', function (e) {{
     e.preventDefault(); err.hidden = true;
     var name = f.elements['name'].value.trim(), phone = f.phone.value.trim(), att = f.querySelector('input[name=attending]:checked');
-    if (!name) return fail('Please enter your name.', f.elements['name']);
-    if (phone.replace(/\D/g, '').length < 10) return fail('Please enter a mobile number with at least 10 digits.', f.phone);
-    if (!att) return fail('Please choose whether you can join us.', document.getElementById('rsvp-yes'));
+    if (!name) return fail('Please enter your name.', 'name', f.elements['name']);
+    if (phone.length < 10 || !/^[0-9]+$/.test(phone)) return fail('Please enter at least 10 digits using numbers only.', 'phone', f.phone);
+    if (!att) return fail('Please choose whether you can join us.', 'attending', document.getElementById('rsvp-yes'));
     var coming = att.value === 'Joyfully attending';
     var evs = coming ? [].map.call(f.querySelectorAll('input[name=events]:checked'), function (c) {{ return c.value; }}) : [];
-    if (coming && !evs.length) return fail('Please tick at least one event.', document.getElementById('ev-tilak'));
+    if (coming && !evs.length) return fail('Please tick at least one event.', 'events', document.getElementById('ev-tilak'));
     var G = GOOGLE_FORM, data = new URLSearchParams();
     function put(k, v) {{ if (G[k] && v !== '') data.append('entry.' + G[k], G.options[v] || v); }}
     put('name', name); put('phone', phone); put('attending', att.value);
-    if (coming) {{ put('guests', f.guests.value || '1'); evs.forEach(function (v) {{ put('events', v); }}); }}
+    if (coming) {{ put('guests', f.guests.value || '1'); evs.forEach(function (v) {{ put('events', v); }}); put('travel', f.travel.value.trim()); }}
     put('message', f.message.value.trim());
-    data.append('pageHistory', coming ? '0,1' : '0');   // the form's 2nd section is only for guests who are coming
+    data.append('pageHistory', coming ? '0,1,2' : '0,2');   // attendees visit sections 1–3; decliners skip details and go to wishes
     var SCRIPT_URL = G.id ? 'https://docs.google.com/forms/d/e/' + G.id + '/formResponse' : '';
-    if (!SCRIPT_URL) return fail('RSVP is not connected yet. Please contact the family directly.');
+    if (!SCRIPT_URL) return fail('RSVP is not connected yet. Please contact the family directly.', null);
     btn.disabled = true; btn.textContent = 'Sending…';
     fetch(SCRIPT_URL, {{ method: 'POST', mode: 'no-cors', body: data }}).then(function () {{
       f.hidden = true; done.hidden = false;
@@ -1114,7 +1138,7 @@ html.locked {{ overflow: hidden; }}
       done.focus();
     }}).catch(function () {{
       btn.disabled = false; btn.textContent = 'Send RSVP';
-      fail('Your RSVP could not be sent. Please check your internet connection and try again.');
+      fail('Your RSVP could not be sent. Please check your internet connection and try again.', null);
     }});
   }});
 }})();
@@ -1191,11 +1215,16 @@ html.locked {{ overflow: hidden; }}
   var raw = '';
   try {{ var q = new URLSearchParams(location.search); raw = q.get('to') || q.get('name') || ''; }} catch (e) {{}}
   raw = raw.replace(/[\\u0000-\\u001f\\u007f<>]/g, '').replace(/\\s+/g, ' ').trim().slice(0, 60);
-  if (!raw) return;
   var el = document.getElementById('intro-to');
-  if (el) {{ el.textContent = 'Dear ' + raw; el.hidden = false; }}
+  if (raw && el) {{ el.textContent = 'Dear ' + raw; el.hidden = false; }}
   var f = document.getElementById('rsvp-name');
-  if (f && !f.value) f.value = raw;
+  function restoreInviteName() {{ if (f && raw) f.value = raw; }}
+  restoreInviteName();
+  var form = document.getElementById('rsvp-form');
+  if (form) window.addEventListener('pageshow', function () {{
+    form.reset();
+    restoreInviteName();
+  }});
 }})();
 </script>
 </body>

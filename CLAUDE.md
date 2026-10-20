@@ -131,10 +131,10 @@ The website's own form posts straight into Soumya's Google Form **"💍 Madhur &
 
 - Editor (Soumya's account): https://docs.google.com/forms/d/1KIkRrLeCScyQz9D6GxDSO4pL7pF5aaTd7-_FSHoLAsk/edit
 - Public ID used for posting: `1FAIpQLSfnBOj2V0I5WwqbaIJzzUCkaqaY4ZEuZ3dqVqI0_m0bwpd1yA`
-- Entry IDs: name `127160018`, mobile `1746679459`, attending `55150948`, guests `798723131` (dropdown 1–20), events `142255648` (checkboxes), message `1689328520`.
-- The website sends the form's **exact option text, emojis included** (mapping in `GOOGLE_FORM.options`): "🎉 Joyfully attending", "💌 Regretfully unable", "🌸 Tilak (24 Nov)", "💃 Engagement & Sangeet (24 Nov)", "🌼 Haldi & Mehendi (25 Nov)", "🥁 Baraat (25 Nov)", "💐 Jaimala (25 Nov)".
-- The form has two sections. "Regretfully unable" jumps to submit, so the site sends `pageHistory=0` for decliners and `0,1` for attendees. A decliner's message may not be saved, because the message question is in section 2. The fix (Soumya's choice) is to move that question into section 1 in the Google Form.
-- If Soumya renames a question or option in the Google Form, re-read the form and update `GOOGLE_FORM`. To read it: open the `/viewform` link in a browser, then in the console run `FB_PUBLIC_LOAD_DATA_[1][1]`. Never send test replies without asking her first; they land in her real responses.
+- Entry IDs: name `127160018`, mobile `1746679459`, attending `55150948`, guests `798723131` (dropdown 1–10), events `142255648` (checkboxes), arrival/departure `136625829`, message `1689328520`.
+- The website sends the form's **exact option text, emojis included** (mapping in `GOOGLE_FORM.options`): "🎉 Joyfully attending", "💌 Regretfully unable", "🌸 Tilak (24 Nov, 4:30 PM)", "💃 Engagement & Sangeet (24 Nov, 7:00 PM)", "🌼 Haldi & Mehendi (25 Nov, 11:30 AM)", "🥁 Baraat (25 Nov, 7:00 PM)", and "💐 Jaimala (25 Nov, 9:00 PM)".
+- The form has three sections. Attendees visit sections 1, 2 and 3; decliners skip attendee details in section 2 and go from section 1 to wishes in section 3. The site sends `pageHistory=0,1,2` for attendees and `0,2` for decliners so wishes/messages are included in either route. Arrival/departure is only sent for attendees. If Soumya renames a question or option in the Google Form, re-read the form and update `GOOGLE_FORM`. To read it: open the `/viewform` link in a browser, then in the console run `FB_PUBLIC_LOAD_DATA_[1][1]`. Never send test replies without asking her first; they land in her real responses.
+- The website uses a `no-cors` POST, so its thank-you screen cannot confirm that Google saved the response. The local check intercepts the request and verifies the payload without sending it.
 - `check.py` verifies the mapping by intercepting the request, so nothing is sent.
 
 ## Deploying
