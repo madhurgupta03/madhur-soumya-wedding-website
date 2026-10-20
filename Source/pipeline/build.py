@@ -689,13 +689,13 @@ html {{ scroll-snap-type: y proximity; scroll-behavior: smooth; }}
 .fluid-bg {{ position: fixed; inset: 0; z-index: 0; overflow: hidden; pointer-events: none;
   background: linear-gradient(135deg, var(--fluid-base, #fdf5ef), #fdf5ef 58%, var(--fluid-base, #fdf5ef));
   transition: background 1.2s ease; }}
-.fluid-bg i {{ position: absolute; display: block; width: 76vw; height: 76vw; max-height: 92vh; border-radius: 50%;
-  filter: blur(34px); opacity: .54; will-change: transform; }}
+.fluid-bg i {{ position: absolute; display: block; width: 64vw; height: 64vw; max-height: 72vh; border-radius: 50%;
+  opacity: .48; will-change: transform; transition: background 1.2s ease; }}
 .fluid-bg .wave-a {{ left: -38vw; top: -22vh; background: radial-gradient(ellipse, var(--fluid-a, #f3e2d2) 0%, transparent 70%);
   animation: fluid-wave-a 42s ease-in-out infinite alternate; }}
 .fluid-bg .wave-b {{ right: -40vw; top: 18vh; background: radial-gradient(ellipse, var(--fluid-b, #d7e9ef) 0%, transparent 70%);
   animation: fluid-wave-b 51s ease-in-out infinite alternate; }}
-.fluid-bg .wave-c {{ left: 18vw; bottom: -50vh; width: 82vw; height: 82vw; background: radial-gradient(ellipse, var(--fluid-a, #f3e2d2) 0%, transparent 72%);
+.fluid-bg .wave-c {{ left: 18vw; bottom: -50vh; width: 68vw; height: 68vw; background: radial-gradient(ellipse, var(--fluid-a, #f3e2d2) 0%, transparent 72%);
   animation: fluid-wave-c 58s ease-in-out infinite alternate; }}
 @keyframes fluid-wave-a {{ from {{ transform: translate3d(-4vw, -2vh, 0) scale(.94) rotate(-8deg); }} to {{ transform: translate3d(13vw, 14vh, 0) scale(1.12) rotate(12deg); }} }}
 @keyframes fluid-wave-b {{ from {{ transform: translate3d(5vw, 7vh, 0) scale(1.08) rotate(10deg); }} to {{ transform: translate3d(-14vw, -11vh, 0) scale(.92) rotate(-12deg); }} }}
@@ -948,7 +948,7 @@ html.locked {{ overflow: hidden; }}
   document.querySelectorAll('.page').forEach(function (p) {{ io.observe(p); }});
 }})();
 
-/* ---------- slow fluid background: interpolate its palette between the unchanged pages ---------- */
+/* ---------- slow fluid background: change its palette at page boundaries, not on every scroll frame ---------- */
 (function () {{
   var palettes = {{
     'page-1': ['#f3e2d2', '#e4c9b4', '#fdf5ef'],
@@ -964,34 +964,31 @@ html.locked {{ overflow: hidden; }}
     'rsvp': ['#102044', '#394a70', '#15264b'],
     'page-8': ['#a7d8ef', '#f3e2d2', '#e9f4f5']
   }};
-  var stops = Array.prototype.map.call(document.querySelectorAll('.page, .web'), function (el) {{
-    return {{ el: el, colors: palettes[el.id] || palettes['page-2'] }};
-  }});
-  if (!stops.length) return;
-  var root = document.documentElement, raf = 0;
-  function mix(c1, c2, t) {{
-    var a = parseInt(c1.slice(1), 16), b = parseInt(c2.slice(1), 16);
-    var r = Math.round((a >> 16) + ((b >> 16) - (a >> 16)) * t);
-    var g = Math.round(((a >> 8 & 255) + ((b >> 8 & 255) - (a >> 8 & 255)) * t));
-    var b2 = Math.round(((a & 255) + ((b & 255) - (a & 255)) * t));
-    return 'rgb(' + r + ' ' + g + ' ' + b2 + ')';
+  var pages = document.querySelectorAll('.page, .web');
+  if (!pages.length) return;
+  var root = document.documentElement, visible = new Map();
+  function paint(entry) {{
+    var colors = palettes[entry.target.id] || palettes['page-2'];
+    root.style.setProperty('--fluid-a', colors[0]);
+    root.style.setProperty('--fluid-b', colors[1]);
+    root.style.setProperty('--fluid-base', colors[2]);
   }}
-  function paint() {{
-    raf = 0;
-    var y = window.scrollY + window.innerHeight * .5, i = 0;
-    while (i < stops.length - 1 && y > stops[i + 1].el.offsetTop + stops[i + 1].el.offsetHeight * .5) i++;
-    var left = stops[i], right = stops[Math.min(i + 1, stops.length - 1)];
-    var start = left.el.offsetTop + left.el.offsetHeight * .5;
-    var end = right.el.offsetTop + right.el.offsetHeight * .5;
-    var t = end > start ? Math.max(0, Math.min(1, (y - start) / (end - start))) : 0;
-    ['--fluid-a', '--fluid-b', '--fluid-base'].forEach(function (name, n) {{
-      root.style.setProperty(name, mix(left.colors[n], right.colors[n], t));
+  if (!('IntersectionObserver' in window)) {{ paint({{ target: pages[0] }}); return; }}
+  var io = new IntersectionObserver(function (entries) {{
+    entries.forEach(function (entry) {{
+      if (entry.isIntersecting) visible.set(entry.target, entry);
+      else visible.delete(entry.target);
     }});
-  }}
-  function schedule() {{ if (!raf) raf = requestAnimationFrame(paint); }}
-  addEventListener('scroll', schedule, {{ passive: true }});
-  addEventListener('resize', schedule, {{ passive: true }});
-  paint();
+    var best = null, bestDistance = Infinity;
+    visible.forEach(function (entry) {{
+      var rect = entry.boundingClientRect;
+      var top = Math.max(0, rect.top), bottom = Math.min(window.innerHeight, rect.bottom);
+      var distance = Math.abs((top + bottom) * .5 - window.innerHeight * .5);
+      if (distance < bestDistance) {{ best = entry; bestDistance = distance; }}
+    }});
+    if (best) paint(best);
+  }}, {{ threshold: [0, .15, .35, .5, .75, 1] }});
+  Array.prototype.forEach.call(pages, function (page) {{ io.observe(page); }});
 }})();
 
 
