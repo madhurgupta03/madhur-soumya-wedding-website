@@ -929,25 +929,42 @@ html.locked {{ overflow: hidden; }}
   var $ = function (s) {{ return intro.querySelector(s); }};
   var seal = $('#seal'), flap = $('.env-flap'), letter = $('.env-letter'), logo = $('.env-letter img'), env = $('#env');
   var busy = false, done = false;
-  var song = new Audio('audio/chaap-tilak.mp3'), songStarted = false;
-  song.volume = 0.65; song.loop = true;
-  var musicToggle = document.getElementById('music-toggle'), muted = false, fadeId = 0;
-  function fadeVolume(target) {{
+  var song = new Audio('audio/chaap-tilak.mp3'), TARGET = 0.65, on = false, fadeId = 0, playId = 0;
+  song.loop = true; song.preload = 'auto';
+  var musicToggle = document.getElementById('music-toggle');
+  function setLabel() {{
+    musicToggle.textContent = on ? '♪ Sound on' : '♪ Sound off';
+    musicToggle.setAttribute('aria-label', on ? 'Turn the music off' : 'Turn the music on');
+    musicToggle.setAttribute('aria-pressed', on ? 'true' : 'false');
+  }}
+  function fadeVolume(target, then) {{                 /* phones (iOS) ignore volume, so the real on/off is play() and pause() */
     var from = song.volume, started = performance.now(), duration = 400, id = ++fadeId;
     function step(now) {{
       if (id !== fadeId) return;
       var t = Math.min(1, (now - started) / duration);
-      song.volume = from + (target - from) * t;
-      if (t < 1) requestAnimationFrame(step);
+      try {{ song.volume = from + (target - from) * t; }} catch (e) {{}}
+      if (t < 1) requestAnimationFrame(step); else if (then) then();
     }}
     requestAnimationFrame(step);
   }}
-  musicToggle.addEventListener('click', function () {{
-    muted = !muted; fadeVolume(muted ? 0 : 0.65);
-    musicToggle.textContent = muted ? '♪ Sound off' : '♪ Sound on';
-    musicToggle.setAttribute('aria-label', muted ? 'Unmute music' : 'Mute music');
-    musicToggle.setAttribute('aria-pressed', muted ? 'true' : 'false');
-  }});
+  function startSong() {{                              /* always called straight from a tap: iOS and Android only allow play() there */
+    var id = ++playId; on = true; setLabel();
+    try {{ song.volume = 0; }} catch (e) {{}}
+    var pr = song.play();
+    if (pr && pr.catch) pr.catch(function (err) {{
+      if (id !== playId || (err && err.name === 'AbortError')) return;       /* a newer tap replaced this one: not a failure */
+      on = false; setLabel();                          /* the browser refused: show "off" so the next tap tries again */
+    }});
+    fadeVolume(TARGET);
+  }}
+  function stopSong() {{
+    ++playId; on = false; setLabel();
+    fadeVolume(0, function () {{ if (!on) song.pause(); }});
+  }}
+  /* the phone paused it for us (call, lock screen, another app took the audio): show "off" so one tap resumes it */
+  song.addEventListener('pause', function () {{ if (on) {{ on = false; setLabel(); }} }});
+  setLabel();
+  musicToggle.addEventListener('click', function () {{ if (on) stopSong(); else startSong(); }});
   function wait(ms) {{ return new Promise(function (r) {{ setTimeout(r, ms); }}); }}
   function anim(el, frames, opt) {{
     if (!el.animate) {{ return Promise.resolve(); }}
@@ -987,7 +1004,7 @@ html.locked {{ overflow: hidden; }}
   }}
   async function open() {{
     if (busy) return; busy = true;
-    if (!songStarted) {{ songStarted = true; song.play().catch(function () {{}}); }}
+    if (!on) startSong();
     if (reduce || !document.body.animate) {{ finish(); return; }}
     var ease = 'cubic-bezier(.45,0,.2,1)';
     anim($('.intro-hint'), [{{ opacity: 1 }}, {{ opacity: 0 }}], {{ duration: 300 }});
@@ -1030,7 +1047,7 @@ html.locked {{ overflow: hidden; }}
   }}
   seal.addEventListener('click', open);
   env.addEventListener('click', open);
-  $('#intro-skip').addEventListener('click', finish);
+  $('#intro-skip').addEventListener('click', function () {{ if (!on) startSong(); finish(); }});
   document.querySelectorAll('a.open').forEach(function (a) {{
     a.addEventListener('click', function (e) {{ e.preventDefault(); document.getElementById('page-2').scrollIntoView({{ behavior: reduce ? 'auto' : 'smooth' }}); }});
   }});
