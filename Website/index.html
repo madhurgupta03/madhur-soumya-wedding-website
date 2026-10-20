@@ -106,7 +106,7 @@ html.locked { overflow: hidden; }
   text-shadow: var(--shadow); }
 .web form, .web .btn { text-shadow: none; }
 .web .label { margin: 0; font-size: 4cqw; letter-spacing: .2em; text-transform: uppercase; color: var(--ink); font-weight: 600; }
-.web h2 { margin: 0; font-weight: 600; font-size: 10.5cqw; line-height: 1.12; color: var(--accent); letter-spacing: .05em; text-transform: uppercase; text-wrap: balance; }
+.web h2 { margin: 0; font-weight: 600; font-size: 7.6cqw; line-height: 1.12; color: #d93774; letter-spacing: .05em; text-transform: uppercase; text-wrap: balance; }
 .web h3 { margin: 0; font-weight: 600; font-size: 6.4cqw; line-height: 1.15; color: var(--accent); letter-spacing: .06em; text-transform: uppercase; }
 .web .lead { margin: 0 auto; max-width: 30em; font-weight: 600; font-size: 4.6cqw; letter-spacing: .02em; text-wrap: balance; }
 .web .divider { display: flex; align-items: center; gap: 3cqw; margin: 1cqw 0; }
@@ -191,16 +191,16 @@ html.locked { overflow: hidden; }
 .web dt { color: var(--accent2); font-size: 3.8cqw; font-weight: 600; letter-spacing: .18em; text-transform: uppercase; }
 .web dd { margin: 0; font-size: 4.7cqw; line-height: 1.4; font-weight: 600; letter-spacing: .02em; }
 /* one palette per section, taken from the cards: day sky (Tilak), starry night (Engagement), sunset (Jaimala), marigold (Haldi) */
-.theme-day { --ink: #7a3a3a; --accent: #d4500e; --accent2: #b8420c; --gold: #e0a01c; --paper: #fdf5ef; --line: rgba(120,70,70,.6); --line2: rgba(120,70,70,.4);
+.theme-day { --ink: #8a3340; --accent: #e65a0f; --accent2: #c9470a; --gold: #f0ae1c; --paper: #fdf5ef; --line: rgba(120,70,70,.6); --line2: rgba(120,70,70,.4);
   --hover: rgba(120,70,70,.12); --field: rgba(255,255,255,.55); --field2: rgba(255,255,255,.4); --field-ink: #4f2c2c; --ph: rgba(120,70,70,.6);
   --shadow: 0 0 1.4cqw rgba(253,245,239,.95), 0 0 .5cqw rgba(253,245,239,.9); }
-.theme-night { --ink: #fdf5ef; --accent: #ffd447; --accent2: #ffd447; --gold: #f2c04a; --paper: #0f1d40; --line: rgba(247,215,122,.7); --line2: rgba(247,215,122,.4);
+.theme-night { --ink: #fffaf2; --accent: #ffe066; --accent2: #ffe066; --gold: #f7cc55; --paper: #0f1d40; --line: rgba(247,215,122,.7); --line2: rgba(247,215,122,.4);
   --hover: rgba(247,215,122,.16); --field: rgba(255,255,255,.1); --field2: rgba(255,255,255,.1); --field-ink: #fdf5ef; --ph: rgba(253,245,239,.55);
   --shadow: 0 0 1.4cqw rgba(6,15,38,.9), 0 0 .5cqw rgba(6,15,38,.8); }
 .theme-dusk { --ink: #fff3ea; --accent: #ffd98a; --accent2: #ffd98a; --gold: #f0b95a; --paper: #32145e; --line: rgba(255,217,138,.75); --line2: rgba(255,217,138,.45);
   --hover: rgba(255,217,138,.18); --field: rgba(255,255,255,.12); --field2: rgba(255,255,255,.1); --field-ink: #fff3ea; --ph: rgba(255,243,234,.6);
   --shadow: 0 0 1.4cqw rgba(50,10,70,.9), 0 0 .5cqw rgba(50,10,70,.85); }
-.theme-haldi { --ink: #5a2e0a; --accent: #cc2f08; --accent2: #aa2808; --gold: #d19a08; --paper: #fff6d6; --line: rgba(94,52,16,.55); --line2: rgba(94,52,16,.35);
+.theme-haldi { --ink: #6b3510; --accent: #dd3510; --accent2: #b82a0a; --gold: #e0a80a; --paper: #fff6d6; --line: rgba(94,52,16,.55); --line2: rgba(94,52,16,.35);
   --hover: rgba(94,52,16,.12); --field: rgba(255,251,230,.65); --field2: rgba(255,251,230,.5); --field-ink: #3b200a; --ph: rgba(94,52,16,.55);
   --shadow: 0 0 1.4cqw rgba(255,246,205,.95), 0 0 .5cqw rgba(255,246,205,.9); }
 .theme-night .sky { background: linear-gradient(180deg, #0a1431 0%, #12234a 40%, #1d2f5c 72%, #2a3d70 100%); }
@@ -239,6 +239,16 @@ html.locked { overflow: hidden; }
 @keyframes flap { from { transform: scaleX(1); } to { transform: scaleX(.2); } }
 @keyframes wing { from { transform: rotate(-24deg); } to { transform: rotate(26deg); } }
 @media (prefers-reduced-motion: reduce) { .web .crit { display: none; } }
+/* the venues and both blessings pages: body text in Crimson italic, like the venue lines on the Baraat and Jaimala cards */
+:is(#venues, #blessings, #blessings-groom) :is(.lead, .addr, .count-note, dd, .hosts, .events .t) { font-style: italic; font-weight: 400; letter-spacing: .015em; }
+:is(#venues, #blessings, #blessings-groom) :is(.lead, .addr, .count-note) { font-size: 4.9cqw; }
+:is(#venues, #blessings, #blessings-groom) dd { font-size: 5cqw; }
+:is(#venues, #blessings, #blessings-groom) .events .t { font-size: 4.8cqw; }
+:is(#venues, #blessings, #blessings-groom) .hosts { font-size: 8.4cqw; }
+/* small headings (labels, day lines, relation tags, countdown captions) in the card's night blue: strong contrast on the sky */
+:is(#venues, #blessings, #blessings-groom) :is(.label, .band, dt, .count span) { color: #1d2f5c; }
+/* no orange on these three pages: venue names, numbers and times in deep purple, lines and dots in pink */
+#venues, #blessings, #blessings-groom { --accent: #5a2d8a; --accent2: #5a2d8a; --gold: #d9468a; }
 [hidden] { display: none !important; }
 </style>
 </head>
