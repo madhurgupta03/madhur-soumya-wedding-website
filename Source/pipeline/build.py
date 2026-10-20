@@ -687,19 +687,41 @@ html, body {{ margin: 0; padding: 0; background: #fdf5ef; }}
 html {{ scroll-snap-type: y proximity; scroll-behavior: smooth; }}
 @media (prefers-reduced-motion: reduce) {{ html {{ scroll-behavior: auto; }} .open text, .open .chev {{ animation: none !important; }} }}
 .fluid-bg {{ position: fixed; inset: 0; z-index: 0; overflow: hidden; pointer-events: none;
-  background: linear-gradient(135deg, var(--fluid-base, #fdf5ef), #fdf5ef 58%, var(--fluid-base, #fdf5ef)); }}
-.fluid-bg i {{ position: absolute; display: block; width: 64vw; height: 64vw; max-height: 72vh; border-radius: 50%;
-  opacity: .48; will-change: transform; }}
-.fluid-bg .wave-a {{ left: -38vw; top: -22vh; background: radial-gradient(ellipse, var(--fluid-a, #f3e2d2) 0%, transparent 70%);
-  animation: fluid-wave-a 42s ease-in-out infinite alternate; }}
-.fluid-bg .wave-b {{ right: -40vw; top: 18vh; background: radial-gradient(ellipse, var(--fluid-b, #d7e9ef) 0%, transparent 70%);
-  animation: fluid-wave-b 51s ease-in-out infinite alternate; }}
-.fluid-bg .wave-c {{ left: 18vw; bottom: -50vh; width: 68vw; height: 68vw; background: radial-gradient(ellipse, var(--fluid-a, #f3e2d2) 0%, transparent 72%);
-  animation: fluid-wave-c 58s ease-in-out infinite alternate; }}
-@keyframes fluid-wave-a {{ from {{ transform: translate3d(-4vw, -2vh, 0) scale(.94) rotate(-8deg); }} to {{ transform: translate3d(13vw, 14vh, 0) scale(1.12) rotate(12deg); }} }}
-@keyframes fluid-wave-b {{ from {{ transform: translate3d(5vw, 7vh, 0) scale(1.08) rotate(10deg); }} to {{ transform: translate3d(-14vw, -11vh, 0) scale(.92) rotate(-12deg); }} }}
-@keyframes fluid-wave-c {{ from {{ transform: translate3d(-9vw, -5vh, 0) scale(.9) rotate(8deg); }} to {{ transform: translate3d(8vw, 8vh, 0) scale(1.1) rotate(-9deg); }} }}
-@media (prefers-reduced-motion: reduce) {{ .fluid-bg i {{ animation: none !important; }} }}
+  background: linear-gradient(116deg, var(--fluid-a, #f3e2d2) 0%, var(--fluid-base, #d7e9ef) 48%, var(--fluid-b, #15264b) 100%); }}
+.fluid-bg .flow-lines {{ position: absolute; inset: -4%; width: 108%; height: 108%; overflow: visible; }}
+.flow-lines .flow-set {{ transform-box: fill-box; transform-origin: center; will-change: transform; }}
+.flow-lines .flow-set-a {{ animation: current-a 24s ease-in-out infinite alternate; }}
+.flow-lines .flow-set-b {{ animation: current-b 29s ease-in-out infinite alternate; }}
+.flow-lines .flow-set-c {{ animation: current-c 26s ease-in-out infinite alternate; }}
+.flow-lines .current {{ fill: none; stroke-width: 1.2; stroke-linecap: round; opacity: .46; }}
+.flow-lines .current-a {{ stroke: url(#metal-gold); }}
+.flow-lines .current-b {{ stroke: url(#metal-blue); }}
+.flow-lines .current-c {{ stroke: url(#metal-rose); }}
+.flow-lines .glint {{ fill: none; stroke: url(#metal-glint); stroke-width: 1.5; stroke-linecap: round;
+  stroke-dasharray: 240 2600; stroke-dashoffset: 0; opacity: .88; will-change: stroke-dashoffset; }}
+.flow-lines .flow-set-a .glint {{ animation: glint-a 14s linear infinite; }}
+.flow-lines .flow-set-b .glint {{ animation: glint-b 16s linear infinite; }}
+.flow-lines .flow-set-c .glint {{ animation: glint-c 15s linear infinite; }}
+@keyframes current-a {{ from {{ transform: translate(-3%, -4%); }} to {{ transform: translate(3%, 4%); }} }}
+@keyframes current-b {{ from {{ transform: translate(3.5%, 3%); }} to {{ transform: translate(-3.5%, -3%); }} }}
+@keyframes current-c {{ from {{ transform: translate(-3%, 3.5%); }} to {{ transform: translate(3%, -3.5%); }} }}
+@keyframes glint-a {{ to {{ stroke-dashoffset: -2840; }} }}
+@keyframes glint-b {{ to {{ stroke-dashoffset: -2840; }} }}
+@keyframes glint-c {{ to {{ stroke-dashoffset: -2840; }} }}
+.fluid-bg .sparkle {{ position: absolute; width: 11px; height: 11px; border-radius: 50%;
+  background: radial-gradient(circle, #fff9df 0 14%, #f5d27d 22%, rgba(229,181,91,.25) 44%, transparent 72%);
+  opacity: 0; animation: fluid-sparkle 5.8s ease-in-out infinite; will-change: transform, opacity; }}
+.fluid-bg .sparkle::before, .fluid-bg .sparkle::after {{ content: ""; position: absolute; left: 48%; top: -72%; width: 1px; height: 244%;
+  background: linear-gradient(transparent, rgba(255,246,207,.9), transparent); }}
+.fluid-bg .sparkle::after {{ transform: rotate(90deg); }}
+.fluid-bg .sparkle.s1 {{ left: 13%; top: 24%; animation-delay: -1.2s; }}
+.fluid-bg .sparkle.s2 {{ left: 31%; top: 67%; animation-delay: -3.8s; }}
+.fluid-bg .sparkle.s3 {{ left: 48%; top: 18%; animation-delay: -2.4s; }}
+.fluid-bg .sparkle.s4 {{ left: 63%; top: 72%; animation-delay: -.6s; }}
+.fluid-bg .sparkle.s5 {{ left: 78%; top: 35%; animation-delay: -4.6s; }}
+.fluid-bg .sparkle.s6 {{ left: 89%; top: 61%; animation-delay: -2.9s; }}
+@keyframes fluid-sparkle {{ 0%, 100% {{ opacity: 0; transform: scale(.5); }} 32%, 58% {{ opacity: .8; transform: scale(1.15); }} 76% {{ opacity: .18; transform: scale(.8); }} }}
+@media (prefers-reduced-motion: reduce) {{ .flow-lines .flow-set, .flow-lines .glint, .fluid-bg .sparkle {{ animation: none !important; }} .flow-lines .glint, .fluid-bg .sparkle {{ display: none; }} }}
 .page {{ height: 100vh; height: 100svh; display: grid; place-items: center; scroll-snap-align: start; overflow: hidden; }}
 .pg {{ display: block; height: min(100svh, calc(100vw * 16 / 9)); width: auto; aspect-ratio: 9 / 16; }}
 @media (max-aspect-ratio: 9/16) {{ .page {{ height: calc(100vw * 16 / 9); }} }}
@@ -933,7 +955,29 @@ html.locked {{ overflow: hidden; }}
 </div>
 <button class="music-toggle" id="music-toggle" type="button" aria-label="Mute music" aria-pressed="false">♪ Sound on</button>
 <svg width="0" height="0" style="position:absolute" aria-hidden="true"><defs>{defs}</defs></svg>
-<div class="fluid-bg" aria-hidden="true"><i class="wave-a"></i><i class="wave-b"></i><i class="wave-c"></i></div>
+<div class="fluid-bg" aria-hidden="true"><svg class="flow-lines" viewBox="0 0 1600 900" preserveAspectRatio="none">
+  <defs>
+    <linearGradient id="metal-gold" x1="0" y1="0" x2="1" y2=".2"><stop stop-color="#b57c3d" stop-opacity=".12"/><stop offset=".22" stop-color="#fff0c2" stop-opacity=".76"/><stop offset=".38" stop-color="#d8a452" stop-opacity=".72"/><stop offset=".53" stop-color="#fffdf2" stop-opacity=".84"/><stop offset=".7" stop-color="#c58c49" stop-opacity=".66"/><stop offset=".86" stop-color="#f8e4ae" stop-opacity=".72"/><stop offset="1" stop-color="#fff9e8" stop-opacity=".14"/></linearGradient>
+    <linearGradient id="metal-blue" x1="0" y1=".2" x2="1" y2=".7"><stop stop-color="#c5e8f5" stop-opacity=".12"/><stop offset=".2" stop-color="#fff" stop-opacity=".72"/><stop offset=".38" stop-color="#a6c9db" stop-opacity=".68"/><stop offset=".56" stop-color="#f5dfb3" stop-opacity=".82"/><stop offset=".74" stop-color="#bddbea" stop-opacity=".74"/><stop offset="1" stop-color="#fff" stop-opacity=".12"/></linearGradient>
+    <linearGradient id="metal-rose" x1="0" y1=".7" x2="1" y2=".1"><stop stop-color="#d49b75" stop-opacity=".1"/><stop offset=".24" stop-color="#fff2d0" stop-opacity=".78"/><stop offset=".43" stop-color="#dcaa79" stop-opacity=".7"/><stop offset=".58" stop-color="#fff" stop-opacity=".84"/><stop offset=".78" stop-color="#d4b8ae" stop-opacity=".68"/><stop offset="1" stop-color="#fff2d7" stop-opacity=".12"/></linearGradient>
+    <linearGradient id="metal-glint" x1="0" y1="0" x2="1" y2="0"><stop stop-color="#fff" stop-opacity="0"/><stop offset=".32" stop-color="#fff9e6" stop-opacity=".6"/><stop offset=".48" stop-color="#fff"/><stop offset=".62" stop-color="#edc56f" stop-opacity=".92"/><stop offset=".8" stop-color="#fff5d7" stop-opacity=".6"/><stop offset="1" stop-color="#fff" stop-opacity="0"/></linearGradient>
+  </defs>
+  <g class="flow-set flow-set-a">
+    <path class="current current-a" d="M-100 145 C160 -65 280 400 520 200 S850 15 1090 185 S1440 415 1700 110"/><path class="glint" d="M-100 145 C160 -65 280 400 520 200 S850 15 1090 185 S1440 415 1700 110"/>
+    <path class="current current-b" d="M-100 345 C160 600 300 70 590 330 S900 590 1120 280 S1460 70 1700 430"/><path class="glint" d="M-100 345 C160 600 300 70 590 330 S900 590 1120 280 S1460 70 1700 430"/>
+    <path class="current current-c" d="M-100 540 C200 250 320 830 610 540 S960 250 1200 570 S1480 900 1700 460"/><path class="glint" d="M-100 540 C200 250 320 830 610 540 S960 250 1200 570 S1480 900 1700 460"/>
+  </g>
+  <g class="flow-set flow-set-b">
+    <path class="current current-b" d="M-100 70 C190 350 370 -150 620 120 S930 390 1180 70 S1460 -100 1700 250"/><path class="glint" d="M-100 70 C190 350 370 -150 620 120 S930 390 1180 70 S1460 -100 1700 250"/>
+    <path class="current current-a" d="M-100 440 C150 160 400 760 640 390 S960 100 1210 480 S1480 760 1700 320"/><path class="glint" d="M-100 440 C150 160 400 760 640 390 S960 100 1210 480 S1480 760 1700 320"/>
+    <path class="current current-c" d="M-100 760 C180 500 400 980 650 680 S990 440 1210 800 S1480 1020 1700 590"/><path class="glint" d="M-100 760 C180 500 400 980 650 680 S990 440 1210 800 S1480 1020 1700 590"/>
+  </g>
+  <g class="flow-set flow-set-c">
+    <path class="current current-c" d="M-100 225 C180 -50 360 540 610 210 S920 -50 1160 240 S1460 550 1700 150"/><path class="glint" d="M-100 225 C180 -50 360 540 610 210 S920 -50 1160 240 S1460 550 1700 150"/>
+    <path class="current current-a" d="M-100 645 C150 950 360 350 610 680 S950 1030 1190 610 S1470 350 1700 780"/><path class="glint" d="M-100 645 C150 950 360 350 610 680 S950 1030 1190 610 S1470 350 1700 780"/>
+  </g>
+</svg>
+  <i class="sparkle s1"></i><i class="sparkle s2"></i><i class="sparkle s3"></i><i class="sparkle s4"></i><i class="sparkle s5"></i><i class="sparkle s6"></i></div>
 {''.join(sections)}
 <script>
 (function () {{
