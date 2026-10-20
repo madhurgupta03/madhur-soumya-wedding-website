@@ -833,16 +833,16 @@ html.locked {{ overflow: hidden; }}
 .web dt {{ color: var(--accent2); font-size: 3.8cqw; font-weight: 600; letter-spacing: .18em; text-transform: uppercase; }}
 .web dd {{ margin: 0; font-size: 4.7cqw; line-height: 1.4; font-weight: 600; letter-spacing: .02em; }}
 /* one palette per section, taken from the cards: day sky (Tilak), starry night (Engagement), sunset (Jaimala), marigold (Haldi) */
-.theme-day {{ --ink: #784646; --accent: #b85c1d; --accent2: #a14d14; --gold: #c99a3e; --paper: #fdf5ef; --line: rgba(120,70,70,.6); --line2: rgba(120,70,70,.4);
+.theme-day {{ --ink: #7a3a3a; --accent: #d4500e; --accent2: #b8420c; --gold: #e0a01c; --paper: #fdf5ef; --line: rgba(120,70,70,.6); --line2: rgba(120,70,70,.4);
   --hover: rgba(120,70,70,.12); --field: rgba(255,255,255,.55); --field2: rgba(255,255,255,.4); --field-ink: #4f2c2c; --ph: rgba(120,70,70,.6);
   --shadow: 0 0 1.4cqw rgba(253,245,239,.95), 0 0 .5cqw rgba(253,245,239,.9); }}
-.theme-night {{ --ink: #fdf5ef; --accent: #f7d77a; --accent2: #f7d77a; --gold: #d9b25a; --paper: #0f1d40; --line: rgba(247,215,122,.7); --line2: rgba(247,215,122,.4);
+.theme-night {{ --ink: #fdf5ef; --accent: #ffd447; --accent2: #ffd447; --gold: #f2c04a; --paper: #0f1d40; --line: rgba(247,215,122,.7); --line2: rgba(247,215,122,.4);
   --hover: rgba(247,215,122,.16); --field: rgba(255,255,255,.1); --field2: rgba(255,255,255,.1); --field-ink: #fdf5ef; --ph: rgba(253,245,239,.55);
   --shadow: 0 0 1.4cqw rgba(6,15,38,.9), 0 0 .5cqw rgba(6,15,38,.8); }}
 .theme-dusk {{ --ink: #fff3ea; --accent: #ffd98a; --accent2: #ffd98a; --gold: #f0b95a; --paper: #32145e; --line: rgba(255,217,138,.75); --line2: rgba(255,217,138,.45);
   --hover: rgba(255,217,138,.18); --field: rgba(255,255,255,.12); --field2: rgba(255,255,255,.1); --field-ink: #fff3ea; --ph: rgba(255,243,234,.6);
   --shadow: 0 0 1.4cqw rgba(50,10,70,.9), 0 0 .5cqw rgba(50,10,70,.85); }}
-.theme-haldi {{ --ink: #5e3410; --accent: #b0300c; --accent2: #9a2a0a; --gold: #b8860b; --paper: #fff6d6; --line: rgba(94,52,16,.55); --line2: rgba(94,52,16,.35);
+.theme-haldi {{ --ink: #5a2e0a; --accent: #cc2f08; --accent2: #aa2808; --gold: #d19a08; --paper: #fff6d6; --line: rgba(94,52,16,.55); --line2: rgba(94,52,16,.35);
   --hover: rgba(94,52,16,.12); --field: rgba(255,251,230,.65); --field2: rgba(255,251,230,.5); --field-ink: #3b200a; --ph: rgba(94,52,16,.55);
   --shadow: 0 0 1.4cqw rgba(255,246,205,.95), 0 0 .5cqw rgba(255,246,205,.9); }}
 .theme-night .sky {{ background: linear-gradient(180deg, #0a1431 0%, #12234a 40%, #1d2f5c 72%, #2a3d70 100%); }}
