@@ -16,6 +16,9 @@ for _f in os.listdir(paths.FONTS):
     shutil.copy2(os.path.join(paths.FONTS, _f), os.path.join(SITE, "fonts", _f))
 os.makedirs(f"{SITE}/audio", exist_ok=True)
 shutil.copy2(os.path.join(paths.SOURCE, "audio", "chaap-tilak.mp3"), os.path.join(SITE, "audio", "chaap-tilak.mp3"))
+os.makedirs(f"{SITE}/images", exist_ok=True)
+shutil.copy2(os.path.join(paths.SOURCE, "assets", "jaimala-page.png"),
+             os.path.join(SITE, "images", "jaimala-page.png"))
 
 # ---------------- decisions agreed with the user ----------------
 PARENTS = {
@@ -208,6 +211,11 @@ for P in model:
         if n == 8:
             plain.append(" ".join(L["text"].strip() for L in lines))
 
+    if n == 7:
+        # The approved high-resolution composition replaces the page artwork;
+        # original text glyphs remain vector layers above it.
+        body = ['<image href="images/jaimala-page.png" x="0" y="0" width="810" height="1440" preserveAspectRatio="xMidYMid slice"/>',
+                '<image href="images/img-16-251x251.png" width="1" height="1" preserveAspectRatio="none" transform="matrix(42.75,0,0,42.75,383.7828,617.9515)"/>']
     P["_body"], P["_extra"], P["_plain_list"] = body, extra, plain
     if n not in range(3, 8):
         P["_text_uses"] = text_uses
@@ -276,6 +284,9 @@ for P in model[2:7]:
     old = V[0]["size"]
     pitch = (V[1]["y"] - V[0]["y"]) * VENUE_SIZE / old if len(V) > 1 else 0
     y0 = V[0]["y"] - CAP * (old - VENUE_SIZE)
+    if n == 7:
+        y0 -= 30  # separate the venue address from the groom's pagdi
+        checklist.append(("7", "Venue address position", "Moved the Jaimala venue address up 30 pt to clear the groom's pagdi"))
     P["_extra"] += live_text([L["text"].strip() for L in V], cx, y0, pitch, VENUE_SIZE, V[0]["color"],
                              400, "italic", V[0]["track"] / old)
     last_base = y0 + pitch * (len(V) - 1)
@@ -284,7 +295,7 @@ for P in model[2:7]:
     bw, bh, by = 250, 54, last_base + 40
     if n == 7:   # Jaimala: the peacock's neck sits under the centre, so the button sits in the clear sky beside it
         bw, cx = 214, 487
-    if True:
+    if n != 7:
       P["_extra"].append(
         f'<a class="dir" href="{url}" target="_blank" rel="noopener" aria-label="Directions to {html.escape(V[0]["text"].split(",")[0])}">'
         f'<rect x="{cx-bw/2:.2f}" y="{by:.2f}" width="{bw}" height="{bh}" rx="27" fill="none" stroke="{col}" stroke-width="1.6"/>'
@@ -642,7 +653,8 @@ for P in model:
            + "</svg>")
     if P["n"] == 8:     # venues, the two blessings pages and the RSVP come before the closing page, which stays last
         sections.append(_VENUES + _BLESSINGS + _RSVP)
-    petals = '<canvas class="petals" aria-hidden="true"></canvas>'
+    petals = ('<canvas class="petals" data-candles="true" aria-hidden="true"></canvas>'
+              if P["n"] == 7 else '<canvas class="petals" aria-hidden="true"></canvas>')
     sections.append(f'<section class="page" id="page-{P["n"]}" data-label="{label}">{svg}{petals}</section>')
 
 defs = "".join(f'<path id="{g}" d="{glyph_defs[g]}"/>' for g in sorted(used_glyphs) if glyph_defs.get(g))
@@ -1103,6 +1115,8 @@ html.locked {{ overflow: hidden; }}
     ctx.quadraticCurveTo(-r * .12, r * .12, -r, 0); ctx.quadraticCurveTo(-r * .12, -r * .12, 0, -r); ctx.fill();
     ctx.restore();
   }}
+  var candlePoints = [[60,1274],[115,1305],[150,1348],[183,1317],[296,1375],[355,1379],
+    [445,1318],[476,1347],[514,1340],[552,1374],[690,1332],[742,1273]];
   window.__sparkStar = star;
   function shape(ctx, p) {{
     var s = p.s;
@@ -1154,6 +1168,14 @@ html.locked {{ overflow: hidden; }}
         if (q.t < 0) continue;
         var k = Math.sin(Math.PI * q.t / q.life);             /* fade in, peak, fade out */
         ctx.save(); ctx.translate(q.x, q.y); ctx.rotate(q.rot + q.t * .6); star(ctx, 0, 0, q.r * (.4 + .6 * k), k * .95, q.c); ctx.restore();
+      }}
+      if (cv.dataset.candles) {{
+        var cr = 2.2 * Math.min(1.4, W / 400);
+        for (var ci = 0; ci < candlePoints.length; ci++) {{
+          var pulse = .5 + .5 * Math.sin(t / 360 + ci * 1.73);
+          star(ctx, candlePoints[ci][0] * W / 810, candlePoints[ci][1] * H / 1440,
+            cr, .14 + .24 * pulse, GOLD[ci % GOLD.length]);
+        }}
       }}
       for (var i = 0; i < ps.length; i++) {{
         var p = ps[i];
