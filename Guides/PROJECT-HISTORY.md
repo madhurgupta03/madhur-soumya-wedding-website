@@ -85,6 +85,7 @@ The current state of the site is described in `CLAUDE.md` and `Guides/CHECKLIST.
 13. Envelope opening was choppy. First rework: the logo glided and scaled onto the cover logo. Then refined to a zoom in place.
 14. **Reverted** the glide/zoom (Soumya: not fading out properly; the card didn't come fully out of the envelope; the envelope vanished choppily; the final alignment was choppy). **Current version:** the card slides fully out, the envelope fades, then a crossfade between the card and the cover. Earlier versions are in `Archive/earlier-build-versions/`.
 15. Set up this folder as a complete, self-contained project with instructions for a new Claude session.
+16. Added a high-resolution transparent illustration of a faceless bride in a powder-pink lehenga placing a varmala on the groom in a white sherwani to the Jaimaala page. The bride already wears her own varmala; her proportions are only slightly fuller than the first draft. The original page artwork, text, fonts, and textures are preserved, and the Get Directions button is omitted from this page. The change is part of the local main build; it has not been deployed.
 
 ## 3. Places outside this folder
 

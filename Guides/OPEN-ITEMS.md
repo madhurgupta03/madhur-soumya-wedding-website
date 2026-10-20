@@ -19,6 +19,10 @@ Use this list for work that is still pending. Check an item only after the chang
 - [ ] Add small, fixed, translucent navigation controls at the lower-right of the website to move to the previous/above page and next/below page, styled to match the wedding invitation theme.
 - [ ] Move the RSVP section/page to second-to-last in the site order, keeping the card's greeting/closing page as the final page.
 
+## Scrolling performance
+
+- [ ] Investigate and improve the reported unsmooth scrolling on the local site. Distinguish scroll-snap settling from frame drops caused by the animated gradient, SVG glints, or flower canvases. The owner deferred this investigation on 20 October 2026; no cause has been confirmed and no fix has been made.
+
 ## Launch verification and countdown
 
 **Owner decision (19 October 2026):** Vercel hosting is working. The owner does not plan further manual deployment checks; any remaining visual checks are waived, not confirmed successful. The already confirmed checks (cross-device display, HTTPS, pages/assets, and venue directions) are recorded in [HOSTING-CHECKLIST.md](HOSTING-CHECKLIST.md).

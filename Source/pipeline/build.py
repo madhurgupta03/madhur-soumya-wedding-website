@@ -16,6 +16,9 @@ for _f in os.listdir(paths.FONTS):
     shutil.copy2(os.path.join(paths.FONTS, _f), os.path.join(SITE, "fonts", _f))
 os.makedirs(f"{SITE}/audio", exist_ok=True)
 shutil.copy2(os.path.join(paths.SOURCE, "audio", "chaap-tilak.mp3"), os.path.join(SITE, "audio", "chaap-tilak.mp3"))
+os.makedirs(f"{SITE}/images", exist_ok=True)
+shutil.copy2(os.path.join(paths.SOURCE, "assets", "jaimala-page.png"),
+             os.path.join(SITE, "images", "jaimala-page.png"))
 
 # ---------------- decisions agreed with the user ----------------
 PARENTS = {
@@ -208,6 +211,11 @@ for P in model:
         if n == 8:
             plain.append(" ".join(L["text"].strip() for L in lines))
 
+    if n == 7:
+        # The approved high-resolution composition replaces the page artwork;
+        # original text glyphs remain vector layers above it.
+        body = ['<image href="images/jaimala-page.png" x="0" y="0" width="810" height="1440" preserveAspectRatio="xMidYMid slice"/>',
+                '<image href="images/img-16-251x251.png" width="1" height="1" preserveAspectRatio="none" transform="matrix(42.75,0,0,42.75,383.7828,617.9515)"/>']
     P["_body"], P["_extra"], P["_plain_list"] = body, extra, plain
     if n not in range(3, 8):
         P["_text_uses"] = text_uses
@@ -276,6 +284,9 @@ for P in model[2:7]:
     old = V[0]["size"]
     pitch = (V[1]["y"] - V[0]["y"]) * VENUE_SIZE / old if len(V) > 1 else 0
     y0 = V[0]["y"] - CAP * (old - VENUE_SIZE)
+    if n == 7:
+        y0 -= 30  # separate the venue address from the groom's pagdi
+        checklist.append(("7", "Venue address position", "Moved the Jaimala venue address up 30 pt to clear the groom's pagdi"))
     P["_extra"] += live_text([L["text"].strip() for L in V], cx, y0, pitch, VENUE_SIZE, V[0]["color"],
                              400, "italic", V[0]["track"] / old)
     last_base = y0 + pitch * (len(V) - 1)
@@ -284,7 +295,7 @@ for P in model[2:7]:
     bw, bh, by = 250, 54, last_base + 40
     if n == 7:   # Jaimala: the peacock's neck sits under the centre, so the button sits in the clear sky beside it
         bw, cx = 214, 487
-    if True:
+    if n != 7:
       P["_extra"].append(
         f'<a class="dir" href="{url}" target="_blank" rel="noopener" aria-label="Directions to {html.escape(V[0]["text"].split(",")[0])}">'
         f'<rect x="{cx-bw/2:.2f}" y="{by:.2f}" width="{bw}" height="{bh}" rx="27" fill="none" stroke="{col}" stroke-width="1.6"/>'
@@ -633,16 +644,19 @@ for P in model:
     used_glyphs.update(u["g"] for u in tu)
     plain = P.get("_plain") or P["_plain_list"]
     label = {1: "Cover", 2: "Families", 8: "Closing"}.get(P["n"], "Event")
+    event_page = P["n"] in range(3, 8)
     svg = (f'<svg class="pg" viewBox="0 0 810 1440" role="img" aria-label="{html.escape(" ".join(plain) or "Soumya and Madhur monogram")}">'
            + "".join(P["_body"])
-           + '<g class="rv rv1">' + "".join(use_svg(u) for u in tu if u.get("title") or (P["n"] in (1, 2) and u.get("scale", 1) * u["size"] > 40)) + '</g>'
+           + ('<g class="event-title">' + "".join(use_svg(u) for u in tu if u.get("title")) + '</g>' if event_page else '')
+           + '<g class="rv rv1">' + "".join(use_svg(u) for u in tu if (not (event_page and u.get("title"))) and (u.get("title") or (P["n"] in (1, 2) and u.get("scale", 1) * u["size"] > 40))) + '</g>'
            + '<g class="rv rv2">' + "".join(use_svg(u) for u in tu if not (u.get("title") or (P["n"] in (1, 2) and u.get("scale", 1) * u["size"] > 40))) + '</g>'
            + '<g class="rv rv3">' + "".join(P["_extra"]) + '</g>'
            + ('<canvas class="petals" aria-hidden="true"></canvas>' if False else '')
            + "</svg>")
     if P["n"] == 8:     # venues, the two blessings pages and the RSVP come before the closing page, which stays last
         sections.append(_VENUES + _BLESSINGS + _RSVP)
-    petals = '<canvas class="petals" aria-hidden="true"></canvas>'
+    petals = ('<canvas class="petals" data-candles="true" aria-hidden="true"></canvas>'
+              if P["n"] == 7 else '<canvas class="petals" aria-hidden="true"></canvas>')
     sections.append(f'<section class="page" id="page-{P["n"]}" data-label="{label}">{svg}{petals}</section>')
 
 defs = "".join(f'<path id="{g}" d="{glyph_defs[g]}"/>' for g in sorted(used_glyphs) if glyph_defs.get(g))
@@ -674,11 +688,47 @@ page = f"""<!doctype html>
 html, body {{ margin: 0; padding: 0; background: #fdf5ef; }}
 html {{ scroll-snap-type: y proximity; scroll-behavior: smooth; }}
 @media (prefers-reduced-motion: reduce) {{ html {{ scroll-behavior: auto; }} .open text, .open .chev {{ animation: none !important; }} }}
+.fluid-bg {{ position: fixed; inset: 0; z-index: 0; overflow: hidden; pointer-events: none;
+  background: linear-gradient(116deg, var(--fluid-a, #f3e2d2) 0%, var(--fluid-base, #d7e9ef) 48%, var(--fluid-b, #15264b) 100%); }}
+.fluid-bg .flow-lines {{ position: absolute; inset: -4%; width: 108%; height: 108%; overflow: visible; }}
+.flow-lines .flow-set {{ transform-box: fill-box; transform-origin: center; will-change: transform; }}
+.flow-lines .flow-set-a {{ animation: current-a 24s ease-in-out infinite alternate; }}
+.flow-lines .flow-set-b {{ animation: current-b 29s ease-in-out infinite alternate; }}
+.flow-lines .flow-set-c {{ animation: current-c 26s ease-in-out infinite alternate; }}
+.flow-lines .current {{ fill: none; stroke-width: 1.2; stroke-linecap: round; opacity: .46; }}
+.flow-lines .current-a {{ stroke: url(#metal-gold); }}
+.flow-lines .current-b {{ stroke: url(#metal-blue); }}
+.flow-lines .current-c {{ stroke: url(#metal-rose); }}
+.flow-lines .glint {{ fill: none; stroke: url(#metal-glint); stroke-width: 1.5; stroke-linecap: round;
+  stroke-dasharray: 240 2600; stroke-dashoffset: 0; opacity: .88; will-change: stroke-dashoffset; }}
+.flow-lines .flow-set-a .glint {{ animation: glint-a 14s linear infinite; }}
+.flow-lines .flow-set-b .glint {{ animation: glint-b 16s linear infinite; }}
+.flow-lines .flow-set-c .glint {{ animation: glint-c 15s linear infinite; }}
+@keyframes current-a {{ from {{ transform: translate(-3%, -4%); }} to {{ transform: translate(3%, 4%); }} }}
+@keyframes current-b {{ from {{ transform: translate(3.5%, 3%); }} to {{ transform: translate(-3.5%, -3%); }} }}
+@keyframes current-c {{ from {{ transform: translate(-3%, 3.5%); }} to {{ transform: translate(3%, -3.5%); }} }}
+@keyframes glint-a {{ to {{ stroke-dashoffset: -2840; }} }}
+@keyframes glint-b {{ to {{ stroke-dashoffset: -2840; }} }}
+@keyframes glint-c {{ to {{ stroke-dashoffset: -2840; }} }}
+.fluid-bg .sparkle {{ position: absolute; width: 11px; height: 11px; border-radius: 50%;
+  background: radial-gradient(circle, #fff9df 0 14%, #f5d27d 22%, rgba(229,181,91,.25) 44%, transparent 72%);
+  opacity: 0; animation: fluid-sparkle 5.8s ease-in-out infinite; will-change: transform, opacity; }}
+.fluid-bg .sparkle::before, .fluid-bg .sparkle::after {{ content: ""; position: absolute; left: 48%; top: -72%; width: 1px; height: 244%;
+  background: linear-gradient(transparent, rgba(255,246,207,.9), transparent); }}
+.fluid-bg .sparkle::after {{ transform: rotate(90deg); }}
+.fluid-bg .sparkle.s1 {{ left: 13%; top: 24%; animation-delay: -1.2s; }}
+.fluid-bg .sparkle.s2 {{ left: 31%; top: 67%; animation-delay: -3.8s; }}
+.fluid-bg .sparkle.s3 {{ left: 48%; top: 18%; animation-delay: -2.4s; }}
+.fluid-bg .sparkle.s4 {{ left: 63%; top: 72%; animation-delay: -.6s; }}
+.fluid-bg .sparkle.s5 {{ left: 78%; top: 35%; animation-delay: -4.6s; }}
+.fluid-bg .sparkle.s6 {{ left: 89%; top: 61%; animation-delay: -2.9s; }}
+@keyframes fluid-sparkle {{ 0%, 100% {{ opacity: 0; transform: scale(.5); }} 32%, 58% {{ opacity: .8; transform: scale(1.15); }} 76% {{ opacity: .18; transform: scale(.8); }} }}
+@media (prefers-reduced-motion: reduce) {{ .flow-lines .flow-set, .flow-lines .glint, .fluid-bg .sparkle {{ animation: none !important; }} .flow-lines .glint, .fluid-bg .sparkle {{ display: none; }} }}
 .page {{ height: 100vh; height: 100svh; display: grid; place-items: center; scroll-snap-align: start; overflow: hidden; }}
 .pg {{ display: block; height: min(100svh, calc(100vw * 16 / 9)); width: auto; aspect-ratio: 9 / 16; }}
 @media (max-aspect-ratio: 9/16) {{ .page {{ height: calc(100vw * 16 / 9); }} }}
 /* ---------- animation ---------- */
-.page {{ position: relative; }}
+.page, .web {{ position: relative; z-index: 1; }}
 .petals {{ position: absolute; inset: 0; width: 100%; height: 100%; pointer-events: none; z-index: 2; }}
 .js .page .rv {{ opacity: 0; transform: translateY(14px); transform-box: fill-box; }}
 .js .page.seen .rv {{ animation: rise 1s cubic-bezier(.2,.7,.2,1) forwards; }}
@@ -917,6 +967,29 @@ html.locked {{ overflow: hidden; }}
 </div>
 <button class="music-toggle" id="music-toggle" type="button" aria-label="Mute music" aria-pressed="false">♪ Sound on</button>
 <svg width="0" height="0" style="position:absolute" aria-hidden="true"><defs>{defs}</defs></svg>
+<div class="fluid-bg" aria-hidden="true"><svg class="flow-lines" viewBox="0 0 1600 900" preserveAspectRatio="none">
+  <defs>
+    <linearGradient id="metal-gold" x1="0" y1="0" x2="1" y2=".2"><stop stop-color="#b57c3d" stop-opacity=".12"/><stop offset=".22" stop-color="#fff0c2" stop-opacity=".76"/><stop offset=".38" stop-color="#d8a452" stop-opacity=".72"/><stop offset=".53" stop-color="#fffdf2" stop-opacity=".84"/><stop offset=".7" stop-color="#c58c49" stop-opacity=".66"/><stop offset=".86" stop-color="#f8e4ae" stop-opacity=".72"/><stop offset="1" stop-color="#fff9e8" stop-opacity=".14"/></linearGradient>
+    <linearGradient id="metal-blue" x1="0" y1=".2" x2="1" y2=".7"><stop stop-color="#c5e8f5" stop-opacity=".12"/><stop offset=".2" stop-color="#fff" stop-opacity=".72"/><stop offset=".38" stop-color="#a6c9db" stop-opacity=".68"/><stop offset=".56" stop-color="#f5dfb3" stop-opacity=".82"/><stop offset=".74" stop-color="#bddbea" stop-opacity=".74"/><stop offset="1" stop-color="#fff" stop-opacity=".12"/></linearGradient>
+    <linearGradient id="metal-rose" x1="0" y1=".7" x2="1" y2=".1"><stop stop-color="#d49b75" stop-opacity=".1"/><stop offset=".24" stop-color="#fff2d0" stop-opacity=".78"/><stop offset=".43" stop-color="#dcaa79" stop-opacity=".7"/><stop offset=".58" stop-color="#fff" stop-opacity=".84"/><stop offset=".78" stop-color="#d4b8ae" stop-opacity=".68"/><stop offset="1" stop-color="#fff2d7" stop-opacity=".12"/></linearGradient>
+    <linearGradient id="metal-glint" x1="0" y1="0" x2="1" y2="0"><stop stop-color="#fff" stop-opacity="0"/><stop offset=".32" stop-color="#fff9e6" stop-opacity=".6"/><stop offset=".48" stop-color="#fff"/><stop offset=".62" stop-color="#edc56f" stop-opacity=".92"/><stop offset=".8" stop-color="#fff5d7" stop-opacity=".6"/><stop offset="1" stop-color="#fff" stop-opacity="0"/></linearGradient>
+  </defs>
+  <g class="flow-set flow-set-a">
+    <path class="current current-a" d="M-100 145 C160 -65 280 400 520 200 S850 15 1090 185 S1440 415 1700 110"/><path class="glint" d="M-100 145 C160 -65 280 400 520 200 S850 15 1090 185 S1440 415 1700 110"/>
+    <path class="current current-b" d="M-100 345 C160 600 300 70 590 330 S900 590 1120 280 S1460 70 1700 430"/><path class="glint" d="M-100 345 C160 600 300 70 590 330 S900 590 1120 280 S1460 70 1700 430"/>
+    <path class="current current-c" d="M-100 540 C200 250 320 830 610 540 S960 250 1200 570 S1480 900 1700 460"/><path class="glint" d="M-100 540 C200 250 320 830 610 540 S960 250 1200 570 S1480 900 1700 460"/>
+  </g>
+  <g class="flow-set flow-set-b">
+    <path class="current current-b" d="M-100 70 C190 350 370 -150 620 120 S930 390 1180 70 S1460 -100 1700 250"/><path class="glint" d="M-100 70 C190 350 370 -150 620 120 S930 390 1180 70 S1460 -100 1700 250"/>
+    <path class="current current-a" d="M-100 440 C150 160 400 760 640 390 S960 100 1210 480 S1480 760 1700 320"/><path class="glint" d="M-100 440 C150 160 400 760 640 390 S960 100 1210 480 S1480 760 1700 320"/>
+    <path class="current current-c" d="M-100 760 C180 500 400 980 650 680 S990 440 1210 800 S1480 1020 1700 590"/><path class="glint" d="M-100 760 C180 500 400 980 650 680 S990 440 1210 800 S1480 1020 1700 590"/>
+  </g>
+  <g class="flow-set flow-set-c">
+    <path class="current current-c" d="M-100 225 C180 -50 360 540 610 210 S920 -50 1160 240 S1460 550 1700 150"/><path class="glint" d="M-100 225 C180 -50 360 540 610 210 S920 -50 1160 240 S1460 550 1700 150"/>
+    <path class="current current-a" d="M-100 645 C150 950 360 350 610 680 S950 1030 1190 610 S1470 350 1700 780"/><path class="glint" d="M-100 645 C150 950 360 350 610 680 S950 1030 1190 610 S1470 350 1700 780"/>
+  </g>
+</svg>
+  <i class="sparkle s1"></i><i class="sparkle s2"></i><i class="sparkle s3"></i><i class="sparkle s4"></i><i class="sparkle s5"></i><i class="sparkle s6"></i></div>
 {''.join(sections)}
 <script>
 (function () {{
@@ -928,6 +1001,58 @@ html.locked {{ overflow: hidden; }}
       e.target.querySelectorAll('image[data-src]').forEach(load); io.unobserve(e.target); }} }});
   }}, {{ rootMargin: '150% 0px' }});
   document.querySelectorAll('.page').forEach(function (p) {{ io.observe(p); }});
+}})();
+
+/* ---------- slow fluid background: continuous palette interpolation with cached section positions ---------- */
+(function () {{
+  var palettes = {{
+    'page-1': ['#f3e2d2', '#e4c9b4', '#fdf5ef'],
+    'page-2': ['#83c6f4', '#d8ebef', '#dff0f7'],
+    'page-3': ['#83c6f4', '#e1d39c', '#d8edf5'],
+    'page-4': ['#102044', '#394a70', '#15264b'],
+    'page-5': ['#91d5f2', '#f1cc56', '#e7f1d1'],
+    'page-6': ['#101e42', '#586f91', '#192b52'],
+    'page-7': ['#e7a0b5', '#c9a2d5', '#eac1c7'],
+    'venues': ['#83c6f4', '#d8ebef', '#dff0f7'],
+    'blessings': ['#83c6f4', '#e1efcb', '#dff0f7'],
+    'blessings-groom': ['#f4dc72', '#ecb847', '#fff0bb'],
+    'rsvp': ['#102044', '#394a70', '#15264b'],
+    'page-8': ['#a7d8ef', '#f3e2d2', '#e9f4f5']
+  }};
+  var pages = document.querySelectorAll('.page, .web');
+  if (!pages.length) return;
+  var bg = document.querySelector('.fluid-bg'), raf = 0, stops = [];
+  if (!bg) return;
+  function parse(hex) {{ return [parseInt(hex.slice(1, 3), 16), parseInt(hex.slice(3, 5), 16), parseInt(hex.slice(5, 7), 16)]; }}
+  function rgb(a, b, t) {{
+    return 'rgb(' + Math.round(a[0] + (b[0] - a[0]) * t) + ' ' +
+      Math.round(a[1] + (b[1] - a[1]) * t) + ' ' + Math.round(a[2] + (b[2] - a[2]) * t) + ')';
+  }}
+  function measure() {{
+    var y = window.scrollY;
+    stops = Array.prototype.map.call(pages, function (page) {{
+      return {{ center: page.getBoundingClientRect().top + y + page.offsetHeight * .5,
+        colors: (palettes[page.id] || palettes['page-2']).map(parse) }};
+    }});
+    schedule();
+  }}
+  function paint() {{
+    raf = 0;
+    var y = window.scrollY + window.innerHeight * .5, i = 0;
+    while (i < stops.length - 1 && y > stops[i + 1].center) i++;
+    var left = stops[i], right = stops[Math.min(i + 1, stops.length - 1)];
+    var span = right.center - left.center;
+    var t = span > 0 ? Math.max(0, Math.min(1, (y - left.center) / span)) : 0;
+    ['--fluid-a', '--fluid-b', '--fluid-base'].forEach(function (name, n) {{
+      bg.style.setProperty(name, rgb(left.colors[n], right.colors[n], t));
+    }});
+  }}
+  function schedule() {{ if (!raf) raf = requestAnimationFrame(paint); }}
+  addEventListener('scroll', schedule, {{ passive: true }});
+  addEventListener('resize', measure, {{ passive: true }});
+  addEventListener('load', measure, {{ once: true }});
+  measure();
+  if (document.fonts && document.fonts.ready) document.fonts.ready.then(measure);
 }})();
 
 
@@ -1113,6 +1238,8 @@ html.locked {{ overflow: hidden; }}
     ctx.quadraticCurveTo(-r * .12, r * .12, -r, 0); ctx.quadraticCurveTo(-r * .12, -r * .12, 0, -r); ctx.fill();
     ctx.restore();
   }}
+  var candlePoints = [[60,1274],[115,1305],[150,1348],[183,1317],[296,1375],[355,1379],
+    [445,1318],[476,1347],[514,1340],[552,1374],[690,1332],[742,1273]];
   window.__sparkStar = star;
   function shape(ctx, p) {{
     var s = p.s;
@@ -1164,6 +1291,14 @@ html.locked {{ overflow: hidden; }}
         if (q.t < 0) continue;
         var k = Math.sin(Math.PI * q.t / q.life);             /* fade in, peak, fade out */
         ctx.save(); ctx.translate(q.x, q.y); ctx.rotate(q.rot + q.t * .6); star(ctx, 0, 0, q.r * (.4 + .6 * k), k * .95, q.c); ctx.restore();
+      }}
+      if (cv.dataset.candles) {{
+        var cr = 2.2 * Math.min(1.4, W / 400);
+        for (var ci = 0; ci < candlePoints.length; ci++) {{
+          var pulse = .5 + .5 * Math.sin(t / 360 + ci * 1.73);
+          star(ctx, candlePoints[ci][0] * W / 810, candlePoints[ci][1] * H / 1440,
+            cr, .14 + .24 * pulse, GOLD[ci % GOLD.length]);
+        }}
       }}
       for (var i = 0; i < ps.length; i++) {{
         var p = ps[i];
