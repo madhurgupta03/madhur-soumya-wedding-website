@@ -516,7 +516,7 @@ def evcheck(i, val, label, date):
 EXTRA_SECTIONS = f"""
 <section class="web theme-day" id="venues" aria-labelledby="venues-h"><canvas class="petals" data-n="7" aria-hidden="true"></canvas><div class="col">{art("day")}<div class="frame">
   <p class="label">Where we celebrate</p>
-  <h2 id="venues-h">Two Days, Two Venues</h2>
+  <h2 id="venues-h">Come Celebrate With Us</h2>
   <div class="count" id="countdown" aria-live="off">
     <div><b data-u="d">–</b><span>Days</span></div><div><b data-u="h">–</b><span>Hours</span></div>
     <div><b data-u="m">–</b><span>Mins</span></div><div><b data-u="s">–</b><span>Secs</span></div>
