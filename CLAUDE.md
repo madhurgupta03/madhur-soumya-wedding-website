@@ -68,6 +68,8 @@ Run everything from the project folder. Use the repo-local `.venv` for all Pytho
 **Normal change loop:** edit `Source/pipeline/build.py`, then `make.py build`, then `make.py check`, then look at it with `make.py serve`. If you changed the CHANGES list or features, update `Guides/CHECKLIST.md`. Then deploy.
 `extract` and `glyphs` only need re-running if the PDF itself changes.
 
+**Before investigating PDF comparison failures, read `Guides/CHECKLIST.md` → “Accepted difference from the approved PDF.”** The Jaimala couple illustration on page 7 is intentional and the comparison difference is accepted; do not remove it or ask the owner to reconfirm it.
+
 **Never hand-edit `Website/index.html`.** It is overwritten on every build. Make every change in `build.py`.
 
 ## How the build works (so edits land in the right place)

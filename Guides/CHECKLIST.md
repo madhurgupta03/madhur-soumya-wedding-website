@@ -29,10 +29,16 @@ Everything not listed below is copied from the original PDF unchanged.
 | Tilak time | 4:30 PM onwards, as in the PDF |
 | Page 7 colours | Kept exactly as in the PDF (date #04112a, venue #000000) |
 
+## Accepted difference from the approved PDF
+
+- **Page 7 (Jaimala):** The website intentionally includes a faceless bride-and-groom varmala illustration at the bottom of the page. The approved PDF comparison image has no couple illustration, so the automated page-7 visual comparison reports a large difference (about 46%). The user confirmed this difference is expected. Preserve the illustration and treat this comparison failure as accepted unless the user explicitly requests a change.
+- The exception applies only to the page-7 artwork comparison. Keep running the rest of `Source/make.py check` and investigate any new failures separately.
+
 ## Website features (added after the card was approved)
 
 | Feature | Details |
 |---------|---------|
+| Wedding memories slideshow | Added after the event cards and before "Where we celebrate." It cycles through 19 supplied photos in capture-date order, with no visible photo sequence counter. Small themed left/right arrows and touch swipes navigate the photos. Auto-advance gives each photo a full five seconds, including after manual navigation; there is no pause button, and reduced-motion users get a static first image. The section uses a newly generated photo-first background, a warm blush/ivory fluid gradient, and a separate theme-matching photo frame. Original files are kept under `Source/assets/wedding-slideshow-originals/`; numbered JPEG copies in `Source/assets/slideshow/` are capped at 2400 px and have EXIF/GPS metadata removed before the build copies them to `Website/images/slideshow/`. |
 | Always starts from the envelope | Every visit and every reload opens at the closed envelope, never part-way down the page |
 | Envelope opening | Guests first see a closed envelope with a rust wax seal. One tap plays a smooth sequence (about 5 seconds): the seal pops with gold sparkles, the flap swings open, the card slides all the way out of the envelope, the empty envelope fades away, the card settles with its SM logo over the spot where the cover's logo sits, and then the card and the cover crossfade (the card fades out as the cover fades in). A "Skip" link is always available |
 | Envelope music | Tapping the seal starts `Chaap Tilak` immediately at 65% volume; it loops continuously. A fixed bottom-right wedding-palette control fades the music smoothly between 65% and muted. The source MP3 is `Source/audio/chaap-tilak.mp3`; the build copies it to `Website/audio/chaap-tilak.mp3`. The Skip link remains silent |

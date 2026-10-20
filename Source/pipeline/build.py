@@ -19,6 +19,17 @@ shutil.copy2(os.path.join(paths.SOURCE, "audio", "chaap-tilak.mp3"), os.path.joi
 os.makedirs(f"{SITE}/images", exist_ok=True)
 shutil.copy2(os.path.join(paths.SOURCE, "assets", "jaimala-page.png"),
              os.path.join(SITE, "images", "jaimala-page.png"))
+with open(os.path.join(paths.SOURCE, "assets", "slideshow.json"), encoding="utf-8") as _f:
+    SLIDES = json.load(_f)
+for _slide in SLIDES:
+    _slide["alt"] = "Wedding photo"
+os.makedirs(f"{SITE}/images/slideshow", exist_ok=True)
+shutil.copy2(os.path.join(paths.SOURCE, "assets", "slideshow-background.png"),
+             os.path.join(SITE, "images", "slideshow", "background.png"))
+for _slide in SLIDES:
+    _name = os.path.basename(_slide["src"])
+    shutil.copy2(os.path.join(paths.SOURCE, "assets", "slideshow", _name),
+                 os.path.join(SITE, "images", "slideshow", _name))
 
 # ---------------- decisions agreed with the user ----------------
 PARENTS = {
@@ -638,6 +649,92 @@ _i_rsvp = EXTRA_SECTIONS.index('<section class="web theme-night" id="rsvp"')
 _i_bless = EXTRA_SECTIONS.index('<section class="web theme-day" id="blessings" ')
 _VENUES, _RSVP, _BLESSINGS = EXTRA_SECTIONS[:_i_rsvp], EXTRA_SECTIONS[_i_rsvp:_i_bless], EXTRA_SECTIONS[_i_bless:]
 
+_slide_data = html.escape(json.dumps(SLIDES, ensure_ascii=False), quote=True)
+SLIDESHOW = f"""
+<section class="web theme-day story-page" id="story" aria-labelledby="story-h" data-slides="{_slide_data}">
+  <canvas class="petals" data-n="7" aria-hidden="true"></canvas>
+  <div class="col"><div class="story-backdrop" aria-hidden="true"></div><div class="frame story-frame">
+    <p class="label">Our story</p>
+    <h2 id="story-h">A Few Moments Together</h2>
+    {DIV}
+    <figure class="story-photo-wrap">
+      <img class="story-photo" id="story-photo" src="{SLIDES[0]['src']}" alt="{html.escape(SLIDES[0]['alt'], quote=True)}" fetchpriority="high">
+      <button class="story-arrow story-prev" type="button" id="story-prev" aria-label="Previous photo">&#8249;</button>
+      <button class="story-arrow story-next" type="button" id="story-next" aria-label="Next photo">&#8250;</button>
+    </figure>
+  </div></div>
+</section>
+<script>
+(function () {{
+  var section = document.getElementById('story');
+  if (!section) return;
+  var slides = JSON.parse(section.dataset.slides), img = document.getElementById('story-photo');
+  var current = 0, timer = 0, swapTimer = 0, revealTimer = 0, version = 0;
+  var reduced = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  function clearTimer() {{ if (timer) window.clearTimeout(timer); timer = 0; }}
+  function clearTransitionTimers() {{
+    if (swapTimer) window.clearTimeout(swapTimer);
+    if (revealTimer) window.clearTimeout(revealTimer);
+    swapTimer = revealTimer = 0;
+  }}
+  function armTimer(token) {{
+    clearTimer();
+    if (reduced) return;
+    timer = window.setTimeout(function () {{
+      timer = 0;
+      if (token === version) show(current + 1);
+    }}, 5000);
+  }}
+  function show(index) {{
+    current = (index + slides.length) % slides.length;
+    var token = ++version;
+    clearTimer();
+    clearTransitionTimers();
+    img.alt = slides[current].alt;
+    var nextSrc = new URL(slides[current].src, document.baseURI).href;
+    function reveal() {{
+      if (token !== version) return;
+      img.onload = img.onerror = null;
+      img.classList.remove('is-changing');
+      revealTimer = window.setTimeout(function () {{ if (token === version) armTimer(token); }}, reduced ? 0 : 320);
+    }}
+    function swap() {{
+      if (token !== version) return;
+      img.onload = img.onerror = null;
+      img.onload = reveal;
+      img.onerror = reveal;
+      img.src = nextSrc;
+      if (img.complete && img.naturalWidth) reveal();
+    }}
+    if (img.currentSrc === nextSrc && img.complete && img.naturalWidth) {{
+      img.classList.remove('is-changing');
+      armTimer(token);
+      return;
+    }}
+    img.classList.add('is-changing');
+    if (reduced) swap();
+    else swapTimer = window.setTimeout(swap, 280);
+  }}
+  document.getElementById('story-prev').addEventListener('click', function () {{ show(current - 1); }});
+  document.getElementById('story-next').addEventListener('click', function () {{ show(current + 1); }});
+  var stage = section.querySelector('.story-photo-wrap'), gesture = null;
+  stage.addEventListener('pointerdown', function (event) {{
+    if (event.button !== 0 || event.target.closest('button')) return;
+    gesture = {{ id: event.pointerId, x: event.clientX, y: event.clientY }};
+    stage.setPointerCapture(event.pointerId);
+  }});
+  stage.addEventListener('pointerup', function (event) {{
+    if (!gesture || event.pointerId !== gesture.id) return;
+    var dx = event.clientX - gesture.x, dy = event.clientY - gesture.y;
+    gesture = null;
+    if (Math.abs(dx) >= 48 && Math.abs(dx) > Math.abs(dy) * 1.2) show(current + (dx < 0 ? 1 : -1));
+  }});
+  stage.addEventListener('pointercancel', function () {{ gesture = null; }});
+  show(0);
+}})();
+</script>
+"""
+
 # ---------- assemble ----------
 used_glyphs = set()
 sections = []
@@ -656,7 +753,7 @@ for P in model:
            + ('<canvas class="petals" aria-hidden="true"></canvas>' if False else '')
            + "</svg>")
     if P["n"] == 8:     # venues, the two blessings pages and the RSVP come before the closing page, which stays last
-        sections.append(_VENUES + _BLESSINGS + _RSVP)
+        sections.append(SLIDESHOW + _VENUES + _BLESSINGS + _RSVP)
     petals = ('<canvas class="petals" data-candles="true" aria-hidden="true"></canvas>'
               if P["n"] == 7 else '<canvas class="petals" aria-hidden="true"></canvas>')
     sections.append(f'<section class="page" id="page-{P["n"]}" data-label="{label}">{svg}{petals}</section>')
@@ -827,6 +924,21 @@ html.locked {{ overflow: hidden; }}
 .web .count b {{ font-weight: 600; font-size: 10cqw; line-height: 1; color: var(--accent); font-variant-numeric: tabular-nums; }}
 .web .count span {{ font-size: 3.3cqw; letter-spacing: .18em; text-transform: uppercase; font-weight: 600; }}
 .web .count-note {{ margin: 0; font-weight: 600; font-size: 4.6cqw; }}
+/* wedding memories slideshow */
+.web .story-backdrop {{ position: absolute; inset: 0; z-index: 0; background: url("images/slideshow/background.png") center / cover no-repeat; }}
+.web .story-frame {{ padding: 18cqw 8cqw 22cqw; gap: 2.5cqw; }}
+.web .story-photo-wrap {{ position: relative; display: flex; flex-direction: column; align-items: center; gap: 2.5cqw; margin: 0; touch-action: pan-y; }}
+.web .story-photo {{ display: block; width: 100%; height: min(78cqw, 62svh); box-sizing: border-box; object-fit: contain; border: 3px solid #fbf3e9; border-radius: 1.5cqw;
+  background: rgba(253,245,239,.55); box-shadow: 0 0 0 1px rgba(190,137,63,.62), 0 5px 14px rgba(60,38,30,.18); opacity: 1; transform: scale(1);
+  transition: opacity .28s ease, transform .28s ease; }}
+.web .story-photo.is-changing {{ opacity: 0; transform: scale(.985); }}
+.web .story-arrow {{ position: absolute; top: 45%; z-index: 3; display: grid; place-items: center; width: 10cqw; height: 10cqw; padding: 0;
+  border: 1px solid rgba(177,130,66,.72); border-radius: 50%; background: rgba(253,245,239,.94); color: #8a3340;
+  font: 600 8cqw/1 "Crimson Text", Georgia, serif; cursor: pointer; box-shadow: 0 2px 8px rgba(60,38,30,.13); }}
+.web .story-prev {{ left: 2cqw; }} .web .story-next {{ right: 2cqw; }}
+.web .story-arrow:hover {{ background: #f6e4e0; }}
+.web .story-arrow:focus-visible {{ outline: 3px solid var(--accent); outline-offset: 3px; }}
+@media (prefers-reduced-motion: reduce) {{ .web .story-photo {{ transition: none; }} }}
 /* venues */
 .web .tile {{ display: flex; flex-direction: column; gap: 2.6cqw; text-align: center; }}
 .web .band {{ margin: 0; font-weight: 600; font-size: 4.4cqw; letter-spacing: .06em; color: var(--ink); }}
@@ -1015,6 +1127,7 @@ html.locked {{ overflow: hidden; }}
     'page-5': ['#91d5f2', '#f1cc56', '#e7f1d1'],
     'page-6': ['#101e42', '#586f91', '#192b52'],
     'page-7': ['#e7a0b5', '#c9a2d5', '#eac1c7'],
+    'story': ['#e9c1b8', '#f4e8dc', '#dfedf3'],
     'venues': ['#83c6f4', '#d8ebef', '#dff0f7'],
     'blessings': ['#83c6f4', '#e1efcb', '#dff0f7'],
     'blessings-groom': ['#f4dc72', '#ecb847', '#fff0bb'],
