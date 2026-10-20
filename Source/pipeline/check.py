@@ -123,9 +123,11 @@ with sync_playwright() as p:
     pg.goto(url("index.html") + "?to=Asha%20%26%20Family%3Cb%3Ex%3C%2Fb%3E"); pg.wait_for_timeout(900)
     check(pg.inner_text("#intro-to").strip() == "Dear Asha & Familybx/b", "envelope greets the guest by name (markup stripped)")
     check(pg.locator("#intro-to b").count() == 0, "no HTML is injected from the link")
+    check(pg.evaluate("document.getElementById('cover-guest-name').textContent") == "Asha & Familybx/b" and pg.evaluate("getComputedStyle(document.getElementById('cover-guest')).display") != "none", "cover page shows the guest's name")
     check(pg.input_value("#rsvp-name") == "Asha & Familybx/b", "RSVP name is pre-filled")
     pg.goto(url("index.html")); pg.wait_for_timeout(700)
     check(not pg.is_visible("#intro-to"), "no greeting without a name in the link")
+    check(pg.evaluate("getComputedStyle(document.getElementById('cover-guest')).display") == "none", "cover page unchanged without a name")
     pg.close()
 
     print("4. Overview picture")

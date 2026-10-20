@@ -337,6 +337,14 @@ mono_cx = e + a / 2
 ib = group_ink(allg); shift(allg, mono_cx - (ib[0] + ib[1]) / 2)
 model[0]["_text_uses"] = model[0]["_text_uses"] + allg
 model[0]["_plain_list"] = ["Soumya & Madhur"]
+mono_top = f + d * alpha_bb[1] / mono["h"]
+_gy = mono_top - 14        # baseline of the guest's name, just above the monogram
+model[0]["_extra"].append(
+    f'<g id="cover-guest" class="cg" aria-live="polite">'
+    f'<text x="{mono_cx:.2f}" y="{_gy - 66:.2f}" text-anchor="middle" font-family="Crimson Text" font-weight="600" font-size="23" '
+    f'letter-spacing="4.6" fill="#784646">WITH LOVE, TO</text>'
+    f'<text id="cover-guest-name" x="{mono_cx:.2f}" y="{_gy:.2f}" text-anchor="middle" font-family="Crimson Text" font-style="italic" '
+    f'font-weight="600" font-size="58" fill="#b85c1d"></text></g>')
 model[0]["_extra"].append(
     f'<a class="open" href="#page-2" aria-label="Scroll down to the invitation">'
     f'<text x="{mono_cx:.2f}" y="{group_ink(allg)[3] + 50:.2f}" text-anchor="middle" font-family="Crimson Text" '
@@ -720,6 +728,7 @@ html.locked {{ overflow: hidden; }}
 .dir, .open {{ cursor: pointer; }}
 .dir:hover .dir-hit, .dir:focus-visible .dir-hit {{ fill-opacity: .12; }}
 .dir:focus-visible rect:first-child {{ stroke-width: 3; }}
+#cover-guest {{ display: none; }}
 .open text {{ animation: breathe 2.4s ease-in-out infinite; }}
 .open .chev {{ animation: nudge 1.6s ease-in-out infinite; }}
 @keyframes breathe {{ 0%, 100% {{ opacity: .7; }} 50% {{ opacity: 1; }} }}
@@ -1256,6 +1265,12 @@ html.locked {{ overflow: hidden; }}
   raw = raw.replace(/[\\u0000-\\u001f\\u007f<>]/g, '').replace(/\\s+/g, ' ').trim().slice(0, 60);
   var el = document.getElementById('intro-to');
   if (raw && el) {{ el.textContent = 'Dear ' + raw; el.hidden = false; }}
+  var g = document.getElementById('cover-guest'), gn = document.getElementById('cover-guest-name');
+  if (raw && g && gn) {{
+    gn.textContent = raw; g.style.display = 'inline';
+    var w = gn.getComputedTextLength ? gn.getComputedTextLength() : 0;      /* long names shrink to fit the card */
+    if (w > 620) gn.setAttribute('font-size', (58 * 620 / w).toFixed(1));
+  }}
   var f = document.getElementById('rsvp-name');
   function restoreInviteName() {{ if (f && raw) f.value = raw; }}
   restoreInviteName();
