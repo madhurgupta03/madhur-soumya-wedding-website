@@ -686,11 +686,26 @@ page = f"""<!doctype html>
 html, body {{ margin: 0; padding: 0; background: #fdf5ef; }}
 html {{ scroll-snap-type: y proximity; scroll-behavior: smooth; }}
 @media (prefers-reduced-motion: reduce) {{ html {{ scroll-behavior: auto; }} .open text, .open .chev {{ animation: none !important; }} }}
+.fluid-bg {{ position: fixed; inset: 0; z-index: 0; overflow: hidden; pointer-events: none;
+  background: linear-gradient(135deg, var(--fluid-base, #fdf5ef), #fdf5ef 58%, var(--fluid-base, #fdf5ef));
+  transition: background 1.2s ease; }}
+.fluid-bg i {{ position: absolute; display: block; width: 76vw; height: 76vw; max-height: 92vh; border-radius: 50%;
+  filter: blur(34px); opacity: .54; will-change: transform; }}
+.fluid-bg .wave-a {{ left: -38vw; top: -22vh; background: radial-gradient(ellipse, var(--fluid-a, #f3e2d2) 0%, transparent 70%);
+  animation: fluid-wave-a 42s ease-in-out infinite alternate; }}
+.fluid-bg .wave-b {{ right: -40vw; top: 18vh; background: radial-gradient(ellipse, var(--fluid-b, #d7e9ef) 0%, transparent 70%);
+  animation: fluid-wave-b 51s ease-in-out infinite alternate; }}
+.fluid-bg .wave-c {{ left: 18vw; bottom: -50vh; width: 82vw; height: 82vw; background: radial-gradient(ellipse, var(--fluid-a, #f3e2d2) 0%, transparent 72%);
+  animation: fluid-wave-c 58s ease-in-out infinite alternate; }}
+@keyframes fluid-wave-a {{ from {{ transform: translate3d(-4vw, -2vh, 0) scale(.94) rotate(-8deg); }} to {{ transform: translate3d(13vw, 14vh, 0) scale(1.12) rotate(12deg); }} }}
+@keyframes fluid-wave-b {{ from {{ transform: translate3d(5vw, 7vh, 0) scale(1.08) rotate(10deg); }} to {{ transform: translate3d(-14vw, -11vh, 0) scale(.92) rotate(-12deg); }} }}
+@keyframes fluid-wave-c {{ from {{ transform: translate3d(-9vw, -5vh, 0) scale(.9) rotate(8deg); }} to {{ transform: translate3d(8vw, 8vh, 0) scale(1.1) rotate(-9deg); }} }}
+@media (prefers-reduced-motion: reduce) {{ .fluid-bg i {{ animation: none !important; }} }}
 .page {{ height: 100vh; height: 100svh; display: grid; place-items: center; scroll-snap-align: start; overflow: hidden; }}
 .pg {{ display: block; height: min(100svh, calc(100vw * 16 / 9)); width: auto; aspect-ratio: 9 / 16; }}
 @media (max-aspect-ratio: 9/16) {{ .page {{ height: calc(100vw * 16 / 9); }} }}
 /* ---------- animation ---------- */
-.page {{ position: relative; }}
+.page, .web {{ position: relative; z-index: 1; }}
 .petals {{ position: absolute; inset: 0; width: 100%; height: 100%; pointer-events: none; z-index: 2; }}
 .js .page .rv {{ opacity: 0; transform: translateY(14px); transform-box: fill-box; }}
 .js .page.seen .rv {{ animation: rise 1s cubic-bezier(.2,.7,.2,1) forwards; }}
@@ -919,6 +934,7 @@ html.locked {{ overflow: hidden; }}
 </div>
 <button class="music-toggle" id="music-toggle" type="button" aria-label="Mute music" aria-pressed="false">♪ Sound on</button>
 <svg width="0" height="0" style="position:absolute" aria-hidden="true"><defs>{defs}</defs></svg>
+<div class="fluid-bg" aria-hidden="true"><i class="wave-a"></i><i class="wave-b"></i><i class="wave-c"></i></div>
 {''.join(sections)}
 <script>
 (function () {{
@@ -930,6 +946,52 @@ html.locked {{ overflow: hidden; }}
       e.target.querySelectorAll('image[data-src]').forEach(load); io.unobserve(e.target); }} }});
   }}, {{ rootMargin: '150% 0px' }});
   document.querySelectorAll('.page').forEach(function (p) {{ io.observe(p); }});
+}})();
+
+/* ---------- slow fluid background: interpolate its palette between the unchanged pages ---------- */
+(function () {{
+  var palettes = {{
+    'page-1': ['#f3e2d2', '#e4c9b4', '#fdf5ef'],
+    'page-2': ['#83c6f4', '#d8ebef', '#dff0f7'],
+    'page-3': ['#83c6f4', '#e1d39c', '#d8edf5'],
+    'page-4': ['#102044', '#394a70', '#15264b'],
+    'page-5': ['#91d5f2', '#f1cc56', '#e7f1d1'],
+    'page-6': ['#101e42', '#586f91', '#192b52'],
+    'page-7': ['#e7a0b5', '#c9a2d5', '#eac1c7'],
+    'venues': ['#83c6f4', '#d8ebef', '#dff0f7'],
+    'blessings': ['#83c6f4', '#e1efcb', '#dff0f7'],
+    'blessings-groom': ['#f4dc72', '#ecb847', '#fff0bb'],
+    'rsvp': ['#102044', '#394a70', '#15264b'],
+    'page-8': ['#a7d8ef', '#f3e2d2', '#e9f4f5']
+  }};
+  var stops = Array.prototype.map.call(document.querySelectorAll('.page, .web'), function (el) {{
+    return {{ el: el, colors: palettes[el.id] || palettes['page-2'] }};
+  }});
+  if (!stops.length) return;
+  var root = document.documentElement, raf = 0;
+  function mix(c1, c2, t) {{
+    var a = parseInt(c1.slice(1), 16), b = parseInt(c2.slice(1), 16);
+    var r = Math.round((a >> 16) + ((b >> 16) - (a >> 16)) * t);
+    var g = Math.round(((a >> 8 & 255) + ((b >> 8 & 255) - (a >> 8 & 255)) * t));
+    var b2 = Math.round(((a & 255) + ((b & 255) - (a & 255)) * t));
+    return 'rgb(' + r + ' ' + g + ' ' + b2 + ')';
+  }}
+  function paint() {{
+    raf = 0;
+    var y = window.scrollY + window.innerHeight * .5, i = 0;
+    while (i < stops.length - 1 && y > stops[i + 1].el.offsetTop + stops[i + 1].el.offsetHeight * .5) i++;
+    var left = stops[i], right = stops[Math.min(i + 1, stops.length - 1)];
+    var start = left.el.offsetTop + left.el.offsetHeight * .5;
+    var end = right.el.offsetTop + right.el.offsetHeight * .5;
+    var t = end > start ? Math.max(0, Math.min(1, (y - start) / (end - start))) : 0;
+    ['--fluid-a', '--fluid-b', '--fluid-base'].forEach(function (name, n) {{
+      root.style.setProperty(name, mix(left.colors[n], right.colors[n], t));
+    }});
+  }}
+  function schedule() {{ if (!raf) raf = requestAnimationFrame(paint); }}
+  addEventListener('scroll', schedule, {{ passive: true }});
+  addEventListener('resize', schedule, {{ passive: true }});
+  paint();
 }})();
 
 
