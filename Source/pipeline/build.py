@@ -338,9 +338,11 @@ ib = group_ink(allg); shift(allg, mono_cx - (ib[0] + ib[1]) / 2)
 model[0]["_text_uses"] = model[0]["_text_uses"] + allg
 model[0]["_plain_list"] = ["Soumya & Madhur"]
 model[0]["_extra"].append(
-    f'<a class="open" href="#page-2" aria-label="Open the invitation">'
-    f'<text x="{mono_cx:.2f}" y="{group_ink(allg)[3] + 46:.2f}" text-anchor="middle" font-family="Crimson Text" '
-    f'font-style="italic" font-size="25" letter-spacing="1.2" fill="#784646">Tap to open</text></a>')
+    f'<a class="open" href="#page-2" aria-label="Scroll down to the invitation">'
+    f'<text x="{mono_cx:.2f}" y="{group_ink(allg)[3] + 50:.2f}" text-anchor="middle" font-family="Crimson Text" '
+    f'font-style="italic" font-size="29" letter-spacing="1.6" fill="#784646">Scroll down</text>'
+    f'<path class="chev" d="M{mono_cx - 15:.2f} {group_ink(allg)[3] + 70:.2f} L{mono_cx:.2f} {group_ink(allg)[3] + 86:.2f} L{mono_cx + 15:.2f} {group_ink(allg)[3] + 70:.2f}" '
+    f'fill="none" stroke="#784646" stroke-width="3.2" stroke-linecap="round" stroke-linejoin="round"/></a>')
 print("page1 names: monogram bottom", round(mono_bottom, 1), "gap", round(gap_v, 1), "ink box", [round(v, 1) for v in group_ink(allg)])
 checklist.append(("1", "Names on cover", f"“Soumya & Madhur” added below the monogram in the same lettering as the names on page 2 (script names, 63 pt, #784646; italic “&”, #b85c1d), centred under the monogram, {gap_v:.0f} pt below it (the same gap as above the names on page 2)"))
 
@@ -637,7 +639,7 @@ page = f"""<!doctype html>
 :root {{ color-scheme: light; }}
 html, body {{ margin: 0; padding: 0; background: #fdf5ef; }}
 html {{ scroll-snap-type: y proximity; scroll-behavior: smooth; }}
-@media (prefers-reduced-motion: reduce) {{ html {{ scroll-behavior: auto; }} .open text {{ animation: none !important; }} }}
+@media (prefers-reduced-motion: reduce) {{ html {{ scroll-behavior: auto; }} .open text, .open .chev {{ animation: none !important; }} }}
 .page {{ height: 100vh; height: 100svh; display: grid; place-items: center; scroll-snap-align: start; overflow: hidden; }}
 .pg {{ display: block; height: min(100svh, calc(100vw * 16 / 9)); width: auto; aspect-ratio: 9 / 16; }}
 @media (max-aspect-ratio: 9/16) {{ .page {{ height: calc(100vw * 16 / 9); }} }}
@@ -695,7 +697,9 @@ html.locked {{ overflow: hidden; }}
 .dir:hover .dir-hit, .dir:focus-visible .dir-hit {{ fill-opacity: .12; }}
 .dir:focus-visible rect:first-child {{ stroke-width: 3; }}
 .open text {{ animation: breathe 2.4s ease-in-out infinite; }}
-@keyframes breathe {{ 0%, 100% {{ opacity: .55; }} 50% {{ opacity: 1; }} }}
+.open .chev {{ animation: nudge 1.6s ease-in-out infinite; }}
+@keyframes breathe {{ 0%, 100% {{ opacity: .7; }} 50% {{ opacity: 1; }} }}
+@keyframes nudge {{ 0%, 100% {{ transform: translateY(0); opacity: .75; }} 50% {{ transform: translateY(9px); opacity: 1; }} }}
 /* website sections: the same look as the cards. The card's own sky, garland and flowers sit behind
    the text; type is Crimson in the card colours (var(--ink) brown, var(--accent) rust); no panels, no coloured backgrounds */
 .web {{ position: relative; display: flex; justify-content: center; scroll-snap-align: start; color: var(--ink); overflow: hidden; }}
