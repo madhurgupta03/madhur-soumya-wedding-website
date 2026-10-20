@@ -455,13 +455,40 @@ def _lantern(side, pos, top, w, grad, cls):
             f'<path d="M24 72 L22 84 M36 72 L38 84" stroke="#8a3b12" stroke-width="1.2"/></svg>')
 LANTERNS = "".join(_lantern(*a) for a in [("left", 3, 12, 12, "lg1", "l1"), ("right", 4, 25, 10, "lg2", "l2"), ("left", 6, 41, 11, "lg3", "l3"),
                                           ("right", 3, 56, 12, "lg1", "l4"), ("left", 4, 71, 10, "lg2", "l5")])
-def art(kind):
+# ---- colourful butterflies and birds drifting across the bright-sky sections ----
+import random as _rnd
+_BFLY = [("#ff7a1a", "#ffc23a"), ("#2f7cff", "#7fd1ff"), ("#e8429b", "#ffa6d0"), ("#8a4bd8", "#c9a4ff"), ("#ffd21a", "#ff9a1a"), ("#17b26a", "#9cf0c2")]
+_BIRD = [("#2fb4e8", "#ffd23a", "#ff8a1a"), ("#ff6a3d", "#ffd23a", "#ffb000"), ("#2bc16b", "#ffe04a", "#ff7a1a"), ("#c04bd8", "#ffb3e6", "#ffb000")]
+def _butterfly(c1, c2, f):
+    return (f'<svg viewBox="0 0 60 50" style="--f:{f}s" aria-hidden="true">'
+            f'<g class="wl"><path d="M30 24 C14 2 2 8 4 22 C5 30 20 30 30 26Z" fill="{c1}"/><path d="M30 26 C18 30 8 40 16 46 C24 50 30 38 30 28Z" fill="{c2}"/>'
+            f'<circle cx="13" cy="16" r="3" fill="#fff" opacity=".8"/><circle cx="19" cy="40" r="2.2" fill="#fff" opacity=".8"/></g>'
+            f'<g class="wr"><path d="M30 24 C46 2 58 8 56 22 C55 30 40 30 30 26Z" fill="{c1}"/><path d="M30 26 C42 30 52 40 44 46 C36 50 30 38 30 28Z" fill="{c2}"/>'
+            f'<circle cx="47" cy="16" r="3" fill="#fff" opacity=".8"/><circle cx="41" cy="40" r="2.2" fill="#fff" opacity=".8"/></g>'
+            f'<ellipse cx="30" cy="27" rx="1.9" ry="9" fill="#3a2418"/><path d="M29 18 Q26 10 22 8 M31 18 Q34 10 38 8" fill="none" stroke="#3a2418" stroke-width="1.1" stroke-linecap="round"/></svg>')
+def _bird(body, wing, beak, f):
+    return (f'<svg viewBox="0 0 80 50" style="--f:{f}s" aria-hidden="true">'
+            f'<path d="M24 28 L4 21 L8 32Z" fill="{wing}"/><ellipse cx="38" cy="28" rx="18" ry="10" fill="{body}"/><ellipse cx="38" cy="32" rx="12" ry="5" fill="#fff" opacity=".35"/>'
+            f'<circle cx="56" cy="22" r="7.5" fill="{body}"/><path d="M62 21 L73 24 L62 27Z" fill="{beak}"/><circle cx="58" cy="20.5" r="1.9" fill="#fff"/><circle cx="58.6" cy="20.5" r=".9" fill="#222"/>'
+            f'<path class="bw" d="M32 27 C28 8 46 1 58 8 C48 14 44 22 42 29Z" fill="{wing}"/></svg>')
+def critters(n_b, n_k, seed=3):
+    r = _rnd.Random(seed); out = []
+    for i in range(n_b):
+        c1, c2 = _BFLY[i % len(_BFLY)]; rev = i % 3 == 1
+        out.append(f'<div class="crit b{" rev" if rev else ""}" style="top:{6 + 86 * (i + r.random() * .6) / n_b:.1f}%;--t:{r.randint(30, 48)}s;--d:-{r.randint(0, 40)}s;--w:{r.randint(7, 10)}cqw">'
+                   f'<div class="bob" style="--b:{r.uniform(2.2, 3.6):.1f}s">{_butterfly(c1, c2, round(r.uniform(.26, .4), 2))}</div></div>')
+    for i in range(n_k):
+        c = _BIRD[i % len(_BIRD)]; rev = i % 2 == 1
+        out.append(f'<div class="crit k{" rev" if rev else ""}" style="top:{10 + 80 * (i + .4 + r.random() * .4) / n_k:.1f}%;--t:{r.randint(20, 30)}s;--d:-{r.randint(0, 25)}s;--w:{r.randint(12, 15)}cqw">'
+                   f'<div class="bob" style="--b:{r.uniform(1.6, 2.4):.1f}s">{_bird(*c, round(r.uniform(.22, .32), 2))}</div></div>')
+    return "".join(out)
+def art(kind, fly=(5, 2)):
     sky = '<div class="sky" aria-hidden="true">' + ('<i></i><i></i><i></i><i></i>' if kind in ("day", "haldi") else '') + '</div>'
     head = HALDI_HEAD if kind == "haldi" else ART_HEAD
     foot = "" if kind == "dusk" else ART_FOOT
     extra = {"dusk": SCENE + LANTERNS + '<canvas class="glow" data-kind="fire" aria-hidden="true"></canvas>',
-             "night": '<canvas class="glow" data-kind="fly" aria-hidden="true"></canvas>', "haldi": VINES,
-             "day": VINES + HYDRANGEAS + LEAVES}.get(kind, "")
+             "night": '<canvas class="glow" data-kind="fly" aria-hidden="true"></canvas>', "haldi": VINES + critters(fly[0], fly[1], 7),
+             "day": VINES + HYDRANGEAS + LEAVES + critters(fly[0], fly[1], 3)}.get(kind, "")
     return sky + head + foot + extra
 def ev(name, time):
     return f'<li><span class="n">{name}</span><span class="t">{time}</span></li>'
@@ -517,8 +544,7 @@ EXTRA_SECTIONS = f"""
   </article>
 </div></div></section>
 <section class="web theme-night" id="rsvp" aria-labelledby="rsvp-h"><canvas class="petals" data-n="6" aria-hidden="true"></canvas><div class="col">{art("night")}<div class="frame">
-  <p class="label">Kindly RSVP</p>
-  <h2 id="rsvp-h">RSVP</h2>
+  <p class="label" id="rsvp-h">Kindly RSVP</p>
   <p class="lead">We would love to know if you can join us.</p>
   <aside class="rsvp-contact" aria-labelledby="rsvp-contact-h">
     <h3 id="rsvp-contact-h"><span>📞 Questions?</span><span>Get in touch!</span></h3>
@@ -566,7 +592,7 @@ EXTRA_SECTIONS = f"""
     <p class="lead" id="rsvp-done-msg"></p>
   </div>
 </div></div></section>
-<section class="web theme-day" id="blessings" aria-labelledby="bless-h"><canvas class="petals" data-n="9" aria-hidden="true"></canvas><div class="col">{art("day")}<div class="frame">
+<section class="web theme-day" id="blessings" aria-labelledby="bless-h"><canvas class="petals" data-n="9" aria-hidden="true"></canvas><div class="col">{art("day", (9, 4))}<div class="frame">
   <div class="hosts-box">
     <p class="label">Lovingly invited by</p>
     <p class="hosts">Umakant Gupta<span>&amp;</span>Santosh Gupta</p>
@@ -577,7 +603,7 @@ EXTRA_SECTIONS = f"""
   <p class="label">The Bride’s Family</p>
   <div class="sides">{side("Bride’s Side", bride, "bride")}</div>
 </div></div></section>
-<section class="web theme-haldi" id="blessings-groom" aria-labelledby="bless-g-h"><canvas class="petals" data-n="8" aria-hidden="true"></canvas><div class="col">{art("haldi")}<div class="frame">
+<section class="web theme-haldi" id="blessings-groom" aria-labelledby="bless-g-h"><canvas class="petals" data-n="8" aria-hidden="true"></canvas><div class="col">{art("haldi", (7, 3))}<div class="frame">
   <p class="label">With blessings of</p>
   <h2 id="bless-g-h">The Groom’s Family</h2>
   {DIV}
@@ -604,12 +630,10 @@ for P in model:
            + '<g class="rv rv3">' + "".join(P["_extra"]) + '</g>'
            + ('<canvas class="petals" aria-hidden="true"></canvas>' if False else '')
            + "</svg>")
-    if P["n"] == 8:     # venues and the two blessings pages come before the closing page; the RSVP comes last of all
-        sections.append(_VENUES + _BLESSINGS)
+    if P["n"] == 8:     # venues, the two blessings pages and the RSVP come before the closing page, which stays last
+        sections.append(_VENUES + _BLESSINGS + _RSVP)
     petals = '<canvas class="petals" aria-hidden="true"></canvas>'
     sections.append(f'<section class="page" id="page-{P["n"]}" data-label="{label}">{svg}{petals}</section>')
-    if P["n"] == 8:
-        sections.append(_RSVP)
 
 defs = "".join(f'<path id="{g}" d="{glyph_defs[g]}"/>' for g in sorted(used_glyphs) if glyph_defs.get(g))
 
@@ -837,6 +861,17 @@ html.locked {{ overflow: hidden; }}
 .web .leaf {{ position: absolute; width: 20cqw; height: auto; pointer-events: none; z-index: 1; }}
 .web .leaf.la {{ right: -6cqw; top: 14%; transform: scaleX(-1) rotate(30deg); }} .web .leaf.lb {{ left: -6cqw; top: 31%; transform: rotate(-25deg); }}
 .web .leaf.lc {{ right: -7cqw; top: 46%; transform: scaleX(-1) rotate(10deg); }} .web .leaf.ld {{ left: -7cqw; top: 58%; transform: rotate(35deg); }}
+.web .crit {{ position: absolute; left: 0; width: var(--w); pointer-events: none; z-index: 1; animation: cross var(--t) linear var(--d) infinite; }}
+.web .crit.rev {{ animation-direction: reverse; }} .web .crit.rev svg {{ transform: scaleX(-1); }}
+.web .crit svg {{ display: block; width: 100%; height: auto; overflow: visible; filter: drop-shadow(0 .6cqw .8cqw rgba(60,40,20,.25)); }}
+.web .crit .bob {{ animation: bob2 var(--b) ease-in-out infinite alternate; }}
+.web .wl, .web .wr {{ transform-origin: 30px 26px; animation: flap var(--f, .32s) ease-in-out infinite alternate; }}
+.web .bw {{ transform-origin: 36px 26px; animation: wing var(--f, .26s) ease-in-out infinite alternate; }}
+@keyframes cross {{ from {{ transform: translateX(-22cqw); }} to {{ transform: translateX(118cqw); }} }}
+@keyframes bob2 {{ from {{ transform: translateY(-2.4cqw) rotate(-3deg); }} to {{ transform: translateY(2.4cqw) rotate(3deg); }} }}
+@keyframes flap {{ from {{ transform: scaleX(1); }} to {{ transform: scaleX(.2); }} }}
+@keyframes wing {{ from {{ transform: rotate(-24deg); }} to {{ transform: rotate(26deg); }} }}
+@media (prefers-reduced-motion: reduce) {{ .web .crit {{ display: none; }} }}
 [hidden] {{ display: none !important; }}
 </style>
 </head>
