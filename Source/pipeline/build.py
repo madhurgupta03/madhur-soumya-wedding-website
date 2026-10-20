@@ -293,6 +293,8 @@ for P in model[2:7]:
     url = MAPS["havana"] if "Havana" in V[0]["text"] else MAPS["royal"]
     col = V[0]["color"]
     bw, bh, by = 250, 54, last_base + 40
+    if n in (5, 6):   # Haldi & Mehendi and Baraat: the button sits a little higher, clear of the artwork below it
+        by -= 24 if n == 5 else 28
     if n == 7:   # Jaimala: the peacock's neck sits under the centre, so the button sits in the clear sky beside it
         bw, cx = 214, 487
     if n != 7:
