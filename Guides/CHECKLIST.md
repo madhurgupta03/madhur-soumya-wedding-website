@@ -34,6 +34,7 @@ Everything not listed below is copied from the original PDF unchanged.
 |---------|---------|
 | Always starts from the envelope | Every visit and every reload opens at the closed envelope, never part-way down the page |
 | Envelope opening | Guests first see a closed envelope with a rust wax seal. One tap plays a smooth sequence (about 5 seconds): the seal pops with gold sparkles, the flap swings open, the card slides all the way out of the envelope, the empty envelope fades away, the card settles with its SM logo over the spot where the cover's logo sits, and then the card and the cover crossfade (the card fades out as the cover fades in). A "Skip" link is always available |
+| Envelope music | Tapping the seal starts `Chaap Tilak` immediately at 65% volume; it loops continuously. A fixed bottom-right wedding-palette control fades the music smoothly between 65% and muted. The source MP3 is `Source/audio/chaap-tilak.mp3`; the build copies it to `Website/audio/chaap-tilak.mp3`. The Skip link remains silent |
 | Gentle reveals | Text on each page and section rises softly into view the first time it is scrolled to. The artwork itself never moves |
 | Falling flowers | Pink rose petals, small marigolds and a few green leaves drift and tumble down, the way leaves fall, on every page and section (lighter on the venue, RSVP and blessings sections). They never block taps, and pause when off-screen to save battery |
 | Sparkle | A shower of gold sparkles bursts from the wax seal when the envelope opens, and a few soft gold stars twinkle on and off across every page and section |
@@ -64,6 +65,7 @@ Everything is rebuilt from the PDF by `python Source/make.py all`. See `CLAUDE.m
 - `index.html` — the whole site
 - `images/` — extracted artwork (about 22 MB)
 - `fonts/` — Crimson Text (SIL Open Font License)
+- `audio/` — Chaap Tilak MP3 played when the envelope opens
 
 To publish: upload this folder to Vercel (or any static host) as is.
 

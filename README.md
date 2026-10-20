@@ -2,7 +2,7 @@
 
 **To look at the site:** open `Website` and double-click **Open website.bat**. It opens http://localhost:8000 and starts at the envelope.
 
-**Dev server with hot reload:** `python3 serve.py` (or `./open.sh` to also open the browser).
+**Dev server with hot reload:** `.venv/bin/python serve.py` on macOS/Linux (or `.venv\Scripts\python.exe serve.py` in Windows; `./open.sh` also opens the browser).
 
 **AI assistants:** When ChatGPT or Codex is connected to this repository (for example, through Codex or a ChatGPT project with repository access), project context is automatic: the assistant reads `AGENTS.md`, which points to `CLAUDE.md`. Claude reads `CLAUDE.md` directly. A standalone ChatGPT chat cannot read files from your computer; open this repository in a connected workspace to give it automatic access.
 
@@ -28,4 +28,4 @@ The existing project setup is documented under "Deploying" in `CLAUDE.md`.
 - `Guides/RSVP-SETUP.md`: how replies reach the Google Form, and how to keep that working.
 - `Previews/`: pictures and a video of the current site.
 
-**One-command rebuild and check:** `python Source/make.py all` (or `build` then `check` after a small edit).
+**One-command rebuild and check:** `.venv/bin/python Source/make.py all` on macOS/Linux or `.venv\Scripts\python.exe Source\make.py all` in Windows (or `build` then `check` after a small edit). See `SETUP.md` for the one-time environment setup.
