@@ -7,7 +7,7 @@ Everything not listed below is copied from the original PDF unchanged.
 
 | # | Page | Change requested | What was done | Where in the site |
 |---|------|------------------|---------------|-------------------|
-| 1 | 2 | Replace lorem-ipsum parent names | "Daughter of Mrs. Rashmi Gupta & / Mr. Umakant Gupta" and "Son of Mrs. Bhavna Gupta & / Mr. Santosh Gupta". Same font (Crimson semibold), 28 pt, colour #b85c1d, letter spacing, two-line break after "&", same baselines, centred on the original lines | `#page-2`, the two `<text>` pairs |
+| 1 | 2 | Replace lorem-ipsum parent names | "Daughter of Mrs. Rashmi Gupta & / Mr. Umakant Gupta" and "Son of Mrs. Bhawana Gupta & / Mr. Santosh Gupta". Same font (Crimson semibold), 28 pt, colour #b85c1d, letter spacing, two-line break after "&", same baselines, centred on the original lines | `#page-2`, the two `<text>` pairs |
 | 2 | 2 | Slightly less letter spacing in "Soumya Gupta" / "Madhur Gupta" | Spacing between letters reduced so each name is 5% narrower; still centred where it was | `#page-2`, script name glyphs |
 | 3 | 2 | Slightly less letter spacing in "॥ श्री गणेशाय नमः ॥" | The 0.86 pt extra spacing between characters removed (line about 6% narrower); still centred | `#page-2`, Hindi line |
 | 4 | 3–7 | Venue address: remove bold, slightly smaller | Crimson semibold italic 34.5 pt → Crimson regular italic 31 pt on Tilak, Engagement & Sangeet, Haldi & Mehendi, Baraat and Jaimala. Colour, line breaks, centring and the top of the text kept | `#page-3` to `#page-7`, venue `<text>` lines |

@@ -114,7 +114,7 @@ A link like `https://…/?to=Sharma%20Family` greets the guest ("Dear Sharma Fam
 
 ## Facts and decisions (already confirmed with Soumya)
 
-- **Bride:** Soumya Gupta, daughter of **Mrs. Rashmi Gupta & Mr. Umakant Gupta**. **Groom:** Madhur Gupta, son of **Mrs. Bhavna Gupta & Mr. Santosh Gupta**.
+- **Bride:** Soumya Gupta, daughter of **Mrs. Rashmi Gupta & Mr. Umakant Gupta**. **Groom:** Madhur Gupta, son of **Mrs. Bhawana Gupta & Mr. Santosh Gupta**.
 - **Day 1 — Tuesday 24 Nov 2026, Havana Restro**, Opposite Bus Stand, Kanpur Road, Cantt, Jhansi (Maps: https://maps.app.goo.gl/NSd9deR3CCMiEXvz9): Tilak **4:30 PM**, Engagement & Sangeet **7:00 PM**.
 - **Day 2 — Wednesday 25 Nov 2026, The Royal Resort Orchha**, Tigela, Orchha: Haldi & Mehendi 11:30 AM, Baraat 7:00 PM, Jaimala 9:00 PM.
 - The old site wrongly said "both days at Royal Resort". The two-venue split above is correct. The Tilak time is 4:30 PM, as in the PDF.

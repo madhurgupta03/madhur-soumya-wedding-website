@@ -58,7 +58,7 @@ The current state of the site is described in `CLAUDE.md` and `Guides/CHECKLIST.
 ### How the open items were settled
 | Item | Decision |
 |---|---|
-| Parent names | Mrs. Rashmi Gupta & Mr. Umakant Gupta (Soumya), Mrs. Bhavna Gupta & Mr. Santosh Gupta (Madhur); confirmed by Soumya |
+| Parent names | Mrs. Rashmi Gupta & Mr. Umakant Gupta (Soumya), Mrs. Bhawana Gupta & Mr. Santosh Gupta (Madhur); confirmed by Soumya |
 | Tilak time | 4:30 PM, as in the PDF (the old site said 3:00 PM) |
 | "Slightly" values | venue 34.5 → 31 pt regular italic; names 5% narrower; Hindi line extra spacing removed; title-to-date gap 50.1 pt on all event pages |
 | Jaimala font | Kept as script. The title font (Alta) has no "J" in the PDF, so it can't be switched without the font file |

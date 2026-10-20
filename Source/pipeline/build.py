@@ -18,7 +18,7 @@ for _f in os.listdir(paths.FONTS):
 # ---------------- decisions agreed with the user ----------------
 PARENTS = {
     "soumya": ["Daughter of Mrs. Rashmi Gupta &", "Mr. Umakant Gupta"],
-    "madhur": ["Son of Mrs. Bhavna Gupta &", "Mr. Santosh Gupta"],
+    "madhur": ["Son of Mrs. Bhawana Gupta &", "Mr. Santosh Gupta"],
 }
 NAME_SHRINK = 0.05          # script names: line 5% narrower via tighter letter spacing
 HINDI_TRACK_CUT = 0.86      # pt removed between glyphs (the line's added tracking)
