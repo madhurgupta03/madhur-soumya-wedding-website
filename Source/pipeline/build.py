@@ -644,9 +644,11 @@ for P in model:
     used_glyphs.update(u["g"] for u in tu)
     plain = P.get("_plain") or P["_plain_list"]
     label = {1: "Cover", 2: "Families", 8: "Closing"}.get(P["n"], "Event")
+    event_page = P["n"] in range(3, 8)
     svg = (f'<svg class="pg" viewBox="0 0 810 1440" role="img" aria-label="{html.escape(" ".join(plain) or "Soumya and Madhur monogram")}">'
            + "".join(P["_body"])
-           + '<g class="rv rv1">' + "".join(use_svg(u) for u in tu if u.get("title") or (P["n"] in (1, 2) and u.get("scale", 1) * u["size"] > 40)) + '</g>'
+           + ('<g class="event-title">' + "".join(use_svg(u) for u in tu if u.get("title")) + '</g>' if event_page else '')
+           + '<g class="rv rv1">' + "".join(use_svg(u) for u in tu if (not (event_page and u.get("title"))) and (u.get("title") or (P["n"] in (1, 2) and u.get("scale", 1) * u["size"] > 40))) + '</g>'
            + '<g class="rv rv2">' + "".join(use_svg(u) for u in tu if not (u.get("title") or (P["n"] in (1, 2) and u.get("scale", 1) * u["size"] > 40))) + '</g>'
            + '<g class="rv rv3">' + "".join(P["_extra"]) + '</g>'
            + ('<canvas class="petals" aria-hidden="true"></canvas>' if False else '')

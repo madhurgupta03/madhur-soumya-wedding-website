@@ -15,6 +15,7 @@ Everything not listed below is copied from the original PDF unchanged.
 | 6 | 4 | Title "ENGAGEMENT / small & / SANGEET", remove "CEREMONY" | Done, three lines, "&" at half the title size, same title font (Alta), white, centred | `#page-4` |
 | 7 | 5 | Title "HALDI / small & / MEHENDI" | Done, three lines, "&" at half the title size, same title font and colour, centred | `#page-5` |
 | 8 | 1 | Add "Soumya & Madhur" below the monogram (requested after first preview) | Added in the same lettering as the names on page 2: script font in #784646 with the italic "&" in #b85c1d, at 70% of the page 2 size (44 pt names, 27 pt "&"). Centred just below the monogram (14 pt gap) | `#page-1` |
+| 9 | 3–7 | Keep event headings visible and prevent reveal animation replay | Event-title SVG glyphs render in their own static group, independent of the scroll observer and reveal animation. Headings remain visible even if observer setup or callbacks fail, and scrolling back does not animate them again | `#page-3` to `#page-7`, `.event-title` SVG group |
 
 ## Decisions
 
