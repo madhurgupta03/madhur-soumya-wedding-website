@@ -516,10 +516,33 @@ def critters(n_b, n_k, seed=3):
         out.append(f'<div class="crit k{" rev" if rev else ""}" style="top:{10 + 80 * (i + .4 + r.random() * .4) / n_k:.1f}%;--t:{r.randint(20, 30)}s;--d:-{r.randint(0, 25)}s;--w:{r.randint(12, 15)}cqw">'
                    f'<div class="bob" style="--b:{r.uniform(1.6, 2.4):.1f}s">{_bird(*c, round(r.uniform(.22, .32), 2))}</div></div>')
     return "".join(out)
+# ---- chandeliers hanging on gold chains (the evening page) ----
+def _chandelier(f=("f1", "f2", "f3")):
+    gold = 'stroke="url(#chg)" stroke-width="2.6" fill="none" stroke-linecap="round"'
+    candles = [(18, 58), (82, 58), (6, 80), (94, 80), (50, 62)]
+    out = ('<svg viewBox="0 0 100 124" aria-hidden="true"><defs><linearGradient id="chg" x1="0" x2="1"><stop offset="0" stop-color="#f6d98a"/><stop offset=".5" stop-color="#d9a441"/><stop offset="1" stop-color="#a87820"/></linearGradient></defs>'
+           '<circle class="halo" cx="50" cy="66" r="62" fill="url(#cg)" opacity=".55"/>'
+           '<circle cx="50" cy="5" r="3.6" fill="none" stroke="#c9972f" stroke-width="2"/>'
+           f'<path d="M50 9 V38" {gold}/><ellipse cx="50" cy="40" rx="7" ry="5.5" fill="url(#chg)"/>'
+           f'<path d="M50 40 C32 40 22 47 18 58 M50 40 C68 40 78 47 82 58" {gold}/>'
+           f'<path d="M50 46 C26 46 10 62 6 80 M50 46 C74 46 90 62 94 80" {gold}/>'
+           f'<path d="M50 46 V62" {gold}/>')
+    for i, (x, y) in enumerate(candles):
+        out += (f'<rect x="{x - 3}" y="{y - 12}" width="6" height="12" rx="1" fill="#fff4dc"/><ellipse cx="{x}" cy="{y + 1}" rx="7" ry="2.6" fill="url(#chg)"/>'
+                f'<g transform="translate({x} {y - 11}) scale(.34)"><path class="flame {f[i % 3]}" d="{_FLAME}" fill="url(#cf)"/></g>')
+    for x, y in [(6, 84), (18, 62), (30, 70), (42, 78), (50, 68), (58, 78), (70, 70), (82, 62), (94, 84)]:
+        out += (f'<path d="M{x} {y} L{x} {y + 6}" stroke="#d9a441" stroke-width="1"/>'
+                f'<path class="crys" style="animation-delay:-{(x * 7 + y * 3) % 23 / 10:.1f}s" d="M{x} {y + 5} C{x - 3.4} {y + 10} {x - 2.6} {y + 14.5} {x} {y + 15} C{x + 2.6} {y + 14.5} {x + 3.4} {y + 10} {x} {y + 5}Z" fill="#fffaf0" stroke="#e0b24e" stroke-width=".7"/>')
+    return out + '</svg>'
+CHANDS = "".join(f'<div class="chand" style="{side}:{pos}%;--len:{ln}cqw;--w:{w}cqw;--t:{t}s">{_chandelier()}</div>'
+                 for side, pos, ln, w, t in [("left", 4, 14, 25, 7), ("right", 3, 20, 20, 8.5), ("left", 12, 156, 24, 7.8), ("right", 9, 162, 22, 9)])
 def art(kind, fly=(5, 2)):
     sky = '<div class="sky" aria-hidden="true">' + ('<i></i><i></i><i></i><i></i>' if kind in ("day", "haldi") else '') + '</div>'
     head = HALDI_HEAD if kind == "haldi" else ART_HEAD
     foot = "" if kind == "dusk" else ART_FOOT
+    if kind == "evening":
+        defs = '<svg width="0" height="0" style="position:absolute" aria-hidden="true">' + SCENE[SCENE.index('<defs>'):SCENE.index('</defs>') + 7] + '</svg>'
+        return sky + head + foot + defs + VINES + HYDRANGEAS + LEAVES + CHANDS + '<canvas class="glow" data-kind="twinkle" aria-hidden="true"></canvas>'
     extra = {"dusk": SCENE + LANTERNS + '<canvas class="glow" data-kind="fire" aria-hidden="true"></canvas>',
              "night": '<canvas class="glow" data-kind="fly" aria-hidden="true"></canvas>', "haldi": VINES + critters(fly[0], fly[1], 7),
              "day": VINES + HYDRANGEAS + LEAVES + critters(fly[0], fly[1], 3)}.get(kind, "")
@@ -651,9 +674,9 @@ _VENUES, _RSVP, _BLESSINGS = EXTRA_SECTIONS[:_i_rsvp], EXTRA_SECTIONS[_i_rsvp:_i
 
 _slide_data = html.escape(json.dumps(SLIDES, ensure_ascii=False), quote=True)
 SLIDESHOW = f"""
-<section class="web theme-day story-page" id="story" aria-labelledby="story-h" data-slides="{_slide_data}">
+<section class="web theme-evening story-page" id="story" aria-labelledby="story-h" data-slides="{_slide_data}">
   <canvas class="petals" data-n="7" aria-hidden="true"></canvas>
-  <div class="col"><div class="story-backdrop" aria-hidden="true"></div><div class="frame story-frame">
+  <div class="col">{art("evening")}<div class="frame story-frame">
     <p class="label">Our story</p>
     <h2 id="story-h">A Few Moments Together</h2>
     {DIV}
@@ -925,8 +948,7 @@ html.locked {{ overflow: hidden; }}
 .web .count span {{ font-size: 3.3cqw; letter-spacing: .18em; text-transform: uppercase; font-weight: 600; }}
 .web .count-note {{ margin: 0; font-weight: 600; font-size: 4.6cqw; }}
 /* wedding memories slideshow */
-.web .story-backdrop {{ position: absolute; inset: 0; z-index: 0; background: url("images/slideshow/background.png") center / cover no-repeat; }}
-.web .story-frame {{ padding: 18cqw 8cqw 22cqw; gap: 2.5cqw; }}
+.web .story-frame {{ padding: 41cqw 8cqw 48cqw; gap: 2.5cqw; }}
 .web .story-photo-wrap {{ position: relative; display: flex; flex-direction: column; align-items: center; gap: 2.5cqw; margin: 0; touch-action: pan-y; }}
 .web .story-photo {{ display: block; width: 100%; height: min(78cqw, 62svh); box-sizing: border-box; object-fit: contain; border: 3px solid #fbf3e9; border-radius: 1.5cqw;
   background: rgba(253,245,239,.55); box-shadow: 0 0 0 1px rgba(190,137,63,.62), 0 5px 14px rgba(60,38,30,.18); opacity: 1; transform: scale(1);
@@ -1062,6 +1084,20 @@ html.locked {{ overflow: hidden; }}
 :is(#venues, #blessings, #blessings-groom) :is(.label, .band, dt, .count span) {{ color: #1d2f5c; }}
 /* no orange on these three pages: venue names, numbers and times in deep purple, lines and dots in pink */
 #venues, #blessings, #blessings-groom {{ --accent: #5a2d8a; --accent2: #5a2d8a; --gold: #d9468a; }}
+.theme-evening {{ --ink: #5e2436; --accent: #a3174f; --accent2: #a3174f; --gold: #d98a3a; --paper: #fff1e4; --line: rgba(94,36,54,.55); --line2: rgba(94,36,54,.35);
+  --hover: rgba(94,36,54,.12); --field: rgba(255,246,236,.65); --field2: rgba(255,246,236,.5); --field-ink: #3b1624; --ph: rgba(94,36,54,.55);
+  --shadow: 0 0 1.4cqw rgba(255,236,214,.95), 0 0 .5cqw rgba(255,236,214,.9); }}
+.theme-evening .sky {{ background: linear-gradient(180deg, #f9c4cf 0%, #f5a79f 30%, #f6b87f 62%, #fbd7a2 100%); }}
+.theme-evening h2 {{ color: #a3174f; }}
+.web .chand {{ position: absolute; top: 0; width: var(--w, 20cqw); display: flex; flex-direction: column; align-items: center; pointer-events: none; z-index: 1;
+  transform-origin: 50% 0; animation: sway var(--t, 7s) ease-in-out infinite alternate; }}
+.web .chand::before {{ content: ""; display: block; width: 1.5px; height: var(--len); background: linear-gradient(#e0b24e, #a87820); }}
+.web .chand svg {{ display: block; width: 100%; height: auto; overflow: visible; filter: drop-shadow(0 0 2cqw rgba(255,190,90,.55)); }}
+@keyframes sway {{ from {{ transform: rotate(-1.4deg); }} to {{ transform: rotate(1.4deg); }} }}
+@media (prefers-reduced-motion: reduce) {{ .web .chand {{ animation: none; }} }}
+.web .crys {{ transform-box: fill-box; transform-origin: 50% 0; animation: crys 2.4s ease-in-out infinite; }}
+@keyframes crys {{ 0%, 100% {{ opacity: .55; }} 50% {{ opacity: 1; filter: drop-shadow(0 0 1.5px #fff6c8); }} }}
+@media (prefers-reduced-motion: reduce) {{ .web .crys {{ animation: none; }} }}
 [hidden] {{ display: none !important; }}
 </style>
 </head>
@@ -1503,13 +1539,18 @@ html.locked {{ overflow: hidden; }}
   var reduce = window.matchMedia && matchMedia('(prefers-reduced-motion: reduce)').matches;
   var COLS = [[255, 170, 0], [226, 32, 110], [255, 96, 20], [196, 24, 64], [255, 200, 30]];
   cvs.forEach(function (cv) {{
-    var fire = cv.getAttribute('data-kind') === 'fire';
+    var fire = cv.getAttribute('data-kind') === 'fire', tw = cv.getAttribute('data-kind') === 'twinkle';
     var ctx = cv.getContext('2d'), dots = [], stars = [], sparks = [], next = 0, W = 0, H = 0, run = false, dpr = Math.min(window.devicePixelRatio || 1, 2);
     function size() {{
       W = cv.clientWidth; H = cv.clientHeight; if (!W || !H) return;
       cv.width = W * dpr; cv.height = H * dpr; ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
       dots = []; stars = [];
       if (fire) return;
+      if (tw) {{                                       /* gold and white sparkles over the whole page */
+        for (var k = 0; k < Math.round(H / 11); k++) stars.push({{ x: Math.random() * W, y: Math.random() * H, r: 1.2 + Math.random() * 2.6,
+          ph: Math.random() * 6.28, sp: .9 + Math.random() * 2.2, c: Math.random() < .55 ? [255, 244, 200] : [255, 255, 255] }});
+        return;
+      }}
       for (var i = 0; i < Math.round(H / 48); i++) dots.push({{ x: Math.random() * W, y: Math.random() * H, r: 1.6 + Math.random() * 1.8,
         a: Math.random() * 6.28, ph: Math.random() * 6.28, sp: .7 + Math.random() * 1.3 }});
       for (var j = 0; j < Math.round(H / 12); j++) stars.push({{ x: Math.random() * W, y: Math.random() * H * .75, r: .4 + Math.random() * 1.0,
@@ -1541,6 +1582,18 @@ html.locked {{ overflow: hidden; }}
         }});
         requestAnimationFrame(frame); return;
       }}
+      if (tw) {{
+        stars.forEach(function (s) {{
+          var a = Math.max(0, Math.sin(t * s.sp + s.ph)), R = s.r * (1 + a * 1.6);
+          if (a < .05) return;
+          ctx.fillStyle = 'rgba(' + s.c[0] + ',' + s.c[1] + ',' + s.c[2] + ',' + (.85 * a) + ')';
+          ctx.beginPath();                              /* four-point twinkle */
+          ctx.moveTo(s.x, s.y - R * 2.4); ctx.lineTo(s.x + R * .45, s.y - R * .45); ctx.lineTo(s.x + R * 2.4, s.y); ctx.lineTo(s.x + R * .45, s.y + R * .45);
+          ctx.lineTo(s.x, s.y + R * 2.4); ctx.lineTo(s.x - R * .45, s.y + R * .45); ctx.lineTo(s.x - R * 2.4, s.y); ctx.lineTo(s.x - R * .45, s.y - R * .45); ctx.fill();
+          ctx.fillStyle = 'rgba(255,225,150,' + (.22 * a) + ')'; ctx.beginPath(); ctx.arc(s.x, s.y, R * 3.2, 0, 6.28); ctx.fill();
+        }});
+        requestAnimationFrame(frame); return;
+      }}
       stars.forEach(function (s) {{
         ctx.fillStyle = 'rgba(255,248,225,' + (.35 + .35 * Math.sin(t * s.sp + s.ph)) + ')';
         ctx.beginPath(); ctx.arc(s.x, s.y, s.r, 0, 6.28); ctx.fill();
@@ -1556,7 +1609,7 @@ html.locked {{ overflow: hidden; }}
       requestAnimationFrame(frame);
     }}
     size(); window.addEventListener('resize', size);
-    if (reduce || !('IntersectionObserver' in window)) {{ if (!fire) {{ run = true; frame(1500); run = false; }} return; }}
+    if (reduce || !('IntersectionObserver' in window)) {{ if (!fire && !tw) {{ run = true; frame(1500); run = false; }} return; }}
     new IntersectionObserver(function (es) {{
       var v = es[0].isIntersecting;
       if (v && !run) {{ run = true; requestAnimationFrame(frame); }} else if (!v) run = false;
