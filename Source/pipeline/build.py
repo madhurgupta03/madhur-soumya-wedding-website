@@ -1667,8 +1667,7 @@ We'd love for you to join us on *24th &amp; 25th November 2026* in Jhansi, Uttar
 Find our wedding invitation and celebration details here:
 🔗 {link}
 
-With love,
-Madhur &amp; Soumya ❤️</textarea>
+From Gupta Family</textarea>
 <div class="bar"><button id="copyall" type="button">Copy all names and links</button></div><p id="status" class="status" role="status" aria-live="polite"></p><div id="out"></div>
 <script>
 var SITE_URL='https://madhur-soumya-wedding-website.vercel.app/';
