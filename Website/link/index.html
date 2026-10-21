@@ -12,8 +12,8 @@ button{font:700 15px Georgia,serif;padding:9px 15px;border-radius:999px;border:1
 <h1>Personal invitation links</h1><p class="intro">Add each guest or family name on a separate line. Their link greets them on the envelope and pre-fills the RSVP name.</p>
 <label for="base">Invitation website</label><input id="base" readonly aria-readonly="true">
 <p class="hint">Leave names blank for a general invitation without a greeting. The website address is fixed; edit the message and use {name} and {link} where guest details should appear.</p>
-<label for="names">Guest or family names</label><textarea id="names" placeholder="Madhu Gupta and family&#10;Aunty Rekha&#10;Rahul &amp; Priya"></textarea>
-<label for="msg">Invitation message</label><textarea id="msg">Dear {name},
+<label for="names">Guest or family names</label><textarea id="names" autocomplete="off" placeholder="e.g. Madhu Gupta and family"></textarea>
+<label for="msg">Invitation message</label><textarea id="msg" autocomplete="off">{name},
 
 With joy in our hearts, we're delighted to share that *Madhur &amp; Soumya are getting married!* 💍✨
 
@@ -28,8 +28,9 @@ Madhur &amp; Soumya ❤️</textarea>
 <script>
 var SITE_URL='https://madhur-soumya-wedding-website.vercel.app/';
 var $=function(i){return document.getElementById(i)};$('base').value=SITE_URL;
+try{localStorage.removeItem('invite-message')}catch(e){}
 function guestLink(name){return SITE_URL+(name?'?to='+encodeURIComponent(name):'')}
-function messageFor(name,url){var template=$('msg').value;if(!name)template=template.replace(/^Dear \{name\},\s*\n+/i,'');return template.split('{name}').join(name).split('{link}').join(url)}
+function messageFor(name,url){var template=$('msg').value;if(!name)template=template.replace(/^\{name\},\s*\n+/i,'');return template.split('{name}').join(name).split('{link}').join(url)}
 function copyText(value){if(navigator.clipboard&&window.isSecureContext)return navigator.clipboard.writeText(value);var t=document.createElement('textarea');t.value=value;t.style.position='fixed';t.style.opacity='0';document.body.append(t);t.select();var ok=document.execCommand('copy');t.remove();return ok?Promise.resolve():Promise.reject()}
 function render(){var out=$('out');out.textContent='';var names=$('names').value.split(/\n/).map(function(x){return x.trim()}).filter(Boolean);if(!names.length)names=[''];names.forEach(function(name){
  var displayName=name||'general invitation',url=guestLink(name),row=document.createElement('section');row.className='row';var title=document.createElement('h2');title.textContent=name||'General invitation (no name)';var link=document.createElement('input');link.value=url;link.readOnly=true;link.setAttribute('aria-label','Invitation link for '+displayName);
@@ -37,7 +38,10 @@ function render(){var out=$('out');out.textContent='';var names=$('names').value
  var copyMessage=document.createElement('button');copyMessage.type='button';copyMessage.textContent='Copy invitation message';copyMessage.onclick=function(){copyText(messageFor(name,url)).then(function(){$('status').textContent='Invitation message copied for '+displayName}).catch(function(){$('status').textContent='Could not copy automatically'})};
  var wa=document.createElement('button');wa.type='button';wa.textContent='Open WhatsApp';wa.onclick=function(){window.open('https://api.whatsapp.com/send/?text='+encodeURIComponent(messageFor(name,url)),'_blank','noopener')};bar.append(copy,copyMessage,wa);row.append(title,link,bar);out.append(row)
  })}
-$('names').oninput=render;$('msg').oninput=function(){try{localStorage.setItem('invite-message',$('msg').value)}catch(e){}};
-try{var saved=localStorage.getItem('invite-message');if(saved)$('msg').value=saved}catch(e){}
+$('names').oninput=render;
+var DEFAULT_MESSAGE=$('msg').value;
+function resetForm(){ $('names').value='';$('msg').value=DEFAULT_MESSAGE;render() }
+window.addEventListener('pageshow',resetForm);
+resetForm();
 $('copyall').onclick=function(){var names=$('names').value.split(/\n/).map(function(x){return x.trim()}).filter(Boolean);if(!names.length)names=[''];var rows=names.map(function(name){return name?name+'	'+guestLink(name):guestLink('')}).join('\n');copyText(rows).then(function(){$('status').textContent='All names and links copied'}).catch(function(){$('status').textContent='Could not copy automatically'})};render();
 </script></main></body></html>
