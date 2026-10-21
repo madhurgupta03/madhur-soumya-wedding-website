@@ -542,7 +542,7 @@ def art(kind, fly=(5, 2)):
     foot = "" if kind == "dusk" else ART_FOOT
     if kind == "evening":
         defs = '<svg width="0" height="0" style="position:absolute" aria-hidden="true">' + SCENE[SCENE.index('<defs>'):SCENE.index('</defs>') + 7] + '</svg>'
-        return sky + head + foot + defs + VINES + HYDRANGEAS + LEAVES + CHANDS + '<canvas class="glow" data-kind="twinkle" aria-hidden="true"></canvas>'
+        return sky + head + foot + defs + VINES + HYDRANGEAS + LEAVES + CHANDS
     extra = {"dusk": SCENE + LANTERNS + '<canvas class="glow" data-kind="fire" aria-hidden="true"></canvas>',
              "night": '<canvas class="glow" data-kind="fly" aria-hidden="true"></canvas>', "haldi": VINES + critters(fly[0], fly[1], 7),
              "day": VINES + HYDRANGEAS + LEAVES + critters(fly[0], fly[1], 3)}.get(kind, "")
