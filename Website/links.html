@@ -1,33 +1,46 @@
 <!doctype html>
 <html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Invitation links - Soumya &amp; Madhur</title><meta name="robots" content="noindex">
+<title>Personal invitations - Soumya &amp; Madhur</title><meta name="robots" content="noindex">
 <style>
-body{font:16px/1.5 Georgia,serif;color:#784646;background:#fdf5ef;margin:0;padding:24px 16px 60px}
-main{max-width:760px;margin:0 auto}h1{font-weight:400;color:#b85c1d;margin:0 0 4px}p.s{margin:0 0 20px;font-style:italic}
-label{display:block;font-weight:700;margin:18px 0 6px}input,textarea{width:100%;box-sizing:border-box;font:inherit;padding:10px 12px;border:1.4px solid #c9a99a;border-radius:10px;background:#fff;color:#4f2c2c}
-textarea{min-height:130px}button{font:700 15px Georgia,serif;letter-spacing:.06em;padding:8px 16px;border-radius:999px;border:1.5px solid #784646;background:transparent;color:#784646;cursor:pointer}
-button:hover{background:rgba(120,70,70,.12)}.row{display:grid;grid-template-columns:1fr auto auto;gap:8px;align-items:center;margin:10px 0;padding:10px 12px;background:#fff;border:1px solid #ecd9cc;border-radius:12px}
-.row b{grid-column:1/-1}.row input{grid-column:1;font-size:14px}.bar{display:flex;gap:10px;margin:16px 0;flex-wrap:wrap}small{color:#9a7468}
+:root{color-scheme:light}*{box-sizing:border-box}body{font:16px/1.5 Georgia,serif;color:#784646;background:#fdf5ef;margin:0;padding:24px 16px 60px}
+main{max-width:760px;margin:0 auto}h1{font-weight:400;color:#b85c1d;margin:0 0 4px}p{margin:0 0 18px}.intro{font-style:italic}
+label{display:block;font-weight:700;margin:18px 0 6px}input,textarea{width:100%;font:inherit;padding:10px 12px;border:1.4px solid #c9a99a;border-radius:10px;background:#fff;color:#4f2c2c}
+textarea{min-height:126px;resize:vertical}input[readonly]{color:#76584e;background:#fffaf6}.hint{color:#9a7468;font-size:14px}
+button{font:700 15px Georgia,serif;padding:9px 15px;border-radius:999px;border:1.5px solid #784646;background:#fffaf6;color:#784646;cursor:pointer}button:hover{background:#f2e4db}.bar{display:flex;gap:10px;margin:16px 0;flex-wrap:wrap}
+.row{margin:12px 0;padding:14px;background:#fff;border:1px solid #ecd9cc;border-radius:12px}.row h2{font-size:18px;font-weight:400;margin:0 0 8px}.row input{font-size:14px}.row .bar{margin:10px 0 0}.status{min-height:1.5em;color:#784646}
 </style></head><body><main>
-<h1>Personal invitation links</h1><p class="s">Type each guest or family on its own line. Each link opens the invitation with &ldquo;Dear &hellip;&rdquo; on the envelope and their name already in the RSVP.</p>
-<label for="base">Website address</label><input id="base" value="https://soumyamadhurweddinginvitation.vercel.app/">
-<label for="names">Names (one per line)</label><textarea id="names" placeholder="Sharma Family&#10;Aunty Rekha&#10;Rahul &amp; Priya"></textarea>
-<label for="msg">WhatsApp message <small>({name} and {link} are filled in)</small></label>
-<textarea id="msg">Dear {name}, you are warmly invited to the wedding of Soumya &amp; Madhur. Please open your invitation here: {link}</textarea>
-<div class="bar"><button id="copyall" type="button">Copy all (name + link)</button></div><div id="out"></div>
+<h1>Personal invitation links</h1><p class="intro">Add each guest or family name on a separate line. Their link greets them on the envelope and pre-fills the RSVP name.</p>
+<label for="base">Invitation website</label><input id="base" readonly aria-readonly="true">
+<p class="hint">Leave names blank for a general invitation without a greeting. The website address is fixed; edit the message and use {name} and {link} where guest details should appear.</p>
+<label for="names">Guest or family names</label><textarea id="names" placeholder="Madhu Gupta and family&#10;Aunty Rekha&#10;Rahul &amp; Priya"></textarea>
+<label for="msg">Invitation message</label><textarea id="msg">Dear {name},
+
+With immense love and happiness, we are delighted to share a very special moment in our lives with you. 💖
+*Madhur &amp; Soumya are getting married!* 💍✨
+
+As we begin this beautiful new chapter together, we would be honoured to have your love, blessings, and good wishes as we celebrate our wedding on 24th &amp; 25th November 2026 in Jhansi, Uttar Pradesh.
+
+We have created a wedding invitation website with all the details of our celebrations. Please find the invitation and other information here:
+🔗 {link}
+
+Your presence and blessings would mean the world to us and our families. We sincerely hope you can join us in making these moments even more memorable. 🥰
+
+With love and warm regards,
+Madhur &amp; Soumya ❤️</textarea>
+<div class="bar"><button id="copyall" type="button">Copy all names and links</button></div><p id="status" class="status" role="status" aria-live="polite"></p><div id="out"></div>
 <script>
-var $=function(i){return document.getElementById(i)};
-try{var sv=localStorage.getItem('base');if(sv)$('base').value=sv}catch(e){}
-function link(n){var b=$('base').value.trim();if(b&&b.slice(-1)!=='/'&&b.indexOf('?')<0)b+='/';return b+'?to='+encodeURIComponent(n)}
-function render(){var out=$('out');out.textContent='';try{localStorage.setItem('base',$('base').value)}catch(e){}
- $('names').value.split(/\n/).map(function(x){return x.trim()}).filter(Boolean).forEach(function(n){
-  var u=link(n),r=document.createElement('div');r.className='row';
-  var t=document.createElement('b');t.textContent=n;var i=document.createElement('input');i.value=u;i.readOnly=true;
-  var c=document.createElement('button');c.textContent='Copy';c.onclick=function(){navigator.clipboard.writeText(u);c.textContent='Copied'};
-  var w=document.createElement('button');w.textContent='WhatsApp';w.onclick=function(){
-   window.open('https://wa.me/?text='+encodeURIComponent($('msg').value.split('{name}').join(n).split('{link}').join(u)),'_blank','noopener')};
-  r.append(t,i,c,w);out.append(r)})}
-$('names').oninput=$('base').oninput=render;
-$('copyall').onclick=function(){var l=$('names').value.split(/\n/).map(function(x){return x.trim()}).filter(Boolean).map(function(n){return n+'\t'+link(n)}).join('\n');navigator.clipboard.writeText(l);$('copyall').textContent='Copied'};
-render();
+var SITE_URL='https://madhur-soumya-wedding-website.vercel.app/';
+var $=function(i){return document.getElementById(i)};$('base').value=SITE_URL;
+function guestLink(name){return SITE_URL+(name?'?to='+encodeURIComponent(name):'')}
+function messageFor(name,url){var template=$('msg').value;if(!name)template=template.replace(/^Dear \{name\},\s*\n+/i,'');return template.split('{name}').join(name).split('{link}').join(url)}
+function copyText(value){if(navigator.clipboard&&window.isSecureContext)return navigator.clipboard.writeText(value);var t=document.createElement('textarea');t.value=value;t.style.position='fixed';t.style.opacity='0';document.body.append(t);t.select();var ok=document.execCommand('copy');t.remove();return ok?Promise.resolve():Promise.reject()}
+function render(){var out=$('out');out.textContent='';var names=$('names').value.split(/\n/).map(function(x){return x.trim()}).filter(Boolean);if(!names.length)names=[''];names.forEach(function(name){
+ var displayName=name||'general invitation',url=guestLink(name),row=document.createElement('section');row.className='row';var title=document.createElement('h2');title.textContent=name||'General invitation (no name)';var link=document.createElement('input');link.value=url;link.readOnly=true;link.setAttribute('aria-label','Invitation link for '+displayName);
+ var bar=document.createElement('div');bar.className='bar';var copy=document.createElement('button');copy.type='button';copy.textContent='Copy link';copy.onclick=function(){copyText(url).then(function(){$('status').textContent='Link copied for '+displayName}).catch(function(){$('status').textContent='Could not copy automatically; select the link to copy it'})};
+ var copyMessage=document.createElement('button');copyMessage.type='button';copyMessage.textContent='Copy invitation message';copyMessage.onclick=function(){copyText(messageFor(name,url)).then(function(){$('status').textContent='Invitation message copied for '+displayName}).catch(function(){$('status').textContent='Could not copy automatically'})};
+ var wa=document.createElement('button');wa.type='button';wa.textContent='Open WhatsApp';wa.onclick=function(){window.open('https://api.whatsapp.com/send/?text='+encodeURIComponent(messageFor(name,url)),'_blank','noopener')};bar.append(copy,copyMessage,wa);row.append(title,link,bar);out.append(row)
+ })}
+$('names').oninput=render;$('msg').oninput=function(){try{localStorage.setItem('invite-message',$('msg').value)}catch(e){}};
+try{var saved=localStorage.getItem('invite-message');if(saved)$('msg').value=saved}catch(e){}
+$('copyall').onclick=function(){var names=$('names').value.split(/\n/).map(function(x){return x.trim()}).filter(Boolean);if(!names.length)names=[''];var rows=names.map(function(name){return name?name+'	'+guestLink(name):guestLink('')}).join('\n');copyText(rows).then(function(){$('status').textContent='All names and links copied'}).catch(function(){$('status').textContent='Could not copy automatically'})};render();
 </script></main></body></html>

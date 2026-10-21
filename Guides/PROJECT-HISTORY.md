@@ -90,6 +90,8 @@ The current state of the site is described in `CLAUDE.md` and `Guides/CHECKLIST.
 18. Remove the visible slideshow photo counter; photo sequence numbering is not needed in the interface. Keep the internal chronological photo ordering and filenames.
 19. Replace the blue fluid gradient visible around the slideshow with warm blush and ivory tones to harmonize with the photo-first background.
 20. Confirm the page-seven Jaimala illustration difference from the approved PDF is intentional: the website includes the couple varmala illustration, while the original PDF comparison does not. Do not treat that known visual comparison failure as a regression or remove the illustration without a new request. See `Guides/CHECKLIST.md` → "Accepted difference from the approved PDF."
+21. Add a deployed `/link/` page for creating personalized guest invitation links. Use the current live site address from `README.md` as a fixed base; let the invitation message be edited, support personalized names and links, and provide copy and WhatsApp actions.
+22. Set the WhatsApp invitation copy to the supplied wedding message, formatted with WhatsApp bold markers and a personalized guest greeting. Keep the message editable; when no guest name is provided, use a general version without the greeting and link to the site root.
 
 ## 3. Places outside this folder
 

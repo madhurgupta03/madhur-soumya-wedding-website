@@ -82,4 +82,5 @@ To publish: upload this folder to Vercel (or any static host) as is.
 | Feature | What it does |
 |---|---|
 | `?to=Name` in the link | Envelope shows "Dear Name" above "Tap the seal to open"; the RSVP name field is pre-filled (editable). Names are plain text, max 60 characters. No change to the approved card pages |
-| `Website/links.html` | Link maker: one name per line gives a link, Copy, and a WhatsApp button with an editable message; "Copy all" gives name + link for pasting into a sheet. Kept out of the deploy via `.vercelignore` |
+| `Website/link/index.html` (`/link`) | Deployed link maker: each guest or family name creates a personal link on the fixed live domain; with no name, it provides a general invitation using the site root and omits the greeting; the page explains this option. Includes copy-link, copy-message, and WhatsApp actions. The invitation message is editable and supports `{name}` and `{link}`; the template is saved in the browser. |
+| `Website/links.html` | Local convenience copy of the same link maker. |
