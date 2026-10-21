@@ -1660,17 +1660,14 @@ button{font:700 15px Georgia,serif;padding:9px 15px;border-radius:999px;border:1
 <label for="names">Guest or family names</label><textarea id="names" placeholder="Madhu Gupta and family&#10;Aunty Rekha&#10;Rahul &amp; Priya"></textarea>
 <label for="msg">Invitation message</label><textarea id="msg">Dear {name},
 
-With immense love and happiness, we are delighted to share a very special moment in our lives with you. 💖
-*Madhur &amp; Soumya are getting married!* 💍✨
+With joy in our hearts, we're delighted to share that *Madhur &amp; Soumya are getting married!* 💍✨
 
-As we begin this beautiful new chapter together, we would be honoured to have your love, blessings, and good wishes as we celebrate our wedding on 24th &amp; 25th November 2026 in Jhansi, Uttar Pradesh.
+We'd love for you to join us on *24th &amp; 25th November 2026* in Jhansi, Uttar Pradesh. Your love and blessings would mean so much to us. 💖
 
-We have created a wedding invitation website with all the details of our celebrations. Please find the invitation and other information here:
+Find our wedding invitation and celebration details here:
 🔗 {link}
 
-Your presence and blessings would mean the world to us and our families. We sincerely hope you can join us in making these moments even more memorable. 🥰
-
-With love and warm regards,
+With love,
 Madhur &amp; Soumya ❤️</textarea>
 <div class="bar"><button id="copyall" type="button">Copy all names and links</button></div><p id="status" class="status" role="status" aria-live="polite"></p><div id="out"></div>
 <script>
