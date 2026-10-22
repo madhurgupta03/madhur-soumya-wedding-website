@@ -103,6 +103,10 @@ Where things live in `build.py` (search for these markers):
 
 A link like `https://…/?to=Sharma%20Family` greets the guest ("Dear Sharma Family" on the envelope) and pre-fills the RSVP name. `/link` turns a list of names into personal links on the fixed live domain. With no name, it creates a general invitation without a greeting and links to the site root. The invitation message is editable, with `{name}` and `{link}` placeholders, and can be copied or opened in WhatsApp. The same tool is also generated as `Website/links.html` for local use. Names are shown as plain text only, so nothing from a link can inject HTML. `check.py` section 3b covers guest-link behavior.
 
+## Save the Date photo
+
+`Source/pipeline/savedate_og.py` makes `Website/save-the-date-og.jpg` (1200 x 630) on every build from the two childhood photos in `Source/assets/save-the-date/` (Madhur in the pink shirt, Soumya in the yellow dress), with the names and dates. It is the `og:image` of the invitation, so any invitation link previews as the photo of us when sent on WhatsApp. The personal links page (`/link/`, also `links.html`) shows it with a download button, so it can also be attached to the message. There is no Save the Date page inside the invitation.
+
 ## Rules from the owner — do not break these
 
 1. **Copy the approved PDF exactly** (`1_ORIGINAL_approved_design.pdf`): same colours (exact hex values from the PDF), positions, alignment, margins, spacing, fonts and every word, including **"॥ श्री गणेशाय नमः ॥"**. Change only what `Guides/CHECKLIST.md` lists.

@@ -14,6 +14,8 @@ OPAC = json.load(open(f"{S}/opacity.json", encoding="utf-8"))
 os.makedirs(f"{SITE}/fonts", exist_ok=True)
 for _f in os.listdir(paths.FONTS):
     shutil.copy2(os.path.join(paths.FONTS, _f), os.path.join(SITE, "fonts", _f))
+import savedate_og
+savedate_og.make(SITE, os.path.join(paths.SOURCE, "assets"), paths.FONTS)     # Website/save-the-date-og.jpg
 os.makedirs(f"{SITE}/audio", exist_ok=True)
 shutil.copy2(os.path.join(paths.SOURCE, "audio", "chaap-tilak.mp3"), os.path.join(SITE, "audio", "chaap-tilak.mp3"))
 os.makedirs(f"{SITE}/images", exist_ok=True)
@@ -793,11 +795,14 @@ page = f"""<!doctype html>
 <meta name="theme-color" content="#fdf5ef">
 <script>document.documentElement.className += " js locked";/* always start from the envelope: no restored scroll position, no #section jump */try {{ if ("scrollRestoration" in history) history.scrollRestoration = "manual"; }} catch (e) {{}}if (location.hash) {{ try {{ history.replaceState(null, "", location.href.split("#")[0]); }} catch (e) {{}} }}window.scrollTo(0, 0);function top0() {{ window.scrollTo(0, 0); }} addEventListener("DOMContentLoaded", top0); addEventListener("load", function () {{ top0(); setTimeout(top0, 0); }});addEventListener("pageshow", function (e) {{ if (e.persisted) location.reload(); }});</script>
 <meta property="og:type" content="website">
-<meta property="og:title" content="Soumya & Madhur \u2022 24\u201325 November 2026">
-<meta property="og:description" content="You are invited to the wedding of Soumya & Madhur. Jhansi &amp; Orchha.">
-<meta property="og:image" content="https://soumyamadhurweddinginvitation.vercel.app/og-cover.jpg">
+<meta property="og:title" content="Soumya &amp; Madhur \u2022 24\u201325 November 2026">
+<meta property="og:description" content="You are invited to the wedding of Soumya &amp; Madhur. Jhansi &amp; Orchha.">
+<meta property="og:image" content="https://madhur-soumya-wedding-website.vercel.app/save-the-date-og.jpg">
 <meta property="og:image:width" content="1200">
 <meta property="og:image:height" content="630">
+<meta property="og:image:secure_url" content="https://madhur-soumya-wedding-website.vercel.app/save-the-date-og.jpg">
+<meta property="og:image:type" content="image/jpeg">
+<meta property="og:image:alt" content="Save the Date: Soumya and Madhur, 24 and 25 November 2026">
 <meta name="twitter:card" content="summary_large_image">
 <style>
 @font-face {{ font-family: "Crimson Text"; font-style: normal; font-weight: 600; font-display: block;
@@ -1653,12 +1658,35 @@ label{display:block;font-weight:700;margin:18px 0 6px}input,textarea{width:100%;
 textarea{min-height:126px;resize:vertical}input[readonly]{color:#76584e;background:#fffaf6}.hint{color:#9a7468;font-size:14px}
 button{font:700 15px Georgia,serif;padding:9px 15px;border-radius:999px;border:1.5px solid #784646;background:#fffaf6;color:#784646;cursor:pointer}button:hover{background:#f2e4db}.bar{display:flex;gap:10px;margin:16px 0;flex-wrap:wrap}
 .row{margin:12px 0;padding:14px;background:#fff;border:1px solid #ecd9cc;border-radius:12px}.row h2{font-size:18px;font-weight:400;margin:0 0 8px}.row input{font-size:14px}.row .bar{margin:10px 0 0}.status{min-height:1.5em;color:#784646}
+.std{margin:6px 0 4px}.std img{display:block;width:100%;height:auto;border-radius:12px;border:1px solid #ecd9cc;background:#fff}.std .hint{margin:8px 0 8px}
+.mode{display:grid;grid-template-columns:1fr 1fr;gap:10px}.mode label{margin:0;font-weight:400;cursor:pointer}.mode input{position:absolute;opacity:0;width:1px;height:1px}
+.mode span{display:block;padding:12px 14px;border:1.5px solid #c9a99a;border-radius:12px;background:#fff;font-size:15px}.mode b{display:block;color:#b85c1d;font-size:16px}
+.mode input:checked+span{border-color:#784646;background:#f7e8dc;box-shadow:0 0 0 2px #784646 inset}.mode input:focus-visible+span{outline:3px solid #b85c1d;outline-offset:2px}
+a.dl{display:inline-block;font:700 15px Georgia,serif;padding:9px 15px;border-radius:999px;border:1.5px solid #784646;background:#fffaf6;color:#784646;text-decoration:none}a.dl:hover{background:#f2e4db}
 </style></head><body><main>
 <h1>Personal invitation links</h1><p class="intro">Add each guest or family name on a separate line. Their link greets them on the envelope and pre-fills the RSVP name.</p>
+<section class="std"><img src="/save-the-date-og.jpg" alt="Save the Date: Soumya and Madhur, 24 and 25 November 2026" width="1200" height="630">
+<p class="hint">Save the Date is the default. Every link shows this photo when it is sent on WhatsApp. On a phone, &ldquo;Send with photo&rdquo; shares the picture with the message; you can also download it and attach it yourself.</p>
+<a class="dl" href="/save-the-date-og.jpg" download="save-the-date-soumya-madhur.jpg">Download the Save the Date photo</a></section>
 <label for="base">Invitation website</label><input id="base" readonly aria-readonly="true">
 <p class="hint">Leave names blank for a general invitation without a greeting. The website address is fixed; edit the message and use {name} and {link} where guest details should appear.</p>
+<label>What are you sending?</label>
+<div class="mode">
+<label><input type="radio" name="mode" value="std" checked><span><b>Save the date</b>The default. A Save the Date message, and the link shows our photo.</span></label>
+<label><input type="radio" name="mode" value="inv"><span><b>Invitation</b>The full invitation message.</span></label>
+</div>
 <label for="names">Guest or family names</label><textarea id="names" autocomplete="off" placeholder="e.g. Madhur Gupta and family"></textarea>
-<label for="msg">Invitation message</label><textarea id="msg" autocomplete="off">{name},
+<label for="msg">Message</label><textarea id="msg" autocomplete="off">{name},
+
+💌 *Save the Date!* 💌
+
+*Madhur &amp; Soumya are getting married* on *24th &amp; 25th November 2026* in Jhansi, Uttar Pradesh. Please keep these days free for us! 💖
+
+Our invitation and all the details are here:
+🔗 {link}
+
+From Gupta Family</textarea>
+<textarea id="msg-inv" hidden>{name},
 
 With joy in our hearts, we're delighted to share that *Madhur &amp; Soumya are getting married!* 💍✨
 
@@ -1676,15 +1704,18 @@ try{localStorage.removeItem('invite-message')}catch(e){}
 function guestLink(name){return SITE_URL+(name?'?to='+encodeURIComponent(name):'')}
 function messageFor(name,url){var template=$('msg').value;if(!name)template=template.replace(/^\\{name\\},\\s*\\n+/i,'');return template.split('{name}').join(name).split('{link}').join(url)}
 function copyText(value){if(navigator.clipboard&&window.isSecureContext)return navigator.clipboard.writeText(value);var t=document.createElement('textarea');t.value=value;t.style.position='fixed';t.style.opacity='0';document.body.append(t);t.select();var ok=document.execCommand('copy');t.remove();return ok?Promise.resolve():Promise.reject()}
+function sendWithPhoto(name,url){fetch('/save-the-date-og.jpg').then(function(r){return r.blob()}).then(function(b){var d={files:[new File([b],'save-the-date.jpg',{type:'image/jpeg'})],text:messageFor(name,url)};if(!navigator.canShare(d))throw new Error('nofiles');return navigator.share(d)}).catch(function(e){if(e&&e.name==='AbortError')return;window.open('https://api.whatsapp.com/send/?text='+encodeURIComponent(messageFor(name,url)),'_blank','noopener')})}
 function render(){var out=$('out');out.textContent='';var names=$('names').value.split(/\\n/).map(function(x){return x.trim()}).filter(Boolean);if(!names.length)names=[''];names.forEach(function(name){
  var displayName=name||'general invitation',url=guestLink(name),row=document.createElement('section');row.className='row';var title=document.createElement('h2');title.textContent=name||'General invitation (no name)';var link=document.createElement('input');link.value=url;link.readOnly=true;link.setAttribute('aria-label','Invitation link for '+displayName);
  var bar=document.createElement('div');bar.className='bar';var copy=document.createElement('button');copy.type='button';copy.textContent='Copy link';copy.onclick=function(){copyText(url).then(function(){$('status').textContent='Link copied for '+displayName}).catch(function(){$('status').textContent='Could not copy automatically; select the link to copy it'})};
  var copyMessage=document.createElement('button');copyMessage.type='button';copyMessage.textContent='Copy invitation message';copyMessage.onclick=function(){copyText(messageFor(name,url)).then(function(){$('status').textContent='Invitation message copied for '+displayName}).catch(function(){$('status').textContent='Could not copy automatically'})};
- var wa=document.createElement('button');wa.type='button';wa.textContent='Open WhatsApp';wa.onclick=function(){window.open('https://api.whatsapp.com/send/?text='+encodeURIComponent(messageFor(name,url)),'_blank','noopener')};bar.append(copy,copyMessage,wa);row.append(title,link,bar);out.append(row)
+ var wa=document.createElement('button');wa.type='button';wa.textContent='Open WhatsApp';wa.onclick=function(){window.open('https://api.whatsapp.com/send/?text='+encodeURIComponent(messageFor(name,url)),'_blank','noopener')};bar.append(copy,copyMessage,wa);if(mode()==='std'&&navigator.share&&navigator.canShare){var ph=document.createElement('button');ph.type='button';ph.textContent='Send with photo';ph.onclick=function(){sendWithPhoto(name,url)};bar.append(ph)}row.append(title,link,bar);out.append(row)
  })}
 $('names').oninput=render;
-var DEFAULT_MESSAGE=$('msg').value;
-function resetForm(){ $('names').value='';$('msg').value=DEFAULT_MESSAGE;render() }
+var MSG={std:$('msg').value,inv:$('msg-inv').value};
+function mode(){return document.querySelector('input[name=mode]:checked').value}
+document.querySelectorAll('input[name=mode]').forEach(function(x){x.onchange=function(){$('msg').value=MSG[mode()];render()}});
+function resetForm(){ document.querySelector('input[name=mode][value=std]').checked=true;$('names').value='';$('msg').value=MSG.std;render() }
 window.addEventListener('pageshow',resetForm);
 resetForm();
 $('copyall').onclick=function(){var names=$('names').value.split(/\\n/).map(function(x){return x.trim()}).filter(Boolean);if(!names.length)names=[''];var rows=names.map(function(name){return name?name+'\t'+guestLink(name):guestLink('')}).join('\\n');copyText(rows).then(function(){$('status').textContent='All names and links copied'}).catch(function(){$('status').textContent='Could not copy automatically'})};render();
