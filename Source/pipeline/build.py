@@ -1626,6 +1626,8 @@ html.locked {{ overflow: hidden; }}
   var raw = '';
   try {{ var q = new URLSearchParams(location.search); raw = q.get('to') || q.get('name') || ''; }} catch (e) {{}}
   raw = raw.replace(/[\\u0000-\\u001f\\u007f<>]/g, '').replace(/\\s+/g, ' ').trim().slice(0, 60);
+  for (var g = 0; g < 3; g++) raw = raw.replace(/^\\s*(?:dear|hi+|hello|hey|namaste|to)\\b[\\s,.:;\\-]*/i, '');            /* "Dear Asha" / "Hi Asha": the envelope and cover add the greeting themselves */
+  raw = raw.replace(/[\\s,:;\\-]+$/, '').trim();
   var el = document.getElementById('intro-to');
   if (raw && el) {{ el.textContent = 'Dear ' + raw; el.hidden = false; }}
   var g = document.getElementById('cover-guest'), gn = document.getElementById('cover-guest-name');
@@ -1681,7 +1683,8 @@ From Gupta Family</textarea>
 var SITE_URL='https://madhur-soumya-wedding-website.vercel.app/';
 var $=function(i){return document.getElementById(i)};$('base').value=SITE_URL;
 try{localStorage.removeItem('invite-message')}catch(e){}
-function guestLink(name){return SITE_URL+(name?'?to='+encodeURIComponent(name):'')}
+function cleanName(n){var t=n;for(var i=0;i<3;i++)t=t.replace(/^\\s*(?:dear|hi+|hello|hey|namaste|to)\\b[\\s,.:;\\-]*/i,'');return t.replace(/[\\s,:;\\-]+$/,'').trim()}
+function guestLink(name){var c=name?cleanName(name):'';return SITE_URL+(c?'?to='+encodeURIComponent(c):'')}
 function messageFor(name,url){var template=$('msg').value;if(!name)template=template.replace(/^\\{name\\},\\s*\\n+/i,'');return template.split('{name}').join(name).split('{link}').join(url)}
 function copyText(value){if(navigator.clipboard&&window.isSecureContext)return navigator.clipboard.writeText(value);var t=document.createElement('textarea');t.value=value;t.style.position='fixed';t.style.opacity='0';document.body.append(t);t.select();var ok=document.execCommand('copy');t.remove();return ok?Promise.resolve():Promise.reject()}
 function sendWithPhoto(name,url){fetch('/save-the-date-og.jpg').then(function(r){return r.blob()}).then(function(b){var d={files:[new File([b],'save-the-date.jpg',{type:'image/jpeg'})],text:messageFor(name,url)};if(!navigator.canShare(d))throw new Error('nofiles');return navigator.share(d)}).catch(function(e){if(e&&e.name==='AbortError')return;window.open('https://api.whatsapp.com/send/?text='+encodeURIComponent(messageFor(name,url)),'_blank','noopener')})}

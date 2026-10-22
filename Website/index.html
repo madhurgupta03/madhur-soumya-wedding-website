@@ -1018,6 +1018,8 @@ html.locked { overflow: hidden; }
   var raw = '';
   try { var q = new URLSearchParams(location.search); raw = q.get('to') || q.get('name') || ''; } catch (e) {}
   raw = raw.replace(/[\u0000-\u001f\u007f<>]/g, '').replace(/\s+/g, ' ').trim().slice(0, 60);
+  for (var g = 0; g < 3; g++) raw = raw.replace(/^\s*(?:dear|hi+|hello|hey|namaste|to)\b[\s,.:;\-]*/i, '');            /* "Dear Asha" / "Hi Asha": the envelope and cover add the greeting themselves */
+  raw = raw.replace(/[\s,:;\-]+$/, '').trim();
   var el = document.getElementById('intro-to');
   if (raw && el) { el.textContent = 'Dear ' + raw; el.hidden = false; }
   var g = document.getElementById('cover-guest'), gn = document.getElementById('cover-guest-name');

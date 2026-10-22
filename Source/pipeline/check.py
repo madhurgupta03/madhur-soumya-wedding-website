@@ -130,6 +130,18 @@ with sync_playwright() as p:
     check(pg.evaluate("getComputedStyle(document.getElementById('cover-guest')).display") == "none", "cover page unchanged without a name")
     pg.close()
 
+    pg = b.new_page(viewport={"width": 390, "height": 844})
+    for typed, want in (("Dear%20Asha", "Dear Asha"), ("Hi%20Asha%2C", "Dear Asha"), ("Hello%20dear%20Asha", "Dear Asha"), ("Hiren", "Dear Hiren"), ("Tony%20Stark", "Dear Tony Stark")):
+        pg.goto(url("index.html") + "?to=" + typed); pg.wait_for_timeout(500)
+        check(pg.inner_text("#intro-to").strip() == want, f"?to={typed} greets as \"{want}\" (no double Dear)")
+    pg.goto(url("index.html") + "?to=Dear"); pg.wait_for_timeout(500)
+    check(not pg.is_visible("#intro-to"), "a name that is only a greeting shows no greeting")
+    pg.close()
+    pg = b.new_page(viewport={"width": 800, "height": 900})
+    pg.goto(url("links.html")); pg.fill("#names", "Dear Asha Gupta\nHi Rahul"); pg.wait_for_timeout(300)
+    check(pg.locator(".row input").nth(0).input_value().endswith("?to=Asha%20Gupta") and pg.locator(".row input").nth(1).input_value().endswith("?to=Rahul"), "links page: a typed Dear/Hi is not put into the link")
+    pg.close()
+
     print("3c. Sound on/off button")
     pg = b.new_page(viewport={"width": 390, "height": 844})
     pg.add_init_script("(function(){var A=window.Audio;window.Audio=function(){var x=new (Function.prototype.bind.apply(A,[null].concat([].slice.call(arguments))))();(window.__songs=window.__songs||[]).push(x);return x;};})();")
