@@ -105,7 +105,7 @@ A link like `https://…/?to=Sharma%20Family` greets the guest ("Dear Sharma Fam
 
 ## Save the Date photo
 
-`Source/pipeline/savedate_og.py` makes `Website/save-the-date-og.jpg` (1200 x 630) on every build from the two childhood photos in `Source/assets/save-the-date/` (Madhur in the pink shirt, Soumya in the yellow dress), with the names and dates. It is the `og:image` of the invitation, so any invitation link previews as the photo of us when sent on WhatsApp. The personal links page (`/link/`, also `links.html`) shows it with a download button, so it can also be attached to the message. There is no Save the Date page inside the invitation.
+`Source/pipeline/savedate_og.py` makes `Website/save-the-date-og.jpg` (1200 x 630) on every build from the two childhood photos in `Source/assets/save-the-date/` (Madhur in the pink shirt, Soumya in the yellow dress), with the names and dates. It is the `og:image` of the invitation, so any invitation link previews as the photo of us when sent on WhatsApp. The personal links page (`/link/`, also `links.html`) shows it at the top; on a phone "Send with photo" shares it with the message. There is no Save the Date page inside the invitation.
 
 ## Rules from the owner — do not break these
 
