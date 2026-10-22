@@ -1,4 +1,4 @@
-"""Link-preview picture for the Save the Date address (/link): the two childhood photos in arches, with the names and dates.
+"""Link-preview picture shown when the invitation link is sent: two photos of Soumya and Madhur in arches, with the names and dates.
 WhatsApp and other apps show it when the link is sent. Called from build.py; writes Website/save-the-date-og.jpg (1200 x 630)."""
 import glob, io, os, random
 from PIL import Image, ImageDraw, ImageFont, ImageFilter
@@ -87,14 +87,14 @@ def make(site_dir, assets_dir, fonts_dir):
     d.rectangle((16, 16, W - 17, H - 17), outline=GOLD, width=2); d.rectangle((26, 26, W - 27, H - 27), outline=GOLD, width=1)
     _scatter(bg, os.path.join(site_dir, "images"))
 
-    m = Image.open(os.path.join(assets_dir, "save-the-date", "madhur.jpg")); s = Image.open(os.path.join(assets_dir, "save-the-date", "soumya.jpg"))
-    for img, x, y, a in ((_arch(m, 262, 350, 2), 70, 108, 0), (_arch(s, 262, 350, -2), 372, 140, 0)):
+    # one picture: the two of them standing in front of the stairs (slideshow photo-12)
+    shows = os.path.join(site_dir, "images", "slideshow")
+    stairs = Image.open(os.path.join(shows, "photo-12.jpg")).convert("RGB").crop((0, 450, 1350, 2250))
+    for img, x, y, a in ((_arch(stairs, 336, 448, 0), 150, 78, 0),):
         shadow = Image.new("RGBA", bg.size, (0, 0, 0, 0)); shadow.paste((60, 30, 20, 90), (x + 6, y + 14), img.getchannel("A"))
         bg.paste(Image.alpha_composite(bg.convert("RGBA"), shadow.filter(ImageFilter.GaussianBlur(12))).convert("RGB"))
         bg.paste(img, (x, y), img)
     d = ImageDraw.Draw(bg)
-    cap = _font(fonts_dir, "crimson-text-latin-400-italic.woff2", 26)
-    d.text((70 + 140, 108 + 350 + 34), "Madhur", font=cap, fill=TXT, anchor="mm"); d.text((372 + 140, 140 + 350 + 34), "Soumya", font=cap, fill=TXT, anchor="mm")
 
     cx = 905
     semi = _font(fonts_dir, "crimson-text-latin-600-normal.woff2", 30)
