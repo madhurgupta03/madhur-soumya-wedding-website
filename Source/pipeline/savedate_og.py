@@ -1,11 +1,12 @@
 """Link-preview picture for the Save the Date address (/link): the two childhood photos in arches, with the names and dates.
 WhatsApp and other apps show it when the link is sent. Called from build.py; writes Website/save-the-date-og.jpg (1200 x 630)."""
-import io, os
+import glob, io, os, random
 from PIL import Image, ImageDraw, ImageFont, ImageFilter
 from fontTools.ttLib import TTFont
 
 W, H = 1200, 630
 BROWN, NAVY, GOLD, CREAM = (120, 70, 70), (29, 47, 92), (224, 160, 28), (251, 243, 233)
+TXT, SOFTGOLD = (253, 245, 239), (247, 215, 122)      # light text on the dark blue
 
 
 def _font(fonts_dir, name, size):
@@ -41,14 +42,50 @@ def _arch(photo, w, h, angle):
     return out.rotate(angle, resample=Image.BICUBIC, expand=True)
 
 
+def _load(images_dir, prefix):
+    return Image.open(glob.glob(os.path.join(images_dir, prefix + "*.png"))[0]).convert("RGBA")
+
+
+def _piece(img, longest, angle):
+    k = longest / max(img.size)
+    return img.resize((max(1, int(img.width * k)), max(1, int(img.height * k))), Image.LANCZOS).rotate(angle, resample=Image.BICUBIC, expand=True)
+
+
+def _petal(color, w, h, angle):
+    im = Image.new("RGBA", (w * 3, h * 3), (0, 0, 0, 0)); d = ImageDraw.Draw(im)
+    d.ellipse((w * 3 * 0.16, h * 3 * 0.02, w * 3 * 0.84, h * 3 * 0.98), fill=color + (235,))
+    light = tuple(min(255, int(c + (255 - c) * .45)) for c in color)
+    d.ellipse((w * 3 * 0.30, h * 3 * 0.10, w * 3 * 0.62, h * 3 * 0.52), fill=light + (210,))
+    return im.resize((w, h), Image.LANCZOS).rotate(angle, resample=Image.BICUBIC, expand=True)
+
+
+def _scatter(bg, images_dir):
+    """Small colourful petals drifting down over the card."""
+    rnd = random.Random(5)
+    items = []
+    cols = [(240, 98, 146), (255, 138, 101), (249, 168, 37), (186, 104, 200), (236, 64, 122), (255, 112, 67), (255, 183, 77)]
+    text_zone = (690, 100, 1125, 540)
+    n = 0
+    while n < 26:
+        x, y = rnd.randint(40, W - 40), rnd.randint(40, H - 40)
+        if text_zone[0] < x < text_zone[2] and text_zone[1] < y < text_zone[3]:
+            continue
+        w = rnd.randint(11, 20); items.append((_petal(rnd.choice(cols), w, int(w * 1.6), rnd.randint(0, 359)), x, y)); n += 1
+    base = bg.convert("RGBA")
+    for img, x, y in items:
+        base.alpha_composite(img, (max(0, min(W - img.width, int(x - img.width / 2))), max(0, min(H - img.height, int(y - img.height / 2)))))
+    bg.paste(base.convert("RGB"))
+
+
 def make(site_dir, assets_dir, fonts_dir):
     bg = Image.new("RGB", (W, H)); px = bg.load()
     for y in range(H):
         t = y / H
-        c = tuple(int(a + (b - a) * t) for a, b in zip((255, 250, 243), (244, 223, 202)))
+        c = tuple(int(a + (b - a) * t) for a, b in zip((12, 24, 60), (4, 9, 28)))
         for x in range(W): px[x, y] = c
     d = ImageDraw.Draw(bg)
     d.rectangle((16, 16, W - 17, H - 17), outline=GOLD, width=2); d.rectangle((26, 26, W - 27, H - 27), outline=GOLD, width=1)
+    _scatter(bg, os.path.join(site_dir, "images"))
 
     m = Image.open(os.path.join(assets_dir, "save-the-date", "madhur.jpg")); s = Image.open(os.path.join(assets_dir, "save-the-date", "soumya.jpg"))
     for img, x, y, a in ((_arch(m, 262, 350, 2), 70, 108, 0), (_arch(s, 262, 350, -2), 372, 140, 0)):
@@ -57,16 +94,16 @@ def make(site_dir, assets_dir, fonts_dir):
         bg.paste(img, (x, y), img)
     d = ImageDraw.Draw(bg)
     cap = _font(fonts_dir, "crimson-text-latin-400-italic.woff2", 26)
-    d.text((70 + 140, 108 + 350 + 34), "Madhur", font=cap, fill=BROWN, anchor="mm"); d.text((372 + 140, 140 + 350 + 34), "Soumya", font=cap, fill=BROWN, anchor="mm")
+    d.text((70 + 140, 108 + 350 + 34), "Madhur", font=cap, fill=TXT, anchor="mm"); d.text((372 + 140, 140 + 350 + 34), "Soumya", font=cap, fill=TXT, anchor="mm")
 
     cx = 905
     semi = _font(fonts_dir, "crimson-text-latin-600-normal.woff2", 30)
     ital = _font(fonts_dir, "crimson-text-latin-400-italic.woff2", 104)
     ital_s = _font(fonts_dir, "crimson-text-latin-400-italic.woff2", 36)
-    _spaced(d, (cx, 128), "SAVE THE DATE", semi, NAVY, 7)
-    d.text((cx, 232), "Soumya", font=ital, fill=BROWN, anchor="mm")
-    d.text((cx, 336), "& Madhur", font=ital, fill=BROWN, anchor="mm")
+    _spaced(d, (cx, 128), "SAVE THE DATE", semi, SOFTGOLD, 7)
+    d.text((cx, 232), "Soumya", font=ital, fill=TXT, anchor="mm")
+    d.text((cx, 336), "& Madhur", font=ital, fill=TXT, anchor="mm")
     d.line((cx - 120, 402, cx + 120, 402), fill=GOLD, width=2)
-    _spaced(d, (cx, 430), "24 & 25 NOVEMBER 2026", semi, NAVY, 3)
-    d.text((cx, 500), "Jhansi · Orchha", font=ital_s, fill=BROWN, anchor="mm")
+    _spaced(d, (cx, 430), "24 & 25 NOVEMBER 2026", semi, SOFTGOLD, 3)
+    d.text((cx, 500), "Jhansi · Orchha", font=ital_s, fill=TXT, anchor="mm")
     bg.save(os.path.join(site_dir, "save-the-date-og.jpg"), quality=88, optimize=True, progressive=True)

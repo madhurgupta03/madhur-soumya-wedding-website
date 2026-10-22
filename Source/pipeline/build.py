@@ -1697,6 +1697,7 @@ function resetForm(){ $('names').value='';$('msg').value=DEFAULT_MESSAGE;render(
 window.addEventListener('pageshow',resetForm);
 resetForm();
 $('copyall').onclick=function(){var names=$('names').value.split(/\\n/).map(function(x){return x.trim()}).filter(Boolean);if(!names.length)names=[''];var rows=names.map(function(name){return name?name+'\t'+guestLink(name):guestLink('')}).join('\\n');copyText(rows).then(function(){$('status').textContent='All names and links copied'}).catch(function(){$('status').textContent='Could not copy automatically'})};render();
+
 </script></main></body></html>"""
 
 open(out, "w", encoding="utf-8", newline="\n").write(page)
