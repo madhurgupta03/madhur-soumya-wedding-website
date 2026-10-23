@@ -552,12 +552,12 @@ def art(kind, fly=(5, 2)):
 def ev(name, time):
     return f'<li><span class="n">{name}</span><span class="t">{time}</span></li>'
 bride = [("Grandparents", ["Late Smt. Mannu Devi Gupta & Shri Nathuram Gupta", "Smt. Shashi Gupta & Shri Amarnath Gupta"]),
-         ("", ["Late Smt. Sumintra & Shri Amrit Lal Gupta ji"]),
+         ("", ["Late Smt. Sumintra & Shri Amrit Lal Gupta"]),
          ("Parents", ["Smt. Rashmi Gupta & Shri Umakant Gupta"]),
          ("Tauji & Tayji", ["Late Smt. Vimla Devi Gupta & Dr. P. D. Gupta", "Smt. Usha Gupta & Shri Ramakant Gupta"]),
          ("Bua & Fufa Ji", ["Smt. Susheela Gupta & Shri Ramprakash Gupta", "Smt. Malti Gupta & Late Shri Santosh Kumar Gupta"]),
          ("Mausi & Mausa", ["Smt. Ruchi Gupta & Shri Sanjay Gupta", "Smt. Rati Gupta & Shri Amit Gupta"]),
-         ("Brothers & Sisters", ["Ramdevi • Annu • Vedprakash • Satya Prakash • Harishchandra • Gyandevi • Gyan Chand • Gyan Bharti • Anurag Gupta • Ashish Gupta",
+         ("Brothers & Sisters", ["Ramdevi • Annu • Vedprakash • Satya Prakash • Harishchandra • Gyandevi • Gyan Chand • Gyan Bharti • Anurag • Ashish",
                                  "Saurav • Achin • Simran • Arnav • Sameeksha • Netra • Anmol • Yashita"])]
 groom = [("Nana Ji & Nani Ji", ["Late Shri Seetaram Gupta & Smt. Rukmani Gupta"]),
          ("Fufa Ji & Bua Ji", ["Shri Narayan Das Gupta & Smt. Uma Gupta", "Late Shri Udit Narayan Gupta & Smt. Kamlesh Gupta", "Shri Rakesh Gupta & Smt. Jayanti Gupta"]),
@@ -1104,6 +1104,7 @@ html.locked {{ overflow: hidden; }}
 .web .crys {{ transform-box: fill-box; transform-origin: 50% 0; animation: crys 2.4s ease-in-out infinite; }}
 @keyframes crys {{ 0%, 100% {{ opacity: .55; }} 50% {{ opacity: 1; filter: drop-shadow(0 0 1.5px #fff6c8); }} }}
 @media (prefers-reduced-motion: reduce) {{ .web .crys {{ animation: none; }} }}
+#venues h2 {{ font-size: 6cqw; }}
 [hidden] {{ display: none !important; }}
 </style>
 </head>
