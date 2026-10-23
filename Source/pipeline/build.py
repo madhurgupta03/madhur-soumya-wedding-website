@@ -552,6 +552,7 @@ def art(kind, fly=(5, 2)):
 def ev(name, time):
     return f'<li><span class="n">{name}</span><span class="t">{time}</span></li>'
 bride = [("Grandparents", ["Late Smt. Mannu Devi Gupta & Shri Nathuram Gupta", "Smt. Shashi Gupta & Shri Amarnath Gupta"]),
+         ("", ["Late Smt. Sumintra & Shri Amrit Lal Gupta ji"]),
          ("Parents", ["Smt. Rashmi Gupta & Shri Umakant Gupta"]),
          ("Tauji & Tayji", ["Late Smt. Vimla Devi Gupta & Dr. P. D. Gupta", "Smt. Usha Gupta & Shri Ramakant Gupta"]),
          ("Bua & Fufa Ji", ["Smt. Susheela Gupta & Shri Ramprakash Gupta", "Smt. Malti Gupta & Late Shri Santosh Kumar Gupta"]),
@@ -566,7 +567,7 @@ groom = [("Nana Ji & Nani Ji", ["Late Shri Seetaram Gupta & Smt. Rukmani Gupta"]
 def side(title, rows, cls):
     out = f'<div class="side {cls}"><h3 class="band">{title}</h3><dl>'
     for k, vs in rows:
-        out += f'<div class="rel"><dt>{html.escape(k)}</dt>' + "".join(f'<dd>{html.escape(v)}</dd>' for v in vs) + '</div>'
+        out += '<div class="rel">' + (f'<dt>{html.escape(k)}</dt>' if k else '') + "".join(f'<dd>{html.escape(v)}</dd>' for v in vs) + '</div>'
     return out + '</dl></div>'
 GUEST_OPTS = "".join(f'<option value="{i}">{i}</option>' for i in range(1, 11))
 def evcheck(i, val, label, date):
@@ -1082,7 +1083,7 @@ html.locked {{ overflow: hidden; }}
 /* the venues and both blessings pages: body text in Crimson italic, like the venue lines on the Baraat and Jaimala cards */
 :is(#venues, #blessings, #blessings-groom) :is(.lead, .addr, .count-note, dd, .hosts, .events .t) {{ font-style: italic; font-weight: 400; letter-spacing: .015em; }}
 :is(#venues, #blessings, #blessings-groom) :is(.lead, .addr, .count-note) {{ font-size: 4.9cqw; }}
-:is(#venues, #blessings, #blessings-groom) dd {{ font-size: 5cqw; }}
+:is(#venues, #blessings, #blessings-groom) dd {{ font-size: 4cqw; letter-spacing: 0; text-wrap: balance; }}
 :is(#venues, #blessings, #blessings-groom) .events .t {{ font-size: 4.8cqw; }}
 :is(#venues, #blessings, #blessings-groom) .hosts {{ font-size: 8.4cqw; }}
 /* small headings (labels, day lines, relation tags, countdown captions) in the card's night blue: strong contrast on the sky */
