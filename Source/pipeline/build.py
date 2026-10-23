@@ -566,8 +566,9 @@ groom = [("Nana Ji & Nani Ji", ["Late Shri Seetaram Gupta & Smt. Rukmani Gupta"]
          ("Mama & Mami", ["Amit Gupta & Deepti Gupta", "Ankit Gupta & Noopur Gupta"])]
 def side(title, rows, cls):
     out = f'<div class="side {cls}"><h3 class="band">{title}</h3><dl>'
-    for k, vs in rows:
-        out += '<div class="rel">' + (f'<dt>{html.escape(k)}</dt>' if k else '') + "".join(f'<dd>{html.escape(v)}</dd>' for v in vs) + '</div>'
+    for n, (k, vs) in enumerate(rows):
+        joined = n + 1 < len(rows) and not rows[n + 1][0]       # the next line continues this group: no divider between them
+        out += '<div class="rel' + (' joined' if joined else '') + '">' + (f'<dt>{html.escape(k)}</dt>' if k else '') + "".join(f'<dd>{html.escape(v)}</dd>' for v in vs) + '</div>'
     return out + '</dl></div>'
 GUEST_OPTS = "".join(f'<option value="{i}">{i}</option>' for i in range(1, 11))
 def evcheck(i, val, label, date):
@@ -1115,6 +1116,7 @@ html.locked {{ overflow: hidden; }}
 #venues .addr {{ font-size: 4cqw; }}
 #venues .events .n, #venues .events .t {{ font-size: 4.1cqw; }}
 #venues .btn {{ font-size: 3.6cqw; padding: 2.4cqw 6.4cqw; }}
+.web .rel.joined {{ border-bottom: 0; padding-bottom: 0; border-image: none; margin-bottom: -2.4cqw; }}
 [hidden] {{ display: none !important; }}
 </style>
 </head>
