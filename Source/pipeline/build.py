@@ -1105,6 +1105,16 @@ html.locked {{ overflow: hidden; }}
 @keyframes crys {{ 0%, 100% {{ opacity: .55; }} 50% {{ opacity: 1; filter: drop-shadow(0 0 1.5px #fff6c8); }} }}
 @media (prefers-reduced-motion: reduce) {{ .web .crys {{ animation: none; }} }}
 #venues h2 {{ font-size: 6cqw; }}
+/* "Come Celebrate With Us" page: all text a little smaller */
+#venues .label {{ font-size: 3.4cqw; }}
+#venues .count b {{ font-size: 8.4cqw; }}
+#venues .count span {{ font-size: 3.1cqw; }}
+#venues .count-note {{ font-size: 4cqw; }}
+#venues .band {{ font-size: 3.8cqw; }}
+#venues h3 {{ font-size: 5.4cqw; }}
+#venues .addr {{ font-size: 4cqw; }}
+#venues .events .n, #venues .events .t {{ font-size: 4.1cqw; }}
+#venues .btn {{ font-size: 3.6cqw; padding: 2.4cqw 6.4cqw; }}
 [hidden] {{ display: none !important; }}
 </style>
 </head>
